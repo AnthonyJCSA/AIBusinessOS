@@ -1,0 +1,5 @@
+export { productService } from './product.service'
+export { saleService } from './sale.service'
+export { cashService } from './cash.service'
+export { customerService } from './customer.service'
+export { syncService } from './sync.service'
