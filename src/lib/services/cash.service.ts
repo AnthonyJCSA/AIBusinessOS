@@ -12,6 +12,8 @@ export const cashService = {
     referenceId?: string
     createdBy?: string
   }): Promise<DBCashMovement> {
+    if (!supabase) throw new Error('Supabase not configured')
+    
     const dbMovement: Omit<DBCashMovement, 'id'> = {
       org_id: orgId,
       type: movement.type,
@@ -33,6 +35,8 @@ export const cashService = {
   },
 
   async getAll(orgId: string): Promise<DBCashMovement[]> {
+    if (!supabase) return []
+    
     const { data, error } = await supabase
       .from(TABLE)
       .select('*')

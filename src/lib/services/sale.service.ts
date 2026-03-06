@@ -18,6 +18,8 @@ export const saleService = {
     items: CartItem[]
     createdBy?: string
   }): Promise<Sale> {
+    if (!supabase) throw new Error('Supabase not configured')
+    
     // Generar número de venta
     const { data: saleNumber } = await supabase
       .rpc('generate_sale_number', { p_org_id: orgId })
@@ -76,6 +78,8 @@ export const saleService = {
   },
 
   async getAll(orgId: string): Promise<Sale[]> {
+    if (!supabase) return []
+    
     const { data, error } = await supabase
       .from(SALES_TABLE)
       .select('*')

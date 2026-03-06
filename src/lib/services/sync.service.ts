@@ -1,6 +1,7 @@
 import { productService } from './product.service'
 import { saleService } from './sale.service'
 import { cashService } from './cash.service'
+import { supabase } from '../supabase'
 import { Product, Sale } from '@/types'
 
 const SYNC_KEY = 'coriva_sync_status'
@@ -25,6 +26,12 @@ export const syncService = {
 
   async syncProducts(orgId: string): Promise<void> {
     try {
+      // Verificar si Supabase está configurado
+      if (!supabase) {
+        console.log('⚠️ Supabase no configurado, usando solo localStorage')
+        return
+      }
+      
       // Verificar si ya tiene productos en Supabase
       const hasProducts = await productService.hasProducts(orgId)
       
@@ -83,6 +90,12 @@ export const syncService = {
   },
 
   async initializeOrg(orgId: string): Promise<void> {
+    // Verificar si Supabase está configurado
+    if (!supabase) {
+      console.log('⚠️ Supabase no configurado, usando solo localStorage')
+      return
+    }
+    
     const status = this.getSyncStatus()
     
     if (!status.productsSynced) {
