@@ -81,34 +81,6 @@ export default function CorivaPOS() {
     }
   }
 
-  const handleOnboardingComplete = async (org: Organization, products: any[]) => {
-    // Save organization
-    localStorage.setItem('coriva_current_org', JSON.stringify(org))
-    
-    // Save products
-    for (const product of products) {
-      await productService.createProduct({ ...product, organization_id: org.id })
-    }
-    
-    // Auto login
-    const newUser: User = {
-      id: `user_${Date.now()}`,
-      organization_id: org.id,
-      username: 'admin',
-      email: org.email || '',
-      full_name: 'Administrador',
-      role: 'ADMIN',
-      is_active: true,
-      created_at: new Date().toISOString()
-    }
-    
-    setCurrentUser(newUser)
-    setCurrentOrg(org)
-    setIsAuthenticated(true)
-    setShowOnboarding(false)
-    alert('🎉 ¡Bienvenido a Coriva Core!')
-  }
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoginError('')
@@ -357,7 +329,20 @@ ${currentOrg?.settings.receipt_footer || ''}
   }
 
   if (showOnboarding) {
-    return <OnboardingWizard onComplete={handleOnboardingComplete} />
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Onboarding deshabilitado</h2>
+          <p className="text-gray-600 mb-4">Por favor, contacta al administrador para crear tu cuenta</p>
+          <button
+            onClick={() => setShowOnboarding(false)}
+            className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+          >
+            Volver al login
+          </button>
+        </div>
+      </div>
+    )
   }
 
   if (!isAuthenticated) {
@@ -534,7 +519,7 @@ ${currentOrg?.settings.receipt_footer || ''}
 
   const updateOrganization = (org: Organization) => {
     setCurrentOrg(org)
-    localStorage.setItem('coriva_current_org', JSON.stringify(org))
+    sessionStorage.setItem('coriva_org', JSON.stringify(org))
   }
 
   // Render active module
