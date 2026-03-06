@@ -138,13 +138,41 @@ export default function CorivaPOS() {
   }
 
   const loadProducts = async () => {
-    const data = await productService.getAll()
-    setProducts(data as Product[])
+    try {
+      // Intentar cargar de Supabase si está sincronizado
+      if (currentOrg && syncComplete) {
+        const supabaseProducts = await supabaseProductService.getAll(currentOrg.id)
+        setProducts(supabaseProducts)
+        // Actualizar cache
+        localStorage.setItem('coriva_products', JSON.stringify(supabaseProducts))
+      } else {
+        // Fallback a localStorage
+        const data = await productService.getAll()
+        setProducts(data as Product[])
+      }
+    } catch (error) {
+      console.error('Error loading products:', error)
+      // Fallback a localStorage
+      const data = await productService.getAll()
+      setProducts(data as Product[])
+    }
   }
 
   const loadSales = async () => {
-    const data = await saleService.getAll()
-    setSales(data as Sale[])
+    try {
+      if (currentOrg && syncComplete) {
+        const supabaseSales = await supabaseSaleService.getAll(currentOrg.id)
+        setSales(supabaseSales)
+        localStorage.setItem('coriva_sales', JSON.stringify(supabaseSales))
+      } else {
+        const data = await saleService.getAll()
+        setSales(data as Sale[])
+      }
+    } catch (error) {
+      console.error('Error loading sales:', error)
+      const data = await saleService.getAll()
+      setSales(data as Sale[])
+    }
   }
 
   const handleOnboardingComplete = async (org: Organization, products: any[]) => {
