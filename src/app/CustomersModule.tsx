@@ -1,18 +1,19 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { customerService } from '@/lib/services'
 import { exportCustomersToCSV } from '../lib/export'
 
 interface Customer {
   id: string
-  document_type: 'DNI' | 'RUC' | 'CE'
-  document_number: string
-  full_name: string
+  org_id: string
+  name: string
+  document_type?: string
+  document_number?: string
   phone?: string
   email?: string
   address?: string
-  total_purchases: number
-  last_purchase?: string
+  is_active: boolean
   created_at: string
 }
 
@@ -20,19 +21,18 @@ interface CustomersModuleProps {
   currentUser: any
 }
 
-const STORAGE_KEY = 'coriva_customers'
-
 export default function CustomersModule({ currentUser }: CustomersModuleProps) {
   const [customers, setCustomers] = useState<Customer[]>([])
   const [showAddForm, setShowAddForm] = useState(false)
   const [showEditForm, setShowEditForm] = useState(false)
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
+  const [loading, setLoading] = useState(true)
 
   const [newCustomer, setNewCustomer] = useState({
-    document_type: 'DNI' as 'DNI' | 'RUC' | 'CE',
+    document_type: 'DNI',
     document_number: '',
-    full_name: '',
+    name: '',
     phone: '',
     email: '',
     address: ''
@@ -42,61 +42,88 @@ export default function CustomersModule({ currentUser }: CustomersModuleProps) {
     loadCustomers()
   }, [])
 
-  const loadCustomers = () => {
-    const data = localStorage.getItem(STORAGE_KEY)
-    setCustomers(data ? JSON.parse(data) : [])
-  }
-
-  const saveCustomers = (data: Customer[]) => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
-    setCustomers(data)
-  }
-
-  const handleAddCustomer = (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    const customer: Customer = {
-      id: `cust_${Date.now()}`,
-      ...newCustomer,
-      total_purchases: 0,
-      created_at: new Date().toISOString()
+  const loadCustomers = async () => {
+    if (!currentUser?.organization_id) return
+    try {
+      setLoading(true)
+      const data = await customerService.getAll(currentUser.organization_id)
+      setCustomers(data)
+    } catch (error) {
+      console.error('Error loading customers:', error)
+    } finally {
+      setLoading(false)
     }
-
-    saveCustomers([customer, ...customers])
-    setNewCustomer({
-      document_type: 'DNI',
-      document_number: '',
-      full_name: '',
-      phone: '',
-      email: '',
-      address: ''
-    })
-    setShowAddForm(false)
-    alert('✅ Cliente agregado')
   }
 
-  const handleUpdateCustomer = (e: React.FormEvent) => {
+  const handleAddCustomer = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!currentUser?.organization_id) return
+    
+    try {
+      await customerService.create(currentUser.organization_id, newCustomer)
+      await loadCustomers()
+      setNewCustomer({
+        document_type: 'DNI',
+        document_number: '',
+        name: '',
+        phone: '',
+        email: '',
+        address: ''
+      })
+      setShowAddForm(false)
+      alert('✅ Cliente agregado')
+    } catch (error) {
+      console.error('Error adding customer:', error)
+      alert('❌ Error al agregar cliente')
+    }
+  }
+
+  const handleUpdateCustomer = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!editingCustomer) return
 
-    const updated = customers.map(c => 
-      c.id === editingCustomer.id ? editingCustomer : c
-    )
-    saveCustomers(updated)
-    setShowEditForm(false)
-    setEditingCustomer(null)
-    alert('✅ Cliente actualizado')
+    try {
+      await customerService.update(editingCustomer.id, {
+        name: editingCustomer.name,
+        document_type: editingCustomer.document_type,
+        document_number: editingCustomer.document_number,
+        phone: editingCustomer.phone,
+        email: editingCustomer.email,
+        address: editingCustomer.address
+      })
+      await loadCustomers()
+      setShowEditForm(false)
+      setEditingCustomer(null)
+      alert('✅ Cliente actualizado')
+    } catch (error) {
+      console.error('Error updating customer:', error)
+      alert('❌ Error al actualizar cliente')
+    }
   }
 
-  const handleDeleteCustomer = (customer: Customer) => {
-    if (!confirm(`¿Eliminar a ${customer.full_name}?`)) return
-    saveCustomers(customers.filter(c => c.id !== customer.id))
+  const handleDeleteCustomer = async (customer: Customer) => {
+    if (!confirm(`¿Eliminar a ${customer.name}?`)) return
+    try {
+      await customerService.update(customer.id, { is_active: false })
+      await loadCustomers()
+    } catch (error) {
+      console.error('Error deleting customer:', error)
+      alert('❌ Error al eliminar cliente')
+    }
   }
 
   const filteredCustomers = customers.filter(c =>
-    c.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    c.document_number.includes(searchTerm)
+    c.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (c.document_number && c.document_number.includes(searchTerm))
   )
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="animate-spin w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full"></div>
+      </div>
+    )
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -128,9 +155,7 @@ export default function CustomersModule({ currentUser }: CustomersModuleProps) {
         </div>
         <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-green-500 hover:shadow-lg transition-shadow">
           <h3 className="text-sm font-medium text-gray-500 mb-2">✅ Clientes Activos</h3>
-          <p className="text-3xl font-bold text-green-600">
-            {customers.filter(c => c.total_purchases > 0).length}
-          </p>
+          <p className="text-3xl font-bold text-green-600">{customers.length}</p>
         </div>
         <div className="bg-white p-6 rounded-xl shadow-md border-l-4 border-purple-500 hover:shadow-lg transition-shadow">
           <h3 className="text-sm font-medium text-gray-500 mb-2">🆕 Nuevos (Este Mes)</h3>
@@ -162,7 +187,7 @@ export default function CustomersModule({ currentUser }: CustomersModuleProps) {
                 <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Documento</th>
                 <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Cliente</th>
                 <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Contacto</th>
-                <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Compras</th>
+                <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Estado</th>
                 <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Acciones</th>
               </tr>
             </thead>
@@ -176,7 +201,7 @@ export default function CustomersModule({ currentUser }: CustomersModuleProps) {
                     </div>
                   </td>
                   <td className="px-6 py-4 text-sm font-semibold text-gray-900">
-                    {customer.full_name}
+                    {customer.name}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600">
                     <div className="space-y-1">
@@ -186,7 +211,7 @@ export default function CustomersModule({ currentUser }: CustomersModuleProps) {
                   </td>
                   <td className="px-6 py-4 text-sm">
                     <span className="font-bold text-green-600 bg-green-50 px-3 py-1 rounded-full">
-                      {customer.total_purchases}
+                      {customer.is_active ? '✅' : '❌'}
                     </span>
                   </td>
                   <td className="px-6 py-4">
@@ -248,8 +273,8 @@ export default function CustomersModule({ currentUser }: CustomersModuleProps) {
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Nombre Completo *</label>
                   <input
                     type="text"
-                    value={newCustomer.full_name}
-                    onChange={(e) => setNewCustomer({...newCustomer, full_name: e.target.value})}
+                    value={newCustomer.name}
+                    onChange={(e) => setNewCustomer({...newCustomer, name: e.target.value})}
                     className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     required
                   />
@@ -335,8 +360,8 @@ export default function CustomersModule({ currentUser }: CustomersModuleProps) {
                   <label className="block text-sm font-semibold text-gray-700 mb-2">Nombre Completo</label>
                   <input
                     type="text"
-                    value={editingCustomer.full_name}
-                    onChange={(e) => setEditingCustomer({...editingCustomer, full_name: e.target.value})}
+                    value={editingCustomer.name}
+                    onChange={(e) => setEditingCustomer({...editingCustomer, name: e.target.value})}
                     className="w-full px-4 py-2.5 bg-gray-50 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
                 </div>
