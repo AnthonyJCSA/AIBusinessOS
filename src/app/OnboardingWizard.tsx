@@ -116,28 +116,6 @@ export default function OnboardingWizard({ onComplete, businessType }: Onboardin
         updated_at: new Date().toISOString()
       }
 
-      if (supabase) {
-        try {
-          await supabase
-            .from('organizations')
-            .insert({
-              id: newOrg.id,
-              name: newOrg.name,
-              slug: newOrg.slug,
-              business_type: newOrg.business_type,
-              ruc: newOrg.ruc,
-              address: newOrg.address,
-              phone: newOrg.phone,
-              email: newOrg.email,
-              settings: newOrg.settings,
-              is_active: newOrg.is_active
-            })
-            .select()
-        } catch (err) {
-          // Silent fail
-        }
-      }
-
       setLoading(false)
       onComplete(newOrg, products)
     }
