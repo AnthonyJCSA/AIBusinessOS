@@ -17,15 +17,21 @@ export default function RegistroPage() {
     try {
       setLoading(true)
       
+      console.log('Creating organization:', org)
+      
       // Crear organización en Supabase
       const createdOrg = await organizationService.create(org)
+      console.log('Organization created:', createdOrg)
       
       // Crear productos
+      console.log('Creating products:', products.length)
       for (const product of products) {
         await productService.create(createdOrg.id, product)
       }
+      console.log('Products created')
       
       // Crear usuario admin
+      console.log('Creating admin user')
       const adminUser = await authService.createUser({
         organization_id: createdOrg.id,
         username: org.slug || 'admin',
@@ -35,6 +41,7 @@ export default function RegistroPage() {
         role: 'admin',
         is_active: true
       })
+      console.log('Admin user created:', adminUser)
       
       // Guardar sesión
       sessionStorage.setItem('coriva_user', JSON.stringify(adminUser))
@@ -44,7 +51,7 @@ export default function RegistroPage() {
       router.push('/dashboard')
     } catch (error) {
       console.error('Error completing onboarding:', error)
-      alert('Error al crear la organización. Por favor intenta de nuevo.')
+      alert(`Error al crear la organización: ${error instanceof Error ? error.message : 'Error desconocido'}`)
       setLoading(false)
     }
   }
