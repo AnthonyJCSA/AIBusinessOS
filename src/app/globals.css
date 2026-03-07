@@ -2,6 +2,30 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  /* Mejorar experiencia móvil */
+  html {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+    touch-action: manipulation;
+  }
+  
+  body {
+    overscroll-behavior-y: none;
+  }
+  
+  /* Mejorar inputs en móviles */
+  input, textarea, select {
+    font-size: 16px !important; /* Evita zoom en iOS */
+  }
+  
+  /* Mejorar botones táctiles */
+  button, a {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+}
+
 @layer utilities {
   @keyframes fade-in-up {
     from {
@@ -16,5 +40,18 @@
 
   .animate-fade-in-up {
     animation: fade-in-up 0.6s ease-out forwards;
+  }
+  
+  /* Utilidades para móviles */
+  .touch-scroll {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
   }
 }
