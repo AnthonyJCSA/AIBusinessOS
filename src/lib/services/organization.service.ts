@@ -7,9 +7,13 @@ export const organizationService = {
   async create(org: Omit<Organization, 'id' | 'created_at' | 'updated_at'>): Promise<Organization> {
     if (!isSupabaseConfigured()) throw new Error('Supabase not configured')
     
+    // Generar ID único
+    const orgId = `org_${Date.now()}`
+    
     const { data, error } = await supabase
       .from(TABLE)
       .insert({
+        id: orgId,
         slug: org.slug,
         name: org.name,
         business_type: org.business_type,

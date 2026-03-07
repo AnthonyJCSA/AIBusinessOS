@@ -59,9 +59,13 @@ export const authService = {
   }): Promise<User> {
     if (!isSupabaseConfigured()) throw new Error('Supabase not configured')
 
+    // Generar ID único
+    const userId = `user_${Date.now()}`
+
     const { data, error } = await supabase
       .from('corivacore_users')
       .insert({
+        id: userId,
         org_id: userData.organization_id,
         username: userData.username,
         password_hash: userData.password, // En producción usar bcrypt
