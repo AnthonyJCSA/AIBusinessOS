@@ -20,6 +20,16 @@
 5. Click en **RUN** (o presiona Ctrl+Enter)
 6. Verifica que aparezca "Success. No rows returned"
 
+## Paso 2.1: Corregir Tipo de org_id (SI YA EJECUTASTE SETUP_SUPABASE.sql ANTES)
+
+**SOLO si ya ejecutaste el script anterior y tienes error de UUID:**
+
+1. En **SQL Editor**, click en "New query"
+2. Copia TODO el contenido de `database/FIX_ORG_ID_TYPE.sql`
+3. Pégalo en el editor
+4. Click en **RUN**
+5. Verifica que aparezca "✅ Tipo de org_id corregido"
+
 ## Paso 3: Insertar Datos de Prueba
 
 1. En **SQL Editor**, click en "New query"
