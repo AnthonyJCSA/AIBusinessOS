@@ -28,7 +28,7 @@ export default function RegistroPage() {
         username: org.slug || 'admin',
         password: 'admin123',
         full_name: 'Administrador',
-        email: org.email,
+        email: org.email || 'admin@coriva.com',
         role: 'admin',
         is_active: true
       })
