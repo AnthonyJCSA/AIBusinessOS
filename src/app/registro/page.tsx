@@ -43,9 +43,17 @@ export default function RegistroPage() {
       })
       console.log('Admin user created:', adminUser)
       
+      // Asegurar que createdOrg tenga todos los campos necesarios
+      const completeOrg = {
+        ...createdOrg,
+        logo_url: createdOrg.logo_url || null
+      }
+      
       // Guardar sesión
       sessionStorage.setItem('coriva_user', JSON.stringify(adminUser))
-      sessionStorage.setItem('coriva_org', JSON.stringify(createdOrg))
+      sessionStorage.setItem('coriva_org', JSON.stringify(completeOrg))
+      
+      console.log('Session saved, redirecting to dashboard')
       
       // Redirigir al dashboard
       router.push('/dashboard')
