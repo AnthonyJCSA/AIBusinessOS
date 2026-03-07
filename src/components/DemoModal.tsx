@@ -74,7 +74,7 @@ export default function DemoModal({ isOpen, onClose, whatsappUrl, demoUrl = '/de
             💬 Hablar por WhatsApp
           </a>
           <a
-            href="/demo"
+            href="/registro"
             className="block w-full text-center py-2 text-sm text-gray-500 hover:text-gray-700 transition-all"
           >
             Ver demo igual (sin asesoría)
