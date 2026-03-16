@@ -44,6 +44,20 @@ export const organizationService = {
     return data as Organization
   },
 
+  async getBySlug(slug: string): Promise<Organization | null> {
+    if (!isSupabaseConfigured()) return null
+
+    const { data, error } = await supabase
+      .from(TABLE)
+      .select('*')
+      .eq('slug', slug)
+      .eq('is_active', true)
+      .single()
+
+    if (error) return null
+    return data as Organization
+  },
+
   async update(id: string, updates: Partial<Organization>): Promise<Organization> {
     if (!isSupabaseConfigured()) throw new Error('Supabase not configured')
     
