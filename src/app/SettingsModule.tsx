@@ -124,7 +124,13 @@ export default function SettingsModule({ currentOrg, onUpdate }: { currentOrg: O
                 <label className="text-[10px] font-bold uppercase tracking-[.5px]" style={{ color: 'var(--muted)' }}>Color del Sistema</label>
                 <div className="flex gap-2 flex-wrap mt-1">
                   {accentColors.map(c => (
-                    <button key={c} onClick={() => { setS(p => ({ ...p, accent: c })); document.documentElement.style.setProperty('--accent', c) }}
+                    <button key={c} onClick={() => {
+                      setS(p => ({ ...p, accent: c }))
+                      const root = document.documentElement
+                      root.style.setProperty('--accent', c)
+                      root.style.setProperty('--accent3', c)
+                      root.style.setProperty('--gradient', `linear-gradient(135deg, ${c}, ${c}CC)`)
+                    }}
                       className="w-7 h-7 rounded-[7px] transition-all"
                       style={{ background: c, border: s.accent === c ? '2px solid #fff' : '2px solid transparent', outline: s.accent === c ? `2px solid ${c}` : 'none' }} />
                   ))}

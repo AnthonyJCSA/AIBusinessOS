@@ -62,9 +62,17 @@ export default function DashboardPage() {
     const saved = sessionStorage.getItem('coriva_user')
     const savedOrg = sessionStorage.getItem('coriva_org')
     if (saved && savedOrg) {
+      const org = JSON.parse(savedOrg)
       setCurrentUser(JSON.parse(saved))
-      setCurrentOrg(JSON.parse(savedOrg))
+      setCurrentOrg(org)
       setIsAuthenticated(true)
+      const themeColor = org?.settings?.theme_color
+      if (themeColor) {
+        const root = document.documentElement
+        root.style.setProperty('--accent', themeColor)
+        root.style.setProperty('--accent3', themeColor)
+        root.style.setProperty('--gradient', `linear-gradient(135deg, ${themeColor}, ${themeColor}CC)`)
+      }
     } else {
       window.location.href = '/'
     }
