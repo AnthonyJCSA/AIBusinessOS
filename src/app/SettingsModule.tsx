@@ -75,7 +75,7 @@ export default function SettingsModule({ currentOrg, onUpdate }: { currentOrg: O
               {fi('Nombre', 'name')}
               <div className="flex flex-col gap-[5px]">
                 <label className="text-[10px] font-bold uppercase tracking-[.5px]" style={{ color: 'var(--muted)' }}>Tipo de Negocio</label>
-                <select value={s.business_type} onChange={e => setS(p => ({ ...p, business_type: e.target.value }))}
+                <select value={s.business_type} onChange={e => setS(p => ({ ...p, business_type: e.target.value as typeof p.business_type }))}
                   className="px-[13px] py-[9px] rounded-[9px] text-sm outline-none"
                   style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)' }}>
                   <option value="retail">🛒 Tienda / Bodega</option>
