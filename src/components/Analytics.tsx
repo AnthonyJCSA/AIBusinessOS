@@ -1,34 +1,10 @@
-'use client'
+// DESACTIVADO — GA4 se gestiona únicamente desde Google Tag Manager (GTM-M3B3KGCQ)
+// No usar este componente. Ver src/app/layout.tsx para la implementación de GTM.
+export default function Analytics() { return null }
 
-import Script from 'next/script'
-
-const GA_ID = process.env.NEXT_PUBLIC_GA_ID || 'G-XXXXXXXXXX'
-
-export default function Analytics() {
-  return (
-    <>
-      <Script
-        src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
-        strategy="afterInteractive"
-      />
-      <Script id="google-analytics" strategy="afterInteractive">
-        {`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', '${GA_ID}');
-        `}
-      </Script>
-    </>
-  )
-}
-
+// Los eventos de tracking siguen funcionando via window.dataLayer → GTM los captura
 export const trackEvent = (action: string, category: string, label?: string, value?: number) => {
-  if (typeof window !== 'undefined' && (window as any).gtag) {
-    (window as any).gtag('event', action, {
-      event_category: category,
-      event_label: label,
-      value: value
-    })
+  if (typeof window !== 'undefined' && window.dataLayer) {
+    window.dataLayer.push({ event: action, event_category: category, event_label: label, value })
   }
 }
