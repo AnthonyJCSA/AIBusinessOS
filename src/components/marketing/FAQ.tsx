@@ -9,7 +9,7 @@ const C = {
 }
 
 const faqs = [
-  { q: '¿Es realmente gratis el plan Starter?', a: 'Sí. El plan Starter es 100% gratuito para siempre. Sin tarjeta de crédito, sin trucos.' },
+  { q: '¿Cuánto cuesta Coriva?', a: 'El plan Starter cuesta S/ 79 al mes con IA básica (alertas de stock automáticas). El plan PRO cuesta S/ 149 al mes e incluye IA avanzada: predicción de ventas, campañas WhatsApp y segmentación de clientes. Implementación gratis en ambos planes.' },
   { q: '¿Necesito saber de computadoras?', a: 'Para nada. Si sabes usar WhatsApp, sabes usar Coriva. Lo diseñamos para personas que nunca han usado un sistema. Un asesor nuestro te guía en el primer día.' },
   { q: '¿Qué pasa si ya uso Treinta?', a: 'Coriva tiene funciones que Treinta no tiene: alertas de stock con IA, control de caja avanzado, reportes detallados y soporte personalizado en Perú. Puedes migrar tu data fácilmente.' },
   { q: '¿Funciona sin internet?', a: 'Funciona con conexión a internet (WiFi o datos móviles). Con una señal básica de celular es suficiente para registrar ventas sin interrupciones.' },

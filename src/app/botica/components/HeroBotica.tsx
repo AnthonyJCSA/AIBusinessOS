@@ -31,7 +31,7 @@ export default function HeroBotica() {
           </h1>
 
           <p style={{ fontSize: 18, lineHeight: 1.7, color: C.muted, marginBottom: 28, maxWidth: 480 }}>
-            Controla ventas, stock de medicamentos y caja sin cuaderno ni Excel. Desde <strong style={{ color: C.ink }}>S/ 49 al mes</strong> con implementación gratis.
+            Controla ventas, stock de medicamentos y caja sin cuaderno ni Excel. Desde <strong style={{ color: C.ink }}>S/ 79 al mes</strong> con implementación gratis.
           </p>
 
           {/* mini stats */}

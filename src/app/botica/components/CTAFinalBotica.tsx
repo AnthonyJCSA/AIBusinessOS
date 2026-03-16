@@ -25,7 +25,7 @@ export default function CTAFinalBotica() {
             Ver demo del sistema
           </a>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 8 }}>
-            {['Implementación gratis · S/49/mes','📞 +51 913 916 967','📧 soporte@corivape.com'].map(p => (
+            {['Implementación gratis · S/79/mes','📞 +51 913 916 967','📧 soporte@corivape.com'].map(p => (
               <div key={p} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>
                 <div style={{ width: 6, height: 6, borderRadius: '50%', background: C.lime, flexShrink: 0 }} />{p}
               </div>

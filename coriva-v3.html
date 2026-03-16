@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coriva Core — Tu negocio en piloto automático</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;0,700;0,900;1,300;1,400;1,600;1,900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink: #0C0E12;
+  --ink2: #2D3142;
+  --muted: #6B7280;
+  --pale: #9CA3AF;
+  --bg: #FAFAF8;
+  --bg2: #F3F2EF;
+  --bg3: #ECEAE5;
+  --card: #FFFFFF;
+  --border: #E5E3DE;
+  --border2: #D4D2CC;
+  --lime: #C8F23A;
+  --lime-dark: #9DC429;
+  --orange: #FF5A1F;
+  --orange-light: #FFF0EB;
+  --green: #0D9C6E;
+  --green-light: #E8F8F3;
+  --amber: #E8970A;
+  --amber-light: #FEF6E4;
+  --red: #DC2626;
+  --wa: #25D366;
+  --ff-display: 'Fraunces', Georgia, serif;
+  --ff-body: 'Plus Jakarta Sans', sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+body { font-family: var(--ff-body); background: var(--bg); color: var(--ink); overflow-x: hidden; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
+a { color: inherit; text-decoration: none; }
+img { display: block; max-width: 100%; }
+
+/* PAGE SYSTEM */
+.pg { display: none; }
+.pg.on { display: block; }
+
+/* ============================================
+   NAV
+============================================ */
+.nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 300;
+  height: 64px; display: flex; align-items: center;
+  padding: 0 clamp(20px, 5vw, 80px);
+  background: rgba(250,250,248,0.88);
+  backdrop-filter: blur(24px) saturate(180%);
+  border-bottom: 1px solid var(--border);
+  justify-content: space-between; gap: 24px;
+  transition: all .3s;
+}
+.nav.scrolled { box-shadow: 0 4px 24px rgba(12,14,18,0.08); }
+.nav-logo { display: flex; align-items: center; gap: 10px; cursor: pointer; flex-shrink: 0; }
+.nav-logo-mark {
+  width: 36px; height: 36px; background: var(--ink); border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--ff-display); font-size: 18px; font-weight: 900; color: var(--lime);
+  letter-spacing: -1px; flex-shrink: 0;
+}
+.nav-logo-name { font-family: var(--ff-display); font-size: 18px; font-weight: 700; color: var(--ink); }
+.nav-center { display: flex; align-items: center; gap: 4px; }
+.nav-link {
+  padding: 7px 14px; border-radius: 8px; font-size: 14px; font-weight: 500;
+  color: var(--muted); cursor: pointer; transition: .15s;
+}
+.nav-link:hover, .nav-link.act { color: var(--ink); background: var(--bg2); }
+.nav-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.btn-nav-ghost {
+  padding: 8px 16px; border-radius: 9px; font-size: 14px; font-weight: 600;
+  border: 1.5px solid var(--border2); color: var(--ink2); cursor: pointer;
+  transition: .15s; background: transparent; font-family: var(--ff-body);
+}
+.btn-nav-ghost:hover { border-color: var(--ink); background: var(--bg2); }
+.btn-nav-wa {
+  padding: 8px 18px; border-radius: 9px; font-size: 14px; font-weight: 700;
+  background: var(--ink); color: #fff; cursor: pointer; transition: .15s;
+  display: flex; align-items: center; gap: 7px; font-family: var(--ff-body);
+  white-space: nowrap;
+}
+.btn-nav-wa:hover { background: #1a1e27; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(12,14,18,0.2); }
+.ham {
+  display: none; width: 38px; height: 38px; border-radius: 9px;
+  background: var(--bg2); border: 1.5px solid var(--border); cursor: pointer;
+  align-items: center; justify-content: center; font-size: 18px;
+}
+
+/* ============================================
+   HERO
+============================================ */
+.hero {
+  min-height: 100vh;
+  padding: 100px clamp(20px, 5vw, 80px) 80px;
+  position: relative; overflow: hidden;
+  display: flex; flex-direction: column; justify-content: center;
+}
+
+/* Textured background */
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    radial-gradient(ellipse 900px 600px at 75% 40%, rgba(200,242,58,0.12), transparent),
+    radial-gradient(ellipse 600px 400px at 10% 80%, rgba(255,90,31,0.06), transparent),
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+.hero-inner {
+  display: grid; grid-template-columns: 1fr 520px; gap: 80px;
+  align-items: center; position: relative; z-index: 2;
+  max-width: 1200px; margin: 0 auto; width: 100%;
+}
+
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  border: 1.5px solid var(--border2); border-radius: 99px;
+  padding: 5px 14px 5px 8px; font-size: 12px; font-weight: 600;
+  color: var(--ink2); margin-bottom: 24px; background: var(--card);
+  box-shadow: 0 2px 8px rgba(12,14,18,0.06);
+}
+.eyebrow-dot {
+  width: 24px; height: 24px; background: var(--lime); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; flex-shrink: 0;
+}
+
+.hero h1 {
+  font-family: var(--ff-display);
+  font-size: clamp(44px, 6vw, 76px);
+  font-weight: 900; line-height: 0.96;
+  letter-spacing: -3px; margin-bottom: 24px;
+  color: var(--ink);
+}
+.hero h1 em {
+  font-style: italic; color: var(--orange);
+  font-weight: 300; display: block;
+}
+.hero h1 .underline-lime {
+  position: relative; white-space: nowrap;
+}
+.hero h1 .underline-lime::after {
+  content: '';
+  position: absolute; left: 0; bottom: -4px; width: 100%; height: 6px;
+  background: var(--lime); border-radius: 3px; z-index: -1;
+  transform: rotate(-1deg);
+}
+
+.hero-sub {
+  font-size: 18px; line-height: 1.7; color: var(--muted);
+  margin-bottom: 36px; max-width: 480px;
+}
+.hero-sub strong { color: var(--ink); font-weight: 600; }
+
+.hero-actions { display: flex; flex-direction: column; gap: 16px; }
+.hero-btns { display: flex; gap: 10px; flex-wrap: wrap; }
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 9px;
+  padding: 15px 28px; border-radius: 12px; font-size: 16px; font-weight: 700;
+  background: var(--ink); color: #fff; cursor: pointer; transition: .2s;
+  font-family: var(--ff-body); border: none; white-space: nowrap;
+}
+.btn-primary:hover { background: #1a1e27; transform: translateY(-2px); box-shadow: 0 8px 28px rgba(12,14,18,0.25); }
+.btn-primary.wa { background: var(--wa); }
+.btn-primary.wa:hover { background: #1fb855; box-shadow: 0 8px 28px rgba(37,211,102,0.3); }
+.btn-ghost {
+  display: inline-flex; align-items: center; gap: 9px;
+  padding: 15px 26px; border-radius: 12px; font-size: 16px; font-weight: 600;
+  background: transparent; border: 1.5px solid var(--border2); color: var(--ink2);
+  cursor: pointer; transition: .2s; font-family: var(--ff-body); white-space: nowrap;
+}
+.btn-ghost:hover { border-color: var(--ink); color: var(--ink); }
+
+.hero-trust {
+  display: flex; align-items: center; gap: 12px;
+  font-size: 13px; color: var(--pale);
+}
+.trust-avatars { display: flex; }
+.trust-av {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 2px solid var(--bg); margin-right: -8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700; color: #fff;
+  flex-shrink: 0;
+}
+.trust-stars { color: var(--amber); font-size: 12px; }
+
+/* HERO CARD */
+.hero-visual { position: relative; }
+.app-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow:
+    0 32px 80px rgba(12,14,18,0.12),
+    0 8px 24px rgba(12,14,18,0.06),
+    0 0 0 1px rgba(255,255,255,0.5) inset;
+  position: relative; z-index: 2;
+}
+.app-bar {
+  background: var(--ink); padding: 12px 16px;
+  display: flex; align-items: center; gap: 10px;
+}
+.app-bar-dots { display: flex; gap: 6px; }
+.app-bar-dot { width: 10px; height: 10px; border-radius: 50%; }
+.app-bar-name {
+  font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.5);
+  margin-left: 8px; font-family: var(--ff-body);
+}
+.app-bar-badge {
+  margin-left: auto; background: var(--lime); color: var(--ink);
+  font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 99px;
+}
+.app-body { padding: 20px; }
+.app-kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.kpi {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 14px; padding: 14px 16px;
+}
+.kpi-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); margin-bottom: 6px; }
+.kpi-val { font-family: var(--ff-display); font-size: 26px; font-weight: 700; line-height: 1; }
+.kpi-val.g { color: var(--green); }
+.kpi-val.b { color: var(--ink); }
+.kpi-sub { font-size: 11px; color: var(--pale); margin-top: 4px; }
+.app-alert {
+  border-radius: 12px; padding: 12px 14px;
+  display: flex; align-items: flex-start; gap: 10px;
+  margin-bottom: 10px;
+}
+.app-alert.warn { background: var(--amber-light); border: 1px solid rgba(232,151,10,0.2); }
+.app-alert.ok { background: var(--green-light); border: 1px solid rgba(13,156,110,0.2); }
+.app-alert-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.app-alert-title { font-size: 12px; font-weight: 700; margin-bottom: 2px; }
+.app-alert.warn .app-alert-title { color: var(--amber); }
+.app-alert.ok .app-alert-title { color: var(--green); }
+.app-alert-desc { font-size: 11px; color: var(--muted); }
+
+.hero-float {
+  position: absolute;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 14px; padding: 10px 14px;
+  box-shadow: 0 8px 28px rgba(12,14,18,0.1);
+  font-size: 12px; font-weight: 600; white-space: nowrap;
+  z-index: 3;
+}
+.hf1 { top: -16px; right: 40px; color: var(--green); }
+.hf2 { bottom: 24px; left: -24px; color: var(--ink2); }
+.hf-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 5px; }
+
+/* ============================================
+   STATS STRIP
+============================================ */
+.stats-strip {
+  background: var(--ink); padding: 28px clamp(20px, 5vw, 80px);
+  overflow: hidden;
+}
+.stats-inner {
+  max-width: 1200px; margin: 0 auto;
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 0; border-left: 1px solid rgba(255,255,255,0.08);
+}
+.stat-it {
+  padding: 16px 32px;
+  border-right: 1px solid rgba(255,255,255,0.08);
+  text-align: center;
+}
+.stat-n {
+  font-family: var(--ff-display); font-size: 36px; font-weight: 900;
+  color: var(--lime); letter-spacing: -1px; margin-bottom: 4px;
+  line-height: 1;
+}
+.stat-l { font-size: 13px; color: rgba(255,255,255,0.4); font-weight: 400; }
+
+/* ============================================
+   SECTION BASICS
+============================================ */
+.section { padding: 100px clamp(20px, 5vw, 80px); }
+.section.alt { background: var(--bg2); }
+.section.dark { background: var(--ink); }
+.inner { max-width: 1200px; margin: 0 auto; }
+
+.eyebrow {
+  font-size: 11px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 2px; color: var(--muted); margin-bottom: 16px; display: block;
+}
+.eyebrow.lime { color: var(--lime-dark); }
+.eyebrow.orange { color: var(--orange); }
+
+.section-title {
+  font-family: var(--ff-display); font-size: clamp(32px, 4.5vw, 54px);
+  font-weight: 900; line-height: 1.0; letter-spacing: -2px; margin-bottom: 16px;
+}
+.section-title em { font-style: italic; font-weight: 300; color: var(--orange); }
+.section-sub { font-size: 17px; color: var(--muted); line-height: 1.7; max-width: 540px; }
+.centered { text-align: center; }
+.centered .section-sub { margin: 0 auto; }
+.section-head { margin-bottom: 60px; }
+
+/* ============================================
+   TYPE SELECTOR
+============================================ */
+.type-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+}
+.type-card {
+  background: var(--card); border: 2px solid var(--border);
+  border-radius: 20px; padding: 28px 24px;
+  cursor: pointer; transition: all .25s; position: relative; overflow: hidden;
+}
+.type-card::before {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
+  background: transparent; transition: .25s;
+}
+.type-card:hover { border-color: var(--ink); transform: translateY(-4px); box-shadow: 0 12px 40px rgba(12,14,18,0.12); }
+.type-card:hover::before { background: var(--lime); }
+.type-card.featured { border-color: var(--ink); }
+.type-card.featured::before { background: var(--lime); }
+.type-card.soon { opacity: .45; cursor: default; }
+.type-card.soon:hover { transform: none; box-shadow: none; border-color: var(--border); }
+.tc-emoji { font-size: 36px; margin-bottom: 14px; display: block; }
+.tc-name {
+  font-family: var(--ff-display); font-size: 20px; font-weight: 700;
+  margin-bottom: 6px; letter-spacing: -0.5px;
+}
+.tc-desc { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 14px; }
+.tc-link { font-size: 13px; font-weight: 700; color: var(--ink); display: flex; align-items: center; gap: 5px; }
+.tc-soon-badge {
+  display: inline-block; font-size: 10px; font-weight: 700; background: var(--bg3);
+  color: var(--pale); padding: 3px 10px; border-radius: 99px;
+}
+
+/* ============================================
+   PROBLEM SECTION
+============================================ */
+.problems-list { display: flex; flex-direction: column; gap: 2px; }
+.prob-item {
+  display: flex; align-items: center; gap: 16px;
+  padding: 18px 20px; border-radius: 12px;
+  border: 1px solid transparent; cursor: default; transition: .2s;
+  background: var(--card);
+}
+.prob-item:hover { border-color: var(--border); box-shadow: 0 4px 16px rgba(12,14,18,0.06); }
+.prob-num {
+  font-family: var(--ff-display); font-size: 13px; font-weight: 700;
+  color: var(--border2); width: 28px; flex-shrink: 0;
+}
+.prob-icon { font-size: 22px; flex-shrink: 0; }
+.prob-text { flex: 1; }
+.prob-title { font-size: 15px; font-weight: 600; margin-bottom: 2px; }
+.prob-desc { font-size: 13px; color: var(--muted); }
+.prob-tag {
+  font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 99px;
+  flex-shrink: 0; white-space: nowrap;
+}
+.pt-red { background: rgba(220,38,38,0.08); color: var(--red); }
+.pt-amber { background: var(--amber-light); color: var(--amber); }
+
+/* ============================================
+   BENEFITS GRID
+============================================ */
+.bens-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
+.ben {
+  padding: 32px 28px; background: var(--card);
+  border: 1px solid var(--border); transition: .2s;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.ben:hover { background: var(--bg2); }
+.ben-ico-wrap {
+  width: 48px; height: 48px; border-radius: 12px;
+  background: var(--ink); display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+}
+.ben-title { font-family: var(--ff-display); font-size: 19px; font-weight: 700; letter-spacing: -0.4px; }
+.ben-desc { font-size: 14px; color: var(--muted); line-height: 1.65; }
+.ben-tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 99px;
+  background: var(--green-light); color: var(--green); width: fit-content;
+}
+
+/* ============================================
+   HOW IT WORKS
+============================================ */
+.how-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+.steps-list { display: flex; flex-direction: column; gap: 0; }
+.step-item {
+  display: flex; gap: 20px; padding: 24px 0;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+.step-item:last-child { border-bottom: none; }
+.step-num-circle {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--lime); display: flex; align-items: center; justify-content: center;
+  font-family: var(--ff-display); font-size: 16px; font-weight: 900; color: var(--ink);
+  flex-shrink: 0; position: relative; z-index: 2;
+}
+.step-body {}
+.step-title { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+.step-desc { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+/* DEMO CARD */
+.demo-phone {
+  background: var(--card); border: 1px solid var(--border); border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(12,14,18,0.1), 0 8px 20px rgba(12,14,18,0.06);
+}
+.demo-header {
+  background: var(--ink); padding: 14px 18px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.demo-header-title { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.7); }
+.demo-header-live {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 700; color: var(--lime);
+}
+.live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--lime); animation: blink 1.5s infinite; }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: .2; } }
+.demo-body { padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+.demo-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 14px; background: var(--bg2); border-radius: 12px;
+  border: 1px solid var(--border);
+}
+.dr-left .dr-name { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+.dr-left .dr-sku { font-size: 11px; color: var(--pale); }
+.dr-right { text-align: right; }
+.dr-price { font-family: var(--ff-display); font-size: 18px; font-weight: 700; color: var(--ink); }
+.dr-stock { font-size: 11px; color: var(--muted); }
+.demo-total {
+  background: var(--ink); border-radius: 14px; padding: 16px 18px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.dt-label { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.6); }
+.dt-val { font-family: var(--ff-display); font-size: 28px; font-weight: 900; color: var(--lime); }
+.demo-pay { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+.pay-btn {
+  padding: 10px; border-radius: 10px; font-size: 12px; font-weight: 700;
+  text-align: center; border: 1.5px solid var(--border); color: var(--muted);
+  cursor: pointer; transition: .15s; background: transparent;
+}
+.pay-btn.on { border-color: var(--ink); color: var(--ink); background: var(--bg2); }
+
+/* ============================================
+   BEFORE / AFTER
+============================================ */
+.ba-wrap {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 52px;
+}
+.ba-card { border-radius: 20px; overflow: hidden; }
+.ba-head {
+  padding: 18px 24px; font-size: 15px; font-weight: 700;
+  display: flex; align-items: center; gap: 10px;
+}
+.ba-before .ba-head { background: rgba(220,38,38,0.07); color: var(--red); border-bottom: 1px solid rgba(220,38,38,0.12); }
+.ba-after .ba-head { background: var(--green-light); color: var(--green); border-bottom: 1px solid rgba(13,156,110,0.15); }
+.ba-before { background: rgba(220,38,38,0.03); border: 1px solid rgba(220,38,38,0.12); }
+.ba-after { background: var(--green-light); border: 1px solid rgba(13,156,110,0.15); }
+.ba-rows { padding: 20px 24px; display: flex; flex-direction: column; gap: 0; }
+.ba-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 0; border-bottom: 1px solid rgba(12,14,18,0.06);
+  font-size: 14px;
+}
+.ba-row:last-child { border-bottom: none; }
+.ba-before .ba-row { color: var(--ink2); }
+.ba-after .ba-row { color: var(--ink2); }
+.ba-icon { font-size: 16px; flex-shrink: 0; }
+
+/* ============================================
+   TESTIMONIALS
+============================================ */
+.testi-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+.testi-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 20px; padding: 28px 24px; display: flex; flex-direction: column; gap: 20px;
+  transition: .2s;
+}
+.testi-card:hover { box-shadow: 0 8px 32px rgba(12,14,18,0.08); transform: translateY(-2px); }
+.testi-stars { color: var(--amber); font-size: 14px; letter-spacing: 1px; }
+.testi-quote {
+  font-size: 15px; line-height: 1.7; color: var(--ink2); flex: 1;
+  font-style: italic;
+}
+.testi-quote strong { font-style: normal; color: var(--ink); }
+.testi-author { display: flex; align-items: center; gap: 12px; }
+.testi-ava {
+  width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; color: #fff;
+}
+.testi-name { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+.testi-biz { font-size: 12px; color: var(--muted); }
+
+/* ============================================
+   PRICING
+============================================ */
+.price-wrap {
+  max-width: 520px; margin: 0 auto;
+  background: var(--card); border: 2px solid var(--ink);
+  border-radius: 28px; overflow: hidden;
+  box-shadow: 0 24px 80px rgba(12,14,18,0.14);
+}
+.price-head-bar {
+  background: var(--ink); padding: 20px 32px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.phb-title { font-family: var(--ff-display); font-size: 22px; font-weight: 900; color: var(--lime); }
+.phb-badge {
+  background: var(--orange); color: #fff;
+  font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 99px;
+}
+.price-body { padding: 32px; }
+.price-amount { text-align: center; margin-bottom: 28px; }
+.price-old { font-size: 16px; color: var(--pale); text-decoration: line-through; margin-bottom: 6px; }
+.price-main {
+  font-family: var(--ff-display); font-size: 72px; font-weight: 900;
+  color: var(--ink); letter-spacing: -3px; line-height: 1;
+}
+.price-mo { font-size: 16px; color: var(--muted); margin-top: 6px; }
+.price-free { font-size: 14px; font-weight: 700; color: var(--green); margin-top: 8px; display: flex; align-items: center; gap: 5px; justify-content: center; }
+.price-divider { height: 1px; background: var(--border); margin: 24px 0; }
+.price-feats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 20px; margin-bottom: 28px; }
+.pf-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink2); }
+.pf-check { color: var(--green); font-size: 14px; flex-shrink: 0; }
+.btn-price-wa {
+  width: 100%; padding: 16px; border-radius: 14px; font-size: 16px; font-weight: 700;
+  background: var(--wa); color: #fff; border: none; cursor: pointer;
+  font-family: var(--ff-body); transition: .2s; display: flex; align-items: center; justify-content: center; gap: 9px;
+}
+.btn-price-wa:hover { background: #1fb855; transform: translateY(-1px); box-shadow: 0 6px 24px rgba(37,211,102,0.3); }
+.scarcity { text-align: center; font-size: 12px; font-weight: 600; color: var(--orange); margin-top: 14px; }
+
+/* ============================================
+   FAQ
+============================================ */
+.faq-wrap { max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; gap: 8px; }
+.faq-it {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 14px; overflow: hidden; cursor: pointer; transition: .2s;
+}
+.faq-it:hover { border-color: var(--border2); }
+.faq-it.open { border-color: var(--ink); }
+.faq-q {
+  padding: 18px 22px; display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; font-size: 15px; font-weight: 600;
+}
+.faq-icon { width: 26px; height: 26px; border-radius: 50%; background: var(--bg2); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 16px; color: var(--muted); flex-shrink: 0; transition: .2s; }
+.faq-it.open .faq-icon { background: var(--ink); color: var(--lime); transform: rotate(45deg); }
+.faq-a { display: none; padding: 0 22px 18px; font-size: 14px; color: var(--muted); line-height: 1.7; }
+.faq-it.open .faq-a { display: block; }
+
+/* ============================================
+   FINAL CTA
+============================================ */
+.final-cta-section {
+  background: var(--ink); padding: 100px clamp(20px, 5vw, 80px);
+  position: relative; overflow: hidden;
+}
+.final-cta-section::before {
+  content: '';
+  position: absolute; top: -200px; right: -200px;
+  width: 600px; height: 600px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(200,242,58,0.08), transparent 70%);
+  pointer-events: none;
+}
+.final-cta-inner { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr auto; gap: 60px; align-items: center; }
+.fci-left .fci-eyebrow { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--lime); margin-bottom: 16px; display: block; }
+.fci-left h2 {
+  font-family: var(--ff-display); font-size: clamp(36px, 5vw, 62px);
+  font-weight: 900; line-height: 1.0; letter-spacing: -2px;
+  color: #fff; margin-bottom: 16px;
+}
+.fci-left h2 em { font-style: italic; font-weight: 300; color: var(--lime); }
+.fci-left p { font-size: 16px; color: rgba(255,255,255,0.5); line-height: 1.7; }
+.fci-right { display: flex; flex-direction: column; gap: 12px; min-width: 280px; }
+.fci-pills { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.fci-pill { display: flex; align-items: center; gap: 8px; font-size: 13px; color: rgba(255,255,255,0.4); }
+.fci-pill-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--lime); flex-shrink: 0; }
+
+/* ============================================
+   FOOTER
+============================================ */
+footer {
+  background: #07080C; padding: 36px clamp(20px, 5vw, 80px);
+  display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+.footer-logo { font-family: var(--ff-display); font-size: 16px; font-weight: 700; color: rgba(255,255,255,0.3); }
+.footer-info { font-size: 13px; color: rgba(255,255,255,0.25); }
+.footer-links { display: flex; gap: 20px; }
+.footer-links a { font-size: 13px; color: rgba(255,255,255,0.25); transition: .15s; }
+.footer-links a:hover { color: rgba(255,255,255,0.5); }
+
+/* ============================================
+   WA FLOAT
+============================================ */
+.wa-float {
+  position: fixed; bottom: 28px; right: 28px; z-index: 500;
+  width: 58px; height: 58px; border-radius: 50%; background: var(--wa);
+  display: flex; align-items: center; justify-content: center; font-size: 28px;
+  cursor: pointer; box-shadow: 0 6px 24px rgba(37,211,102,0.4);
+  transition: .2s;
+  animation: float 4s ease-in-out infinite;
+}
+.wa-float:hover { transform: scale(1.1); box-shadow: 0 8px 32px rgba(37,211,102,0.5); animation: none; }
+@keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+
+/* ============================================
+   RESPONSIVE
+============================================ */
+@media (max-width: 1050px) {
+  .hero-inner { grid-template-columns: 1fr; gap: 60px; }
+  .app-card { max-width: 480px; }
+  .type-grid { grid-template-columns: 1fr 1fr; }
+  .how-grid { grid-template-columns: 1fr; gap: 48px; }
+  .final-cta-inner { grid-template-columns: 1fr; gap: 40px; }
+  .fci-right { flex-direction: row; flex-wrap: wrap; min-width: auto; }
+}
+@media (max-width: 768px) {
+  .nav-center { display: none; }
+  .btn-nav-ghost { display: none; }
+  .ham { display: flex; }
+  .bens-grid { grid-template-columns: 1fr; }
+  .testi-grid { grid-template-columns: 1fr; }
+  .ba-wrap { grid-template-columns: 1fr; }
+  .stats-inner { grid-template-columns: 1fr 1fr; }
+  .stat-it:nth-child(2) { border-right: none; }
+  .stat-it:nth-child(3) { border-top: 1px solid rgba(255,255,255,0.08); }
+  .price-feats { grid-template-columns: 1fr; }
+  .type-grid { grid-template-columns: 1fr 1fr; }
+  .hero h1 { font-size: 42px; letter-spacing: -2px; }
+  .fci-right { flex-direction: column; }
+}
+@media (max-width: 480px) {
+  .type-grid { grid-template-columns: 1fr; }
+  .hero-btns { flex-direction: column; }
+  .btn-primary, .btn-ghost { justify-content: center; }
+}
+
+/* ============================================
+   ANIMATIONS
+============================================ */
+.reveal {
+  opacity: 0; transform: translateY(32px);
+  transition: opacity .7s ease, transform .7s ease;
+}
+.reveal.visible { opacity: 1; transform: none; }
+
+.stagger-1 { transition-delay: .1s; }
+.stagger-2 { transition-delay: .2s; }
+.stagger-3 { transition-delay: .3s; }
+.stagger-4 { transition-delay: .4s; }
+</style>
+</head>
+<body>
+
+<a class="wa-float" href="https://wa.me/51913916967?text=Hola,%20quiero%20conocer%20Coriva%20Core%20para%20mi%20negocio." target="_blank">💬</a>
+
+<!-- NAV -->
+<nav class="nav" id="nav">
+  <div class="nav-logo" onclick="showPage('home')">
+    <div class="nav-logo-mark">C</div>
+    <span class="nav-logo-name">Coriva</span>
+  </div>
+  <div class="nav-center">
+    <div class="nav-link act" onclick="showPage('home')">Inicio</div>
+    <div class="nav-link" onclick="showPage('botica')">💊 Boticas</div>
+    <div class="nav-link" onclick="showPage('bodega')">🛒 Bodegas</div>
+    <div class="nav-link" onclick="scrollTo('faq-s')">FAQ</div>
+  </div>
+  <div class="nav-right">
+    <a class="btn-nav-ghost" href="https://coriva-core.vercel.app/demo" target="_blank">Ver demo</a>
+    <a class="btn-nav-wa" href="https://wa.me/51913916967?text=Hola,%20quiero%20conocer%20Coriva%20Core%20para%20mi%20negocio." target="_blank">
+      <span>💬</span> WhatsApp gratis
+    </a>
+    <button class="ham">☰</button>
+  </div>
+</nav>
+
+
+<!-- ══════════════════════════════ PAGE: HOME ══════════════════════════════ -->
+<div class="pg on" id="pg-home">
+
+<section class="hero">
+  <div class="hero-inner">
+    <div class="reveal">
+      <div class="hero-eyebrow">
+        <div class="eyebrow-dot">🚀</div>
+        Sistema POS con IA · América Latina &amp; EE.UU.
+      </div>
+      <h1>
+        Deja el<br>
+        <em>cuaderno.</em><br>
+        <span class="underline-lime">Ordena</span> tu<br>negocio.
+      </h1>
+      <p class="hero-sub">
+        Sistema para bodegas, boticas y tiendas. Controla ventas, stock y caja desde <strong>S/ 49 al mes</strong>. La IA trabaja por ti.
+      </p>
+      <div class="hero-actions">
+        <div class="hero-btns">
+          <div onclick="showPage('botica')" class="btn-primary">💊 Soy botica</div>
+          <div onclick="showPage('bodega')" class="btn-primary" style="background:var(--orange)">🛒 Soy bodega</div>
+          <a class="btn-ghost" href="https://wa.me/51913916967?text=Hola,%20quiero%20conocer%20Coriva%20Core%20para%20mi%20negocio." target="_blank">💬 WhatsApp</a>
+        </div>
+        <div class="hero-trust">
+          <div class="trust-avatars">
+            <div class="trust-av" style="background:#4F46E5">MG</div>
+            <div class="trust-av" style="background:#0D9C6E">CR</div>
+            <div class="trust-av" style="background:#E8970A">AT</div>
+            <div class="trust-av" style="background:#DC2626">JP</div>
+          </div>
+          <div>
+            <div class="trust-stars">★★★★★</div>
+            <div><strong style="color:var(--ink2);font-weight:600">500+ negocios</strong> ya usan Coriva</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-visual reveal stagger-2">
+      <div class="hero-float hf1" style="animation:floatCard 6s ease-in-out infinite">
+        <span class="hf-dot" style="background:var(--green)"></span>+18% ventas esta semana
+      </div>
+      <div class="app-card">
+        <div class="app-bar">
+          <div class="app-bar-dots">
+            <div class="app-bar-dot" style="background:#FF5F57"></div>
+            <div class="app-bar-dot" style="background:#FEBC2E"></div>
+            <div class="app-bar-dot" style="background:#28C840"></div>
+          </div>
+          <span class="app-bar-name">Coriva Core — Dashboard</span>
+          <span class="app-bar-badge">IA activa</span>
+        </div>
+        <div class="app-body">
+          <div class="app-kpis">
+            <div class="kpi">
+              <div class="kpi-label">Ventas hoy</div>
+              <div class="kpi-val g">S/ 2,450</div>
+              <div class="kpi-sub">↑ 18% vs ayer</div>
+            </div>
+            <div class="kpi">
+              <div class="kpi-label">Productos</div>
+              <div class="kpi-val b">245</div>
+              <div class="kpi-sub">2 con stock bajo</div>
+            </div>
+          </div>
+          <div class="app-alert warn">
+            <div class="app-alert-icon">⚠️</div>
+            <div>
+              <div class="app-alert-title">Stock bajo · Coca Cola 1L</div>
+              <div class="app-alert-desc">Quedan 5 unidades · IA recomienda pedir hoy</div>
+            </div>
+          </div>
+          <div class="app-alert ok">
+            <div class="app-alert-icon">✅</div>
+            <div>
+              <div class="app-alert-title">Caja cerrada · Todo cuadra</div>
+              <div class="app-alert-desc">S/ 2,450 registrados · Cierre en 47 segundos</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="hero-float hf2" style="animation:floatCard2 5s ease-in-out infinite 1s">
+        <span class="hf-dot" style="background:var(--amber)"></span>⏱ Caja cerrada en 1 min
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="stats-strip">
+  <div class="stats-inner inner">
+    <div class="stat-it"><div class="stat-n">500+</div><div class="stat-l">Negocios activos</div></div>
+    <div class="stat-it"><div class="stat-n">1 día</div><div class="stat-l">Para estar listo</div></div>
+    <div class="stat-it"><div class="stat-n">S/ 49</div><div class="stat-l">Por mes todo incluido</div></div>
+    <div class="stat-it"><div class="stat-n">4.9★</div><div class="stat-l">Satisfacción clientes</div></div>
+  </div>
+</div>
+
+<!-- TIPO NEGOCIO -->
+<section class="section">
+  <div class="inner">
+    <div class="section-head centered reveal">
+      <span class="eyebrow">Elige tu solución</span>
+      <h2 class="section-title">Especializado para<br>tu tipo de negocio</h2>
+      <p class="section-sub">No somos un sistema genérico. Cada módulo fue diseñado pensando en cómo trabajas tú.</p>
+    </div>
+    <div class="type-grid reveal">
+      <div class="type-card featured" onclick="showPage('botica')">
+        <span class="tc-emoji">💊</span>
+        <div class="tc-name">Boticas y Farmacias</div>
+        <div class="tc-desc">Control de medicamentos, stock automático y caja en 1 minuto.</div>
+        <div class="tc-link">Ver solución <span>→</span></div>
+      </div>
+      <div class="type-card featured" onclick="showPage('bodega')">
+        <span class="tc-emoji">🛒</span>
+        <div class="tc-name">Bodegas y Tiendas</div>
+        <div class="tc-desc">Sabe cuánto ganas hoy. Controla mercadería y deudas en tiempo real.</div>
+        <div class="tc-link">Ver solución <span>→</span></div>
+      </div>
+      <div class="type-card soon">
+        <span class="tc-emoji">🍔</span>
+        <div class="tc-name">Restaurantes</div>
+        <div class="tc-desc">Pedidos, cocina y caja integrados.</div>
+        <div class="tc-soon-badge">Próximamente</div>
+      </div>
+      <div class="type-card soon">
+        <span class="tc-emoji">✂️</span>
+        <div class="tc-name">Salones de Belleza</div>
+        <div class="tc-desc">Citas, ventas y productos en un lugar.</div>
+        <div class="tc-soon-badge">Próximamente</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STORY -->
+<section class="section alt">
+  <div class="inner">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center" class="how-grid">
+      <div class="reveal">
+        <span class="eyebrow orange">Nuestra historia</span>
+        <h2 class="section-title">¿Por qué<br>creamos <em>esto?</em></h2>
+        <div style="display:flex;flex-direction:column;gap:14px;margin-top:24px">
+          <p style="font-size:16px;color:var(--muted);line-height:1.8">
+            Coriva nació porque <strong style="color:var(--ink)">miles de negocios en Perú</strong> siguen perdiendo plata por usar cuaderno y Excel.
+          </p>
+          <p style="font-size:16px;color:var(--muted);line-height:1.8">
+            Vimos cómo dueños de bodegas y boticas trabajan 12 horas al día pero <strong style="color:var(--ink)">no saben cuánto ganan</strong>. Cierran caja en 1 hora y siempre falta dinero.
+          </p>
+          <p style="font-size:16px;color:var(--muted);line-height:1.8">
+            Hoy ayudamos a <strong style="color:var(--ink)">ordenar su negocio en minutos</strong>. Sin cuaderno, sin Excel, sin complicaciones.
+          </p>
+        </div>
+        <div style="margin-top:32px">
+          <a class="btn-primary wa" href="https://wa.me/51913916967?text=Hola,%20quiero%20conocer%20Coriva%20Core." target="_blank">
+            💬 Hablar por WhatsApp →
+          </a>
+        </div>
+      </div>
+      <div class="reveal stagger-2">
+        <div style="background:var(--card);border:1px solid var(--border);border-radius:24px;overflow:hidden;box-shadow:0 16px 48px rgba(12,14,18,0.08)">
+          <div style="background:var(--ink);padding:18px 24px">
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,0.4);margin-bottom:6px">Impacto real</div>
+            <div style="font-family:var(--ff-display);font-size:22px;font-weight:900;color:var(--lime)">Resultados en el primer mes</div>
+          </div>
+          <div style="padding:0 24px">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 0;border-bottom:1px solid var(--border)">
+              <span style="font-size:14px;color:var(--muted)">Tiempo cerrando caja</span>
+              <span style="font-family:var(--ff-display);font-size:22px;font-weight:700;color:var(--green)">1 min</span>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 0;border-bottom:1px solid var(--border)">
+              <span style="font-size:14px;color:var(--muted)">Aumento en ventas</span>
+              <span style="font-family:var(--ff-display);font-size:22px;font-weight:700;color:var(--ink)">+35%</span>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 0;border-bottom:1px solid var(--border)">
+              <span style="font-size:14px;color:var(--muted)">Dinero perdido por errores</span>
+              <span style="font-family:var(--ff-display);font-size:22px;font-weight:700;color:var(--green)">S/ 0</span>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 0">
+              <span style="font-size:14px;color:var(--muted)">Tiempo para estar listo</span>
+              <span style="font-family:var(--ff-display);font-size:22px;font-weight:700;color:var(--amber)">1 día</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BENEFITS -->
+<section class="section">
+  <div class="inner">
+    <div class="section-head centered reveal">
+      <span class="eyebrow">Beneficios</span>
+      <h2 class="section-title">Problemas que<br>resuelves <em>desde hoy</em></h2>
+    </div>
+    <div class="bens-grid reveal">
+      <div class="ben"><div class="ben-ico-wrap">🕐</div><div class="ben-title">10 horas menos por semana</div><div class="ben-desc">Ya no pierdas tiempo contando inventario ni cerrando caja a mano. Coriva lo hace en segundos.</div><div class="ben-tag">✓ Desde el día 1</div></div>
+      <div class="ben"><div class="ben-ico-wrap">💰</div><div class="ben-title">Control total de tu plata</div><div class="ben-desc">Sabe exactamente cuánto debes, cuánto te deben y cuánto tienes en caja. Sin sorpresas a fin de mes.</div><div class="ben-tag">✓ Tiempo real</div></div>
+      <div class="ben"><div class="ben-ico-wrap">📦</div><div class="ben-title">Nunca más sin stock</div><div class="ben-desc">La IA te avisa 3 días antes de que se acabe un producto. Tus clientes siempre encuentran lo que buscan.</div><div class="ben-tag">✓ IA automática</div></div>
+      <div class="ben"><div class="ben-ico-wrap">📊</div><div class="ben-title">Decisiones con datos reales</div><div class="ben-desc">Reportes claros que te dicen qué vender más, qué eliminar y cuándo comprar. Sin Excel.</div><div class="ben-tag">✓ Reportes diarios</div></div>
+      <div class="ben"><div class="ben-ico-wrap">📱</div><div class="ben-title">Gestiona desde tu celular</div><div class="ben-desc">Revisa tus ventas desde donde estés. No necesitas estar físicamente en tu negocio.</div><div class="ben-tag">✓ iOS y Android</div></div>
+      <div class="ben"><div class="ben-ico-wrap">🤖</div><div class="ben-title">IA que trabaja por ti</div><div class="ben-desc">Alertas automáticas, predicción de ventas y sugerencias de compra. Tu asistente 24/7.</div><div class="ben-tag">✓ IA incluida</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="section alt">
+  <div class="inner">
+    <div class="section-head centered reveal">
+      <span class="eyebrow">Testimonios reales</span>
+      <h2 class="section-title">Negocios como el tuyo<br>ya están <em>creciendo</em></h2>
+    </div>
+    <div class="testi-grid reveal">
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-quote">Antes perdía 2 horas diarias cerrando caja. Ahora Coriva lo hace en 30 segundos y <strong>siempre cuadra</strong>. No sé cómo trabajé sin esto.</div>
+        <div class="testi-author"><div class="testi-ava" style="background:#4F46E5">MG</div><div><div class="testi-name">María González</div><div class="testi-biz">Bodega El Ahorro · Lima</div></div></div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-quote">La IA me avisó que se acababa mi producto estrella. Reabastecí a tiempo y <strong>vendí el doble ese fin de semana</strong>.</div>
+        <div class="testi-author"><div class="testi-ava" style="background:#0D9C6E">CR</div><div><div class="testi-name">Carlos Ruiz</div><div class="testi-biz">Fashion Store · Arequipa</div></div></div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-quote">Dejé el cuaderno para siempre. Ahora sé exactamente quién me debe y cuánto. <strong>Recuperé S/ 500</strong> en deudas que no me acordaba.</div>
+        <div class="testi-author"><div class="testi-ava" style="background:#DC2626">AT</div><div><div class="testi-name">Ana Torres</div><div class="testi-biz">Bodega La Esquina · Cusco</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="section" id="faq-s">
+  <div class="inner">
+    <div class="section-head centered reveal">
+      <span class="eyebrow">FAQ</span>
+      <h2 class="section-title">Todo lo que<br>necesitas saber</h2>
+    </div>
+    <div class="faq-wrap reveal">
+      <div class="faq-it" onclick="toggleFaq(this)"><div class="faq-q">¿Es realmente gratis el plan Starter? <div class="faq-icon">+</div></div><div class="faq-a">Sí. El plan Starter es 100% gratuito para siempre. Sin tarjeta de crédito, sin trucos.</div></div>
+      <div class="faq-it" onclick="toggleFaq(this)"><div class="faq-q">¿Necesito saber de computadoras? <div class="faq-icon">+</div></div><div class="faq-a">Para nada. Si sabes usar WhatsApp, sabes usar Coriva. Lo diseñamos para personas que nunca han usado un sistema. Un asesor nuestro te guía en el primer día.</div></div>
+      <div class="faq-it" onclick="toggleFaq(this)"><div class="faq-q">¿Qué pasa si ya uso Treinta? <div class="faq-icon">+</div></div><div class="faq-a">Coriva tiene funciones que Treinta no tiene: alertas de stock con IA, control de caja avanzado, reportes detallados y soporte personalizado en Perú. Puedes migrar tu data fácilmente.</div></div>
+      <div class="faq-it" onclick="toggleFaq(this)"><div class="faq-q">¿Funciona sin internet? <div class="faq-icon">+</div></div><div class="faq-a">Funciona con conexión a internet (WiFi o datos móviles). Con una señal básica de celular es suficiente para registrar ventas sin interrupciones.</div></div>
+      <div class="faq-it" onclick="toggleFaq(this)"><div class="faq-q">¿Puedo cancelar cuando quiera? <div class="faq-icon">+</div></div><div class="faq-a">Sí. Sin contratos, sin penalidades. Cancela en cualquier momento con un mensaje por WhatsApp.</div></div>
+      <div class="faq-it" onclick="toggleFaq(this)"><div class="faq-q">¿Cómo funciona la IA? <div class="faq-icon">+</div></div><div class="faq-a">La IA analiza tu historial de ventas y te avisa automáticamente cuando un producto está por agotarse, predice cuándo necesitas reponer stock y sugiere qué productos comprar.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final-cta-section">
+  <div class="final-cta-inner inner reveal">
+    <div class="fci-left">
+      <span class="fci-eyebrow">Empieza hoy</span>
+      <h2>¿Listo para<br><em>ordenar tu</em><br>negocio?</h2>
+      <p>Elige tu tipo de negocio y empieza hoy.<br>Implementación gratis, soporte en español.</p>
+    </div>
+    <div class="fci-right">
+      <div onclick="showPage('botica')" class="btn-primary" style="justify-content:center;font-size:15px;padding:14px 24px;cursor:pointer">💊 Soy botica →</div>
+      <div onclick="showPage('bodega')" class="btn-primary" style="background:var(--orange);justify-content:center;font-size:15px;padding:14px 24px;cursor:pointer">🛒 Soy bodega →</div>
+      <a class="btn-primary wa" href="https://wa.me/51913916967?text=Hola,%20quiero%20conocer%20Coriva%20Core." target="_blank" style="justify-content:center;font-size:15px;padding:14px 24px">💬 Hablar por WhatsApp →</a>
+      <div class="fci-pills">
+        <div class="fci-pill"><div class="fci-pill-dot"></div>Implementación gratis</div>
+        <div class="fci-pill"><div class="fci-pill-dot"></div>Desde S/ 49 al mes</div>
+        <div class="fci-pill"><div class="fci-pill-dot"></div>Soporte en Perú</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-logo">Coriva Core</div>
+  <div class="footer-info">soporte@corivape.com · +51 913 916 967</div>
+  <div class="footer-links">
+    <a href="#">Términos</a>
+    <a href="#">Privacidad</a>
+    <a href="https://wa.me/51913916967" target="_blank">WhatsApp</a>
+  </div>
+</footer>
+</div>
+
+
+<!-- ══════════════════════════════ PAGE: BOTICA ══════════════════════════════ -->
+<div class="pg" id="pg-botica">
+
+<section class="hero" style="background:linear-gradient(180deg, #F0FAF6 0%, var(--bg) 60%)">
+  <div class="hero-inner">
+    <div class="reveal">
+      <div class="hero-eyebrow" style="border-color:rgba(13,156,110,0.3);background:var(--green-light)">
+        <div class="eyebrow-dot" style="background:var(--green)">💊</div>
+        Sistema especializado para boticas en Perú
+      </div>
+      <h1>
+        Para boticas<br>que quieren<br>
+        <em>vender</em><br>
+        <span class="underline-lime">más.</span>
+      </h1>
+      <p class="hero-sub">
+        Controla ventas, stock de medicamentos y caja sin cuaderno ni Excel. Desde <strong>S/ 49 al mes</strong> con implementación gratis.
+      </p>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:32px">
+        <div style="text-align:center;padding:14px;background:var(--green-light);border:1px solid rgba(13,156,110,0.2);border-radius:14px">
+          <div style="font-family:var(--ff-display);font-size:24px;font-weight:900;color:var(--green)">1 min</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:3px">Cierre de caja</div>
+        </div>
+        <div style="text-align:center;padding:14px;background:var(--green-light);border:1px solid rgba(13,156,110,0.2);border-radius:14px">
+          <div style="font-family:var(--ff-display);font-size:24px;font-weight:900;color:var(--green)">+35%</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:3px">Más ventas</div>
+        </div>
+        <div style="text-align:center;padding:14px;background:var(--green-light);border:1px solid rgba(13,156,110,0.2);border-radius:14px">
+          <div style="font-family:var(--ff-display);font-size:24px;font-weight:900;color:var(--green)">S/ 0</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:3px">Dinero perdido</div>
+        </div>
+      </div>
+      <div class="hero-btns">
+        <a class="btn-primary wa" href="https://wa.me/51913916967?text=Hola,%20tengo%20una%20botica%20y%20quiero%20digitalizar%20mi%20negocio%20con%20Coriva%20Core." target="_blank">💬 Quiero que me lo instalen →</a>
+        <a class="btn-ghost" href="https://coriva-core.vercel.app/demo" target="_blank">Ver demo</a>
+      </div>
+    </div>
+    <div class="reveal stagger-2">
+      <!-- Testimonial -->
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:24px;margin-bottom:14px;box-shadow:0 8px 28px rgba(12,14,18,0.08)">
+        <div class="testi-stars">★★★★★</div>
+        <div style="font-size:15px;line-height:1.7;color:var(--ink2);margin:10px 0 16px;font-style:italic">"Antes cerraba caja en 1 hora y <strong style="font-style:normal;color:var(--ink)">siempre faltaba dinero</strong>. Ahora en 1 minuto y sé exactamente cuánto gané."</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:38px;height:38px;border-radius:10px;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff">RM</div>
+          <div><div style="font-size:13px;font-weight:700">Rosa Mendoza</div><div style="font-size:11px;color:var(--muted)">Botica Santa Rosa · San Juan de Lurigancho</div></div>
+        </div>
+      </div>
+      <!-- App card -->
+      <div class="app-card">
+        <div class="app-bar">
+          <div class="app-bar-dots"><div class="app-bar-dot" style="background:#FF5F57"></div><div class="app-bar-dot" style="background:#FEBC2E"></div><div class="app-bar-dot" style="background:#28C840"></div></div>
+          <span class="app-bar-name">💊 Botica San Juan · Lima</span>
+          <span class="app-bar-badge">En vivo</span>
+        </div>
+        <div class="app-body">
+          <div class="app-kpis">
+            <div class="kpi"><div class="kpi-label">Ventas hoy</div><div class="kpi-val g">S/ 2,450</div><div class="kpi-sub">324 medicamentos</div></div>
+            <div class="kpi"><div class="kpi-label">Caja</div><div class="kpi-val b">✅ OK</div><div class="kpi-sub">Cierre en 52 seg</div></div>
+          </div>
+          <div class="app-alert warn"><div class="app-alert-icon">⚠️</div><div><div class="app-alert-title">Paracetamol 500mg — 8 unidades</div><div class="app-alert-desc">IA recomienda pedir hoy · Agotamiento en ~3 días</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEMAS BOTICA -->
+<section class="section alt">
+  <div class="inner">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start" class="how-grid">
+      <div class="reveal">
+        <span class="eyebrow orange">¿Te pasa esto?</span>
+        <h2 class="section-title">Los problemas<br>de tu botica<br><em>terminan hoy</em></h2>
+        <p style="font-size:16px;color:var(--muted);line-height:1.7;margin-top:16px;margin-bottom:32px">No eres el único. Estos son exactamente los problemas que Coriva resuelve desde el primer día.</p>
+        <a class="btn-primary wa" href="https://wa.me/51913916967?text=Hola,%20tengo%20una%20botica%20y%20quiero%20digitalizar%20mi%20negocio%20con%20Coriva%20Core." target="_blank">💬 Solucionar esto ahora →</a>
+      </div>
+      <div class="problems-list reveal stagger-2">
+        <div class="prob-item"><div class="prob-num">01</div><div class="prob-icon">💸</div><div class="prob-text"><div class="prob-title">La caja no cuadra</div><div class="prob-desc">Al final del día falta dinero y no sabes por qué.</div></div><div class="prob-tag pt-red">Pérdida</div></div>
+        <div class="prob-item"><div class="prob-num">02</div><div class="prob-icon">📦</div><div class="prob-text"><div class="prob-title">Te quedas sin medicamentos</div><div class="prob-desc">Los clientes piden y no tienes. Pierdes ventas.</div></div><div class="prob-tag pt-amber">Ventas perdidas</div></div>
+        <div class="prob-item"><div class="prob-num">03</div><div class="prob-icon">📓</div><div class="prob-text"><div class="prob-title">El cuaderno miente</div><div class="prob-desc">Números borrados, hojas perdidas. No sabes cuánto vendiste.</div></div><div class="prob-tag pt-red">Sin control</div></div>
+        <div class="prob-item"><div class="prob-num">04</div><div class="prob-icon">💰</div><div class="prob-text"><div class="prob-title">Deudas que no se cobran</div><div class="prob-desc">Fías y no te acuerdas quién debe ni cuánto.</div></div><div class="prob-tag pt-red">Pérdida</div></div>
+        <div class="prob-item"><div class="prob-num">05</div><div class="prob-icon">⏰</div><div class="prob-text"><div class="prob-title">Cierras caja en 1 hora</div><div class="prob-desc">Contar billetes, revisar cuaderno, hacer cuentas.</div></div><div class="prob-tag pt-amber">Tiempo</div></div>
+        <div class="prob-item"><div class="prob-num">06</div><div class="prob-icon">❓</div><div class="prob-text"><div class="prob-title">No sabes cuánto ganas</div><div class="prob-desc">¿Qué medicamento se vende más? No tienes idea.</div></div><div class="prob-tag pt-amber">Sin datos</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS BOTICA -->
+<section class="section">
+  <div class="inner">
+    <div class="how-grid">
+      <div class="reveal">
+        <span class="eyebrow">Así de fácil</span>
+        <h2 class="section-title">3 pasos y<br><em>listo.</em></h2>
+        <p class="section-sub" style="margin-bottom:36px">No necesitas ser experto en tecnología. Si usas WhatsApp, puedes usar Coriva.</p>
+        <div class="steps-list">
+          <div class="step-item"><div class="step-num-circle">1</div><div class="step-body"><div class="step-title">Busca el medicamento</div><div class="step-desc">Escribe el nombre o código. Aparece al instante con precio y stock disponible.</div></div></div>
+          <div class="step-item"><div class="step-num-circle">2</div><div class="step-body"><div class="step-title">Cobra la venta</div><div class="step-desc">Efectivo, tarjeta o Yape. El sistema registra todo automáticamente.</div></div></div>
+          <div class="step-item"><div class="step-num-circle">3</div><div class="step-body"><div class="step-title">¡Listo! A seguir vendiendo</div><div class="step-desc">El stock se actualiza solo. La caja queda registrada. Sin hacer nada más.</div></div></div>
+        </div>
+      </div>
+      <div class="reveal stagger-2">
+        <div class="demo-phone">
+          <div class="demo-header"><div class="demo-header-title">💊 Nueva Venta</div><div class="demo-header-live"><div class="live-dot"></div>En vivo</div></div>
+          <div class="demo-body">
+            <div class="demo-row"><div class="dr-left"><div class="dr-name">Paracetamol 500mg</div><div class="dr-sku">MED-001 · ×2</div></div><div class="dr-right"><div class="dr-price">S/ 5.00</div><div class="dr-stock">45 en stock</div></div></div>
+            <div class="demo-row"><div class="dr-left"><div class="dr-name">Ibuprofeno 400mg</div><div class="dr-sku">MED-002 · ×1</div></div><div class="dr-right"><div class="dr-price">S/ 3.80</div><div class="dr-stock">28 en stock</div></div></div>
+            <div class="demo-total"><div class="dt-label">Total a cobrar</div><div class="dt-val">S/ 8.80</div></div>
+            <div class="demo-pay">
+              <div class="pay-btn on">💵 Efectivo</div>
+              <div class="pay-btn">💳 Tarjeta</div>
+              <div class="pay-btn">📱 Yape</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BEFORE/AFTER BOTICA -->
+<section class="section alt">
+  <div class="inner">
+    <div class="section-head centered reveal">
+      <span class="eyebrow">La diferencia es clara</span>
+      <h2 class="section-title">Antes vs.<br><em>después</em></h2>
+    </div>
+    <div class="ba-wrap reveal">
+      <div class="ba-card ba-before">
+        <div class="ba-head">❌ Sin Coriva Core</div>
+        <div class="ba-rows">
+          <div class="ba-row"><div class="ba-icon">❌</div>Cierras caja en 1–2 horas</div>
+          <div class="ba-row"><div class="ba-icon">❌</div>No sabes cuánto vendiste hoy</div>
+          <div class="ba-row"><div class="ba-icon">❌</div>Te quedas sin stock de medicamentos</div>
+          <div class="ba-row"><div class="ba-icon">❌</div>Pierdes control de deudas</div>
+          <div class="ba-row"><div class="ba-icon">❌</div>Cuaderno y Excel como única herramienta</div>
+          <div class="ba-row"><div class="ba-icon">❌</div>No sabes qué medicamentos comprar ni cuándo</div>
+        </div>
+      </div>
+      <div class="ba-card ba-after">
+        <div class="ba-head">✅ Con Coriva Core</div>
+        <div class="ba-rows">
+          <div class="ba-row"><div class="ba-icon">✅</div>Cierras caja en 1 minuto exacto</div>
+          <div class="ba-row"><div class="ba-icon">✅</div>Ves tus ventas en tiempo real desde el celular</div>
+          <div class="ba-row"><div class="ba-icon">✅</div>IA te avisa 3 días antes que se agote</div>
+          <div class="ba-row"><div class="ba-icon">✅</div>Registro exacto de quién debe y cuánto</div>
+          <div class="ba-row"><div class="ba-icon">✅</div>Todo automático, desde cualquier dispositivo</div>
+          <div class="ba-row"><div class="ba-icon">✅</div>Reportes claros de qué pedir y cuándo</div>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:36px">
+      <a class="btn-primary wa" href="https://wa.me/51913916967?text=Hola,%20tengo%20una%20botica%20y%20quiero%20digitalizar%20mi%20negocio%20con%20Coriva%20Core." target="_blank" style="display:inline-flex">💬 Sí, quiero digitalizar mi botica →</a>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS BOTICA -->
+<section class="section">
+  <div class="inner">
+    <div class="section-head centered reveal">
+      <span class="eyebrow">Lo dicen ellos</span>
+      <h2 class="section-title">Boticas que ya<br>usan Coriva</h2>
+    </div>
+    <div class="testi-grid reveal">
+      <div class="testi-card"><div class="testi-stars">★★★★★</div><div class="testi-quote">Antes perdía 2 horas cerrando caja. Ahora lo hago en 1 minuto y sin errores. <strong>Mi estrés bajó a cero.</strong></div><div class="testi-author"><div class="testi-ava" style="background:#0D9C6E">RM</div><div><div class="testi-name">Rosa Mendoza</div><div class="testi-biz">Botica Santa Rosa · SJL</div></div></div></div>
+      <div class="testi-card"><div class="testi-stars">★★★★★</div><div class="testi-quote">Ya no pierdo ventas por falta de stock. El sistema me avisa y <strong>mis ventas subieron 35%</strong> en el primer mes.</div><div class="testi-author"><div class="testi-ava" style="background:#4F46E5">CV</div><div><div class="testi-name">Carlos Vega</div><div class="testi-biz">Farmacia El Pueblo · Villa El Salvador</div></div></div></div>
+      <div class="testi-card"><div class="testi-stars">★★★★★</div><div class="testi-quote">Ahora sé exactamente cuánto gano cada día. <strong>Antes era un misterio total.</strong> Coriva me cambió la forma de manejar mi negocio.</div><div class="testi-author"><div class="testi-ava" style="background:#E8970A">MF</div><div><div class="testi-name">María Flores</div><div class="testi-biz">Botica San Martín · Los Olivos</div></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING BOTICA -->
+<section class="section alt">
+  <div class="inner">
+    <div class="section-head centered reveal">
+      <span class="eyebrow orange">🔥 Oferta limitada · Solo 50 cupos</span>
+      <h2 class="section-title">Oferta especial<br>para <em>boticas</em></h2>
+    </div>
+    <div class="price-wrap reveal">
+      <div class="price-head-bar">
+        <div class="phb-title">Plan Botica</div>
+        <div class="phb-badge">🔥 Primeras 50</div>
+      </div>
+      <div class="price-body">
+        <div class="price-amount">
+          <div class="price-old">Antes S/ 99 / mes</div>
+          <div class="price-main">S/ 49</div>
+          <div class="price-mo">por mes, todo incluido</div>
+          <div class="price-free">✅ Implementación gratis (Valor S/ 300)</div>
+        </div>
+        <div class="price-divider"></div>
+        <div class="price-feats">
+          <div class="pf-item"><span class="pf-check">✓</span>Control de ventas</div>
+          <div class="pf-item"><span class="pf-check">✓</span>Control de stock</div>
+          <div class="pf-item"><span class="pf-check">✓</span>Control de caja</div>
+          <div class="pf-item"><span class="pf-check">✓</span>Alertas stock bajo</div>
+          <div class="pf-item"><span class="pf-check">✓</span>Reportes de ventas</div>
+          <div class="pf-item"><span class="pf-check">✓</span>Control de deudas</div>
+          <div class="pf-item"><span class="pf-check">✓</span>Soporte en Perú</div>
+          <div class="pf-item"><span class="pf-check">✓</span>Capacitación incluida</div>
+        </div>
+        <button class="btn-price-wa" onclick="window.open('https://wa.me/51913916967?text=Hola,%20tengo%20una%20botica%20y%20quiero%20digitalizar%20mi%20negocio%20con%20Coriva%20Core.','_blank')">💬 Quiero esta oferta para mi botica →</button>
+        <div class="scarcity">⏰ Solo para las primeras 50 boticas · Cupos limitados por semana</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ BOTICA -->
+<section class="section">
+  <div class="inner">
+    <div class="section-head centered reveal">
+      <span class="eyebrow">FAQ</span>
+      <h2 class="section-title">Resolvemos<br>tus dudas</h2>
+    </div>
+    <div class="faq-wrap reveal">
+      <div class="faq-it" onclick="toggleFaq(this)"><div class="faq-q">¿Necesito computadora? <div class="faq-icon">+</div></div><div class="faq-a">No. Funciona en celular, tablet y computadora. Puedes vender desde tu celular sin problema.</div></div>
+      <div class="faq-it" onclick="toggleFaq(this)"><div class="faq-q">¿Me ayudan a instalarlo? <div class="faq-icon">+</div></div><div class="faq-a">Sí, gratis. Un asesor nuestro te ayuda a cargar tus medicamentos y configurar todo. En 1 día estás vendiendo.</div></div>
+      <div class="faq-it" onclick="toggleFaq(this)"><div class="faq-q">¿Puedo importar desde Excel? <div class="faq-icon">+</div></div><div class="faq-a">Sí. Si tienes tu lista de medicamentos en Excel, te la cargamos nosotros sin costo adicional.</div></div>
+      <div class="faq-it" onclick="toggleFaq(this)"><div class="faq-q">¿Cuánto demora estar listo? <div class="faq-icon">+</div></div><div class="faq-a">En 1 día estás vendiendo. La configuración inicial toma entre 2 y 4 horas con nuestro equipo.</div></div>
+      <div class="faq-it" onclick="toggleFaq(this)"><div class="faq-q">¿Puedo cancelar cuando quiera? <div class="faq-icon">+</div></div><div class="faq-a">Sí. Sin contratos ni penalidades. Cancela con un mensaje por WhatsApp.</div></div>
+    </div>
+    <div style="text-align:center;margin-top:28px"><a class="btn-primary wa" href="https://wa.me/51913916967?text=Hola,%20tengo%20una%20botica%20y%20quiero%20digitalizar%20mi%20negocio%20con%20Coriva%20Core." target="_blank" style="display:inline-flex">💬 ¿Más preguntas? Escríbenos →</a></div>
+  </div>
+</section>
+
+<section class="final-cta-section">
+  <div class="final-cta-inner inner reveal">
+    <div class="fci-left">
+      <span class="fci-eyebrow">Empieza hoy</span>
+      <h2>Digitaliza tu<br>botica <em>ahora.</em></h2>
+      <p>Implementación gratis. Soporte personalizado. En 1 día estás vendiendo con sistema.</p>
+    </div>
+    <div class="fci-right">
+      <a class="btn-primary wa" href="https://wa.me/51913916967?text=Hola,%20tengo%20una%20botica%20y%20quiero%20digitalizar%20mi%20negocio%20con%20Coriva%20Core." target="_blank" style="justify-content:center;font-size:15px;padding:14px 24px">💬 Hablar con un asesor ahora →</a>
+      <a class="btn-ghost" href="https://coriva-core.vercel.app/demo" target="_blank" style="justify-content:center">Ver demo del sistema</a>
+      <div class="fci-pills">
+        <div class="fci-pill"><div class="fci-pill-dot"></div>Implementación gratis · S/49/mes</div>
+        <div class="fci-pill"><div class="fci-pill-dot"></div>📞 +51 913 916 967</div>
+        <div class="fci-pill"><div class="fci-pill-dot"></div>📧 soporte@corivape.com</div>
+      </div>
+    </div>
+  </div>
+</section>
+<footer>
+  <div class="footer-logo">Coriva Core</div>
+  <div class="footer-info">soporte@corivape.com · +51 913 916 967</div>
+  <div class="footer-links"><a href="#" onclick="showPage('home')">Inicio</a><a href="#">Términos</a><a href="https://wa.me/51913916967" target="_blank">WhatsApp</a></div>
+</footer>
+</div>
+
+
+<!-- ══════════════════════════════ PAGE: BODEGA ══════════════════════════════ -->
+<div class="pg" id="pg-bodega">
+
+<section class="hero" style="background:linear-gradient(180deg, #FFF8F0 0%, var(--bg) 60%)">
+  <div class="hero-inner">
+    <div class="reveal">
+      <div class="hero-eyebrow" style="border-color:rgba(232,151,10,0.3);background:var(--amber-light)">
+        <div class="eyebrow-dot" style="background:var(--amber)">🛒</div>
+        Sistema especializado para bodegas en Perú
+      </div>
+      <h1>
+        Para bodegas<br>que quieren<br>
+        <em>ganar</em><br>
+        <span class="underline-lime">más.</span>
+      </h1>
+      <p class="hero-sub">
+        Vende rápido, controla tu mercadería y tu plata desde <strong>S/ 49 al mes</strong>. Ordena tu negocio en 1 día.
+      </p>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:32px">
+        <div style="text-align:center;padding:14px;background:var(--amber-light);border:1px solid rgba(232,151,10,0.2);border-radius:14px">
+          <div style="font-family:var(--ff-display);font-size:24px;font-weight:900;color:var(--amber)">1 min</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:3px">Cierre de caja</div>
+        </div>
+        <div style="text-align:center;padding:14px;background:var(--amber-light);border:1px solid rgba(232,151,10,0.2);border-radius:14px">
+          <div style="font-family:var(--ff-display);font-size:24px;font-weight:900;color:var(--amber)">+40%</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:3px">Más ventas</div>
+        </div>
+        <div style="text-align:center;padding:14px;background:var(--amber-light);border:1px solid rgba(232,151,10,0.2);border-radius:14px">
+          <div style="font-family:var(--ff-display);font-size:24px;font-weight:900;color:var(--amber)">S/ 0</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:3px">Dinero perdido</div>
+        </div>
+      </div>
+      <div class="hero-btns">
+        <a class="btn-primary wa" href="https://wa.me/51913916967?text=Hola,%20tengo%20una%20bodega%20y%20quiero%20ordenar%20mi%20negocio%20con%20Coriva%20Core." target="_blank">💬 Quiero que me lo instalen →</a>
+        <a class="btn-ghost" href="https://coriva-core.vercel.app/demo" target="_blank">Ver demo</a>
+      </div>
+    </div>
+    <div class="reveal stagger-2">
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:20px;padding:24px;margin-bottom:14px;box-shadow:0 8px 28px rgba(12,14,18,0.08)">
+        <div class="testi-stars">★★★★★</div>
+        <div style="font-size:15px;line-height:1.7;color:var(--ink2);margin:10px 0 16px;font-style:italic">"Antes no sabía cuánto ganaba. Cerraba caja en 1 hora y <strong style="font-style:normal;color:var(--ink)">siempre faltaba plata</strong>. Ahora en 1 minuto y veo todo en mi celular."</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:38px;height:38px;border-radius:10px;background:var(--amber);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff">JP</div>
+          <div><div style="font-size:13px;font-weight:700">Juan Pérez</div><div style="font-size:11px;color:var(--muted)">Bodega Don Juan · San Juan de Miraflores</div></div>
+        </div>
+      </div>
+      <div class="app-card">
+        <div class="app-bar">
+          <div class="app-bar-dots"><div class="app-bar-dot" style="background:#FF5F57"></div><div class="app-bar-dot" style="background:#FEBC2E"></div><div class="app-bar-dot" style="background:#28C840"></div></div>
+          <span class="app-bar-name">🛒 Bodega El Ahorro · Lima</span>
+          <span class="app-bar-badge">En vivo</span>
+        </div>
+        <div class="app-body">
+          <div class="app-kpis">
+            <div class="kpi"><div class="kpi-label">Ventas hoy</div><div class="kpi-val g">S/ 850</div><div class="kpi-sub">245 productos</div></div>
+            <div class="kpi"><div class="kpi-label">Caja</div><div class="kpi-val b">✅ OK</div><div class="kpi-sub">Todo cuadra</div></div>
+          </div>
+          <div class="app-alert warn"><div class="app-alert-icon">⚠️</div><div><div class="app-alert-title">Coca Cola 1L — Quedan 5 unidades</div><div class="app-alert-desc">IA recomienda reponer hoy · Agotamiento en ~2 días</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEMAS BODEGA -->
+<section class="section alt">
+  <div class="inner">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:start" class="how-grid">
+      <div class="reveal">
+        <span class="eyebrow orange">¿Te pasa esto?</span>
+        <h2 class="section-title">Los problemas<br>de tu bodega<br><em>terminan hoy</em></h2>
+        <p style="font-size:16px;color:var(--muted);line-height:1.7;margin-top:16px;margin-bottom:32px">Estos son los problemas más comunes de los bodegueros. Coriva los resuelve desde el primer día.</p>
+        <a class="btn-primary wa" href="https://wa.me/51913916967?text=Hola,%20tengo%20una%20bodega%20y%20quiero%20ordenar%20mi%20negocio%20con%20Coriva%20Core." target="_blank">💬 Ordenar mi bodega ahora →</a>
+      </div>
+      <div class="problems-list reveal stagger-2">
+        <div class="prob-item"><div class="prob-num">01</div><div class="prob-icon">❓</div><div class="prob-text"><div class="prob-title">No sabes cuánto ganas al día</div><div class="prob-desc">Vendes todo el día pero no sabes si ganas o pierdes.</div></div><div class="prob-tag pt-amber">Sin datos</div></div>
+        <div class="prob-item"><div class="prob-num">02</div><div class="prob-icon">⏰</div><div class="prob-text"><div class="prob-title">Pierdes tiempo cerrando caja</div><div class="prob-desc">1 hora contando billetes y revisando el cuaderno.</div></div><div class="prob-tag pt-amber">Tiempo</div></div>
+        <div class="prob-item"><div class="prob-num">03</div><div class="prob-icon">📦</div><div class="prob-text"><div class="prob-title">No sabes qué se acaba</div><div class="prob-desc">Los clientes piden y no tienes. Ventas perdidas todos los días.</div></div><div class="prob-tag pt-red">Pérdida</div></div>
+        <div class="prob-item"><div class="prob-num">04</div><div class="prob-icon">💰</div><div class="prob-text"><div class="prob-title">Fiados que no se cobran</div><div class="prob-desc">No te acuerdas quién debe ni cuánto. Plata perdida.</div></div><div class="prob-tag pt-red">Pérdida</div></div>
+        <div class="prob-item"><div class="prob-num">05</div><div class="prob-icon">📓</div><div class="prob-text"><div class="prob-title">El cuaderno es un lío</div><div class="prob-desc">Números borrados, hojas perdidas. Caos total.</div></div><div class="prob-tag pt-red">Sin control</div></div>
+        <div class="prob-item"><div class="prob-num">06</div><div class="prob-icon">😰</div><div class="prob-text"><div class="prob-title">¿Me están robando?</div><div class="prob-desc">La caja no cuadra y no sabes si es error o robo.</div></div><div class="prob-tag pt-red">Riesgo</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS BODEGA -->
+<section class="section">
+  <div class="inner">
+    <div class="how-grid">
+      <div class="reveal">
+        <span class="eyebrow">Así de fácil</span>
+        <h2 class="section-title">Deja el cuaderno.<br>Empieza en <em>3 pasos.</em></h2>
+        <p class="section-sub" style="margin-bottom:36px">No necesitas saber nada de tecnología. En 1 día estás vendiendo con sistema.</p>
+        <div class="steps-list">
+          <div class="step-item"><div class="step-num-circle">1</div><div class="step-body"><div class="step-title">Busca el producto</div><div class="step-desc">Escribe el nombre o código. Aparece al instante con precio y stock.</div></div></div>
+          <div class="step-item"><div class="step-num-circle">2</div><div class="step-body"><div class="step-title">Cobra la venta</div><div class="step-desc">Efectivo, Yape o Plin. El sistema registra todo automáticamente.</div></div></div>
+          <div class="step-item"><div class="step-num-circle">3</div><div class="step-body"><div class="step-title">¡Listo! A seguir vendiendo</div><div class="step-desc">Stock actualizado. Caja registrada. Todo sin hacer nada extra.</div></div></div>
+        </div>
+      </div>
+      <div class="reveal stagger-2">
+        <div class="demo-phone">
+          <div class="demo-header"><div class="demo-header-title">🛒 Nueva Venta</div><div class="demo-header-live"><div class="live-dot"></div>En vivo</div></div>
+          <div class="demo-body">
+            <div class="demo-row"><div class="dr-left"><div class="dr-name">Coca Cola 1L</div><div class="dr-sku">BOD-001 · ×2</div></div><div class="dr-right"><div class="dr-price">S/ 9.00</div><div class="dr-stock">⚠️ 5 en stock</div></div></div>
+            <div class="demo-row"><div class="dr-left"><div class="dr-name">Arroz Extra 1kg</div><div class="dr-sku">BOD-002 · ×1</div></div><div class="dr-right"><div class="dr-price">S/ 4.20</div><div class="dr-stock">40 en stock</div></div></div>
+            <div class="demo-total"><div class="dt-label">Total a cobrar</div><div class="dt-val">S/ 13.20</div></div>
+            <div class="demo-pay">
+              <div class="pay-btn on">💵 Efectivo</div>
+              <div class="pay-btn">📱 Yape</div>
+              <div class="pay-btn">📱 Plin</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS BODEGA -->
+<section class="section alt">
+  <div class="inner">
+    <div class="section-head centered reveal">
+      <span class="eyebrow">Lo dicen ellos</span>
+      <h2 class="section-title">Bodegas que ya<br>usan Coriva</h2>
+    </div>
+    <div class="testi-grid reveal">
+      <div class="testi-card"><div class="testi-stars">★★★★★</div><div class="testi-quote">Antes no sabía cuánto ganaba. Ahora veo mis ventas en tiempo real desde mi celular. <strong>Es como tener un contador gratis.</strong></div><div class="testi-author"><div class="testi-ava" style="background:#E8970A">JP</div><div><div class="testi-name">Juan Pérez</div><div class="testi-biz">Bodega Don Juan · San Juan de Miraflores</div></div></div></div>
+      <div class="testi-card"><div class="testi-stars">★★★★★</div><div class="testi-quote">Ya no pierdo tiempo cerrando caja. Antes me demoraba 1 hora. Ahora 1 minuto. <strong>Ese tiempo lo uso para atender más clientes.</strong></div><div class="testi-author"><div class="testi-ava" style="background:#4F46E5">MQ</div><div><div class="testi-name">María Quispe</div><div class="testi-biz">Bodega La Esquina · Villa María del Triunfo</div></div></div></div>
+      <div class="testi-card"><div class="testi-stars">★★★★★</div><div class="testi-quote">Dejé el cuaderno. Sé exactamente quién me debe y cuánto. <strong>Recuperé S/ 500 en deudas</strong> que no me acordaba.</div><div class="testi-author"><div class="testi-ava" style="background:#0D9C6E">CR</div><div><div class="testi-name">Carlos Rojas</div><div class="testi-biz">Bodega El Vecino · Ate Vitarte</div></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING BODEGA -->
+<section class="section">
+  <div class="inner">
+    <div class="section-head centered reveal">
+      <span class="eyebrow orange">🔥 Oferta limitada · Solo 50 cupos</span>
+      <h2 class="section-title">Oferta especial<br>para <em>bodegas</em></h2>
+    </div>
+    <div class="price-wrap reveal">
+      <div class="price-head-bar">
+        <div class="phb-title">Plan Bodega</div>
+        <div class="phb-badge">🔥 Primeras 50</div>
+      </div>
+      <div class="price-body">
+        <div class="price-amount">
+          <div class="price-old">Antes S/ 99 / mes</div>
+          <div class="price-main">S/ 49</div>
+          <div class="price-mo">por mes, todo incluido</div>
+          <div class="price-free">✅ Implementación gratis (Valor S/ 300)</div>
+        </div>
+        <div class="price-divider"></div>
+        <div class="price-feats">
+          <div class="pf-item"><span class="pf-check">✓</span>Control de ventas</div>
+          <div class="pf-item"><span class="pf-check">✓</span>Control de mercadería</div>
+          <div class="pf-item"><span class="pf-check">✓</span>Control de caja</div>
+          <div class="pf-item"><span class="pf-check">✓</span>Alertas cuando se acaba</div>
+          <div class="pf-item"><span class="pf-check">✓</span>Reportes de ventas</div>
+          <div class="pf-item"><span class="pf-check">✓</span>Control de deudas</div>
+          <div class="pf-item"><span class="pf-check">✓</span>Soporte en Perú</div>
+          <div class="pf-item"><span class="pf-check">✓</span>Te enseñamos a usarlo</div>
+        </div>
+        <button class="btn-price-wa" onclick="window.open('https://wa.me/51913916967?text=Hola,%20tengo%20una%20bodega%20y%20quiero%20ordenar%20mi%20negocio%20con%20Coriva%20Core.','_blank')">💬 Quiero esta oferta para mi bodega →</button>
+        <div class="scarcity">⏰ Solo para las primeras 50 bodegas · Cupos limitados por semana</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ BODEGA -->
+<section class="section alt">
+  <div class="inner">
+    <div class="section-head centered reveal">
+      <span class="eyebrow">FAQ</span>
+      <h2 class="section-title">Resolvemos<br>tus dudas</h2>
+    </div>
+    <div class="faq-wrap reveal">
+      <div class="faq-it" onclick="toggleFaq(this)"><div class="faq-q">¿Necesito computadora? <div class="faq-icon">+</div></div><div class="faq-a">No. Funciona en celular, tablet y computadora. Puedes vender desde tu celular sin problema.</div></div>
+      <div class="faq-it" onclick="toggleFaq(this)"><div class="faq-q">¿Me ayudan a instalarlo? <div class="faq-icon">+</div></div><div class="faq-a">Sí, totalmente gratis. Un asesor te ayuda a cargar tus productos y configurar todo. En 1 día estás vendiendo.</div></div>
+      <div class="faq-it" onclick="toggleFaq(this)"><div class="faq-q">¿Puedo importar desde Excel? <div class="faq-icon">+</div></div><div class="faq-a">Sí. Si tienes tu lista de productos en Excel, te la cargamos nosotros sin costo adicional.</div></div>
+      <div class="faq-it" onclick="toggleFaq(this)"><div class="faq-q">¿Cuánto demora estar listo? <div class="faq-icon">+</div></div><div class="faq-a">En 1 día estás vendiendo. La configuración inicial toma entre 2 y 4 horas con nuestro equipo.</div></div>
+      <div class="faq-it" onclick="toggleFaq(this)"><div class="faq-q">¿Puedo cancelar cuando quiera? <div class="faq-icon">+</div></div><div class="faq-a">Sí. Sin contratos ni penalidades. Cancela con un mensaje por WhatsApp, cuando quieras.</div></div>
+    </div>
+    <div style="text-align:center;margin-top:28px"><a class="btn-primary wa" href="https://wa.me/51913916967?text=Hola,%20tengo%20una%20bodega%20y%20quiero%20ordenar%20mi%20negocio%20con%20Coriva%20Core." target="_blank" style="display:inline-flex">💬 ¿Más preguntas? Escríbenos →</a></div>
+  </div>
+</section>
+
+<section class="final-cta-section">
+  <div class="final-cta-inner inner reveal">
+    <div class="fci-left">
+      <span class="fci-eyebrow">Empieza hoy</span>
+      <h2>Ordena tu<br>bodega <em>ahora.</em></h2>
+      <p>Implementación gratis. Soporte personalizado. En 1 día estás vendiendo con sistema.</p>
+    </div>
+    <div class="fci-right">
+      <a class="btn-primary wa" href="https://wa.me/51913916967?text=Hola,%20tengo%20una%20bodega%20y%20quiero%20ordenar%20mi%20negocio%20con%20Coriva%20Core." target="_blank" style="justify-content:center;font-size:15px;padding:14px 24px">💬 Hablar con un asesor ahora →</a>
+      <a class="btn-ghost" href="https://coriva-core.vercel.app/demo" target="_blank" style="justify-content:center">Ver cómo funciona</a>
+      <div class="fci-pills">
+        <div class="fci-pill"><div class="fci-pill-dot"></div>Implementación gratis · S/49/mes</div>
+        <div class="fci-pill"><div class="fci-pill-dot"></div>📞 +51 913 916 967</div>
+        <div class="fci-pill"><div class="fci-pill-dot"></div>📧 soporte@coriva.com</div>
+      </div>
+    </div>
+  </div>
+</section>
+<footer>
+  <div class="footer-logo">Coriva Core</div>
+  <div class="footer-info">soporte@coriva.com · +51 913 916 967</div>
+  <div class="footer-links"><a href="#" onclick="showPage('home')">Inicio</a><a href="#">Términos</a><a href="https://wa.me/51913916967" target="_blank">WhatsApp</a></div>
+</footer>
+</div>
+
+
+<script>
+/* PAGE ROUTING */
+function showPage(id) {
+  document.querySelectorAll('.pg').forEach(p => p.classList.remove('on'));
+  document.getElementById('pg-' + id).classList.add('on');
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('act'));
+  const map = { home: 'Inicio', botica: '💊 Boticas', bodega: '🛒 Bodegas' };
+  document.querySelectorAll('.nav-link').forEach(l => {
+    if (l.textContent.trim() === map[id]) l.classList.add('act');
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  setTimeout(initReveal, 100);
+}
+
+/* NAV LINKS */
+document.querySelectorAll('.nav-link').forEach(l => {
+  l.addEventListener('click', () => {
+    const t = l.textContent.trim();
+    if (t === 'Inicio') showPage('home');
+    else if (t.includes('Boticas')) showPage('botica');
+    else if (t.includes('Bodegas')) showPage('bodega');
+    else if (t === 'FAQ') { showPage('home'); setTimeout(() => scrollTo('faq-s'), 400); }
+  });
+});
+
+/* SCROLL TO */
+function scrollTo(id) {
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: 'smooth' });
+}
+
+/* FAQ */
+function toggleFaq(el) {
+  const open = el.classList.contains('open');
+  document.querySelectorAll('.faq-it.open').forEach(f => f.classList.remove('open'));
+  if (!open) el.classList.add('open');
+}
+
+/* STICKY NAV */
+window.addEventListener('scroll', () => {
+  document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 20);
+});
+
+/* REVEAL ON SCROLL */
+function initReveal() {
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => { el.classList.remove('visible'); obs.observe(el); });
+}
+initReveal();
+
+/* FLOAT ANIMATIONS */
+const styleEl = document.createElement('style');
+styleEl.textContent = `
+  @keyframes floatCard { 0%,100%{transform:translateY(0) rotate(-1deg)} 50%{transform:translateY(-8px) rotate(-1deg)} }
+  @keyframes floatCard2 { 0%,100%{transform:translateY(0) rotate(1deg)} 50%{transform:translateY(-6px) rotate(1deg)} }
+  .hero-float { animation-duration: 6s; animation-timing-function: ease-in-out; animation-iteration-count: infinite; }
+`;
+document.head.appendChild(styleEl);
+</script>
+</body>
+</html>

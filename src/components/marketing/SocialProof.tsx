@@ -15,7 +15,7 @@ const testimonials = [
 const stats = [
   { n: '500+', l: 'Negocios activos' },
   { n: '1 día', l: 'Para estar listo' },
-  { n: 'S/ 49', l: 'Por mes todo incluido' },
+  { n: 'S/ 79', l: 'Plan Starter / mes' },
   { n: '4.9★', l: 'Satisfacción clientes' },
 ]
 
