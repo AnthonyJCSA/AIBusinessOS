@@ -1,108 +1,49 @@
-import ScrollReveal from '@/components/ScrollReveal'
+'use client'
+
+const C = { ink: '#0C0E12', muted: '#6B7280', bg2: '#F3F2EF', card: '#FFFFFF', border: '#E5E3DE', lime: '#C8F23A', green: '#0D9C6E', orange: '#FF5A1F', wa: '#25D366', pale: '#9CA3AF' }
+const WA = "https://wa.me/51913916967?text=Hola,%20tengo%20una%20botica%20y%20quiero%20digitalizar%20mi%20negocio%20con%20Coriva%20Core."
+
+const feats = ['Control de ventas','Control de stock','Control de caja','Alertas stock bajo','Reportes de ventas','Control de deudas','Soporte en Perú','Capacitación incluida']
 
 export default function OfertaUrgencia() {
   return (
-    <section className="py-20 bg-gradient-to-br from-orange-50 to-red-50">
-      <div className="max-w-5xl mx-auto px-6">
-        <ScrollReveal>
-          <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 border-4 border-orange-300 relative overflow-hidden">
-            <div className="absolute top-0 right-0 bg-gradient-to-r from-red-500 to-orange-500 text-white px-6 py-2 rounded-bl-2xl font-bold">
-              🔥 OFERTA LIMITADA: Solo 50 cupos
-            </div>
-            
-            <div className="mt-8 text-center">
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-                Oferta especial para boticas
-              </h2>
-              <p className="text-xl text-gray-600 mb-8">
-                Solo por tiempo limitado
-              </p>
-              
-              <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-2xl p-8 border-2 border-green-300 mb-8">
-                <div className="grid md:grid-cols-2 gap-8 mb-6">
-                  <div>
-                    <div className="text-5xl font-bold text-green-600 mb-2">S/ 0</div>
-                    <div className="text-gray-700 font-semibold">Implementación gratis</div>
-                    <div className="text-sm text-gray-500">(Valor: S/ 300)</div>
-                  </div>
-                  <div>
-                    <div className="text-5xl font-bold text-green-600 mb-2">S/ 49</div>
-                    <div className="text-gray-700 font-semibold">Por mes</div>
-                    <div className="text-sm text-gray-500 line-through">Antes S/ 99</div>
-                  </div>
-                </div>
-                
-                <div className="border-t-2 border-green-200 pt-6">
-                  <h3 className="font-bold text-gray-900 mb-4 text-lg">Incluye:</h3>
-                  <div className="grid md:grid-cols-2 gap-3 text-left">
-                    <div className="flex items-start">
-                      <svg className="w-5 h-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                      <span className="text-gray-700">Control de ventas</span>
-                    </div>
-                    <div className="flex items-start">
-                      <svg className="w-5 h-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                      <span className="text-gray-700">Control de stock</span>
-                    </div>
-                    <div className="flex items-start">
-                      <svg className="w-5 h-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                      <span className="text-gray-700">Control de caja</span>
-                    </div>
-                    <div className="flex items-start">
-                      <svg className="w-5 h-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                      <span className="text-gray-700">Alertas de stock bajo</span>
-                    </div>
-                    <div className="flex items-start">
-                      <svg className="w-5 h-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                      <span className="text-gray-700">Reportes de ventas</span>
-                    </div>
-                    <div className="flex items-start">
-                      <svg className="w-5 h-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                      <span className="text-gray-700">Control de deudas</span>
-                    </div>
-                    <div className="flex items-start">
-                      <svg className="w-5 h-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                      <span className="text-gray-700">Soporte en Perú</span>
-                    </div>
-                    <div className="flex items-start">
-                      <svg className="w-5 h-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                      <span className="text-gray-700">Capacitación incluida</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+    <section style={{ padding: '100px clamp(20px,5vw,80px)', background: C.bg2 }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: 60 }}>
+          <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2, color: C.orange, display: 'block', marginBottom: 16 }}>🔥 Oferta limitada · Solo 50 cupos</span>
+          <h2 style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 'clamp(32px,4.5vw,54px)', fontWeight: 900, lineHeight: 1.0, letterSpacing: -2, color: C.ink }}>
+            Oferta especial<br />para <em style={{ fontStyle: 'italic', fontWeight: 300, color: C.orange }}>boticas</em>
+          </h2>
+        </div>
 
-              <a 
-                href="https://wa.me/51913916967?text=Hola,%20tengo%20una%20botica%20y%20quiero%20digitalizar%20mi%20negocio%20con%20Coriva%20Core."
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block bg-gradient-to-r from-green-600 to-emerald-600 text-white px-12 py-5 rounded-xl font-bold text-xl hover:from-green-700 hover:to-emerald-700 shadow-lg hover:shadow-xl transition-all mb-4"
-              >
-                💬 Quiero esta oferta para mi botica →
-              </a>
-              
-              <p className="text-sm text-gray-500">
-                ⏰ Oferta válida solo para las primeras 50 boticas<br />
-                <span className="text-xs">La implementación es 1 a 1 y hay cupos limitados por semana</span>
-              </p>
+        <div style={{ maxWidth: 520, margin: '0 auto', background: C.card, border: `2px solid ${C.ink}`, borderRadius: 28, overflow: 'hidden', boxShadow: '0 24px 80px rgba(12,14,18,0.14)' }}>
+          <div style={{ background: C.ink, padding: '20px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 22, fontWeight: 900, color: C.lime }}>Plan Botica</span>
+            <span style={{ background: C.orange, color: '#fff', fontSize: 11, fontWeight: 700, padding: '4px 12px', borderRadius: 99 }}>🔥 Primeras 50</span>
+          </div>
+          <div style={{ padding: 32 }}>
+            <div style={{ textAlign: 'center', marginBottom: 28 }}>
+              <div style={{ fontSize: 16, color: C.pale, textDecoration: 'line-through', marginBottom: 6 }}>Antes S/ 99 / mes</div>
+              <div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 72, fontWeight: 900, color: C.ink, letterSpacing: -3, lineHeight: 1 }}>S/ 49</div>
+              <div style={{ fontSize: 16, color: C.muted, marginTop: 6 }}>por mes, todo incluido</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: C.green, marginTop: 8, display: 'flex', alignItems: 'center', gap: 5, justifyContent: 'center' }}>✅ Implementación gratis (Valor S/ 300)</div>
+            </div>
+            <div style={{ height: 1, background: C.border, margin: '24px 0' }} />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px 20px', marginBottom: 28 }}>
+              {feats.map(f => (
+                <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: C.ink }}>
+                  <span style={{ color: C.green, fontSize: 14, flexShrink: 0 }}>✓</span>{f}
+                </div>
+              ))}
+            </div>
+            <a href={WA} target="_blank" rel="noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 9, width: '100%', padding: '16px', borderRadius: 14, fontSize: 16, fontWeight: 700, background: C.wa, color: '#fff', textDecoration: 'none', transition: '.2s' }}>
+              💬 Quiero esta oferta para mi botica →
+            </a>
+            <div style={{ textAlign: 'center', fontSize: 12, fontWeight: 600, color: C.orange, marginTop: 14 }}>
+              ⏰ Solo para las primeras 50 boticas · Cupos limitados por semana
             </div>
           </div>
-        </ScrollReveal>
+        </div>
       </div>
     </section>
   )

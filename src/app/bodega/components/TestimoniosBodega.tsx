@@ -1,68 +1,42 @@
-import ScrollReveal from '@/components/ScrollReveal'
+'use client'
+
+const C = { ink: '#0C0E12', ink2: '#2D3142', muted: '#6B7280', bg: '#FAFAF8', card: '#FFFFFF', border: '#E5E3DE', amber: '#E8970A' }
+
+const testimonios = [
+  { quote: <>Antes no sabía cuánto ganaba. Ahora veo mis ventas en tiempo real desde mi celular. <strong>Es como tener un contador gratis.</strong></>, name: 'Juan Pérez', biz: 'Bodega Don Juan · San Juan de Miraflores', bg: '#E8970A', initials: 'JP' },
+  { quote: <>Ya no pierdo tiempo cerrando caja. Antes me demoraba 1 hora. Ahora 1 minuto. <strong>Ese tiempo lo uso para atender más clientes.</strong></>, name: 'María Quispe', biz: 'Bodega La Esquina · Villa María del Triunfo', bg: '#4F46E5', initials: 'MQ' },
+  { quote: <>Dejé el cuaderno. Sé exactamente quién me debe y cuánto. <strong>Recuperé S/ 500 en deudas</strong> que no me acordaba.</>, name: 'Carlos Rojas', biz: 'Bodega El Vecino · Ate Vitarte', bg: '#0D9C6E', initials: 'CR' },
+]
 
 export default function TestimoniosBodega() {
-  const testimonios = [
-    {
-      texto: "Antes no sabía cuánto ganaba. Ahora veo mis ventas en tiempo real desde mi celular.",
-      autor: "Juan Pérez",
-      bodega: "Bodega Don Juan",
-      ubicacion: "San Juan de Miraflores",
-      avatar: "JP"
-    },
-    {
-      texto: "Ya no pierdo tiempo cerrando caja. Antes me demoraba 1 hora, ahora 1 minuto.",
-      autor: "María Quispe",
-      bodega: "Bodega La Esquina",
-      ubicacion: "Villa María del Triunfo",
-      avatar: "MQ"
-    },
-    {
-      texto: "Dejé el cuaderno. Ahora sé exactamente quién me debe y cuánto. Recuperé S/500.",
-      autor: "Carlos Rojas",
-      bodega: "Bodega El Vecino",
-      ubicacion: "Ate Vitarte",
-      avatar: "CR"
-    }
-  ]
-
   return (
-    <section className="py-20 bg-white">
-      <div className="max-w-7xl mx-auto px-6">
-        <ScrollReveal>
-          <h2 className="text-4xl md:text-5xl font-bold text-center text-gray-900 mb-4">
-            Bodegas que ya usan Coriva Core
+    <section style={{ padding: '100px clamp(20px,5vw,80px)', background: C.bg }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: 60 }}>
+          <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2, color: C.muted, display: 'block', marginBottom: 16 }}>Lo dicen ellos</span>
+          <h2 style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 'clamp(32px,4.5vw,54px)', fontWeight: 900, lineHeight: 1.0, letterSpacing: -2, color: C.ink }}>
+            Bodegas que ya<br />usan Coriva
           </h2>
-          <p className="text-center text-gray-600 mb-16 text-lg">
-            Esto dicen los bodegueros en Perú
-          </p>
-        </ScrollReveal>
-        <div className="grid md:grid-cols-3 gap-8">
-          {testimonios.map((testimonio, i) => (
-            <ScrollReveal key={i} delay={i * 100}>
-              <div className="bg-white p-8 rounded-2xl shadow-lg border border-blue-200 hover:shadow-xl transition-all">
-                <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold mr-4">
-                    {testimonio.avatar}
-                  </div>
-                  <div>
-                    <div className="font-bold text-gray-900">{testimonio.autor}</div>
-                    <div className="text-sm text-gray-600">{testimonio.bodega}</div>
-                    <div className="text-xs text-gray-500">{testimonio.ubicacion}</div>
-                  </div>
-                </div>
-                <p className="text-gray-700 italic leading-relaxed">"{testimonio.texto}"</p>
-                <div className="flex mt-4 text-yellow-400">
-                  {[...Array(5)].map((_, i) => (
-                    <svg key={i} className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  ))}
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 14 }} className="testi-bodega-grid">
+          {testimonios.map(t => (
+            <div key={t.name} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 20, padding: '28px 24px', display: 'flex', flexDirection: 'column', gap: 20, transition: '.2s' }}
+              onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.boxShadow = '0 8px 32px rgba(12,14,18,0.08)'; el.style.transform = 'translateY(-2px)' }}
+              onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.boxShadow = ''; el.style.transform = '' }}>
+              <div style={{ color: C.amber, fontSize: 14, letterSpacing: 1 }}>★★★★★</div>
+              <div style={{ fontSize: 15, lineHeight: 1.7, color: C.ink2, flex: 1, fontStyle: 'italic' }}>{t.quote}</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ width: 40, height: 40, borderRadius: 12, background: t.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, color: '#fff', flexShrink: 0 }}>{t.initials}</div>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: C.ink, marginBottom: 2 }}>{t.name}</div>
+                  <div style={{ fontSize: 12, color: C.muted }}>{t.biz}</div>
                 </div>
               </div>
-            </ScrollReveal>
+            </div>
           ))}
         </div>
       </div>
+      <style>{`@media (max-width: 768px) { .testi-bodega-grid { grid-template-columns: 1fr !important; } }`}</style>
     </section>
   )
 }

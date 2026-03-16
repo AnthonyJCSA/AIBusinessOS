@@ -1,54 +1,70 @@
-import ScrollReveal from '@/components/ScrollReveal'
+'use client'
+
+const C = { ink: '#0C0E12', muted: '#6B7280', bg: '#FAFAF8', card: '#FFFFFF', border: '#E5E3DE', lime: '#C8F23A', green: '#0D9C6E', amber: '#E8970A' }
+
+const steps = [
+  { n: '1', title: 'Busca el medicamento', desc: 'Escribe el nombre o código. Aparece al instante con precio y stock disponible.' },
+  { n: '2', title: 'Cobra la venta', desc: 'Efectivo, tarjeta o Yape. El sistema registra todo automáticamente.' },
+  { n: '3', title: '¡Listo! A seguir vendiendo', desc: 'El stock se actualiza solo. La caja queda registrada. Sin hacer nada más.' },
+]
 
 export default function StorysellingBotica() {
   return (
-    <section className="py-16 bg-gradient-to-br from-green-50 to-emerald-50">
-      <div className="max-w-5xl mx-auto px-6">
-        <ScrollReveal>
-          <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 border-2 border-green-200">
-            <div className="flex items-start space-x-4 mb-6">
-              <div className="w-16 h-16 bg-gradient-to-br from-green-600 to-emerald-600 rounded-full flex items-center justify-center text-white font-bold text-xl flex-shrink-0">
-                RM
+    <section style={{ padding: '100px clamp(20px,5vw,80px)', background: C.bg }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 80, alignItems: 'center' }} className="story-botica-grid">
+        <div>
+          <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2, color: C.muted, display: 'block', marginBottom: 16 }}>Así de fácil</span>
+          <h2 style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 'clamp(32px,4.5vw,54px)', fontWeight: 900, lineHeight: 1.0, letterSpacing: -2, color: C.ink, marginBottom: 16 }}>
+            3 pasos y<br /><em style={{ fontStyle: 'italic', fontWeight: 300, color: '#FF5A1F' }}>listo.</em>
+          </h2>
+          <p style={{ fontSize: 17, color: C.muted, lineHeight: 1.7, marginBottom: 36 }}>No necesitas ser experto en tecnología. Si usas WhatsApp, puedes usar Coriva.</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+            {steps.map((s, i) => (
+              <div key={i} style={{ display: 'flex', gap: 20, padding: '24px 0', borderBottom: i < steps.length - 1 ? `1px solid ${C.border}` : 'none' }}>
+                <div style={{ width: 40, height: 40, borderRadius: '50%', background: C.lime, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Fraunces',Georgia,serif", fontSize: 16, fontWeight: 900, color: C.ink, flexShrink: 0 }}>{s.n}</div>
+                <div>
+                  <div style={{ fontSize: 17, fontWeight: 700, color: C.ink, marginBottom: 6 }}>{s.title}</div>
+                  <div style={{ fontSize: 14, color: C.muted, lineHeight: 1.6 }}>{s.desc}</div>
+                </div>
               </div>
-              <div>
-                <h3 className="text-xl font-bold text-gray-900">Rosa Mendoza</h3>
-                <p className="text-gray-600">Botica Santa Rosa - San Juan de Lurigancho</p>
-              </div>
-            </div>
-            
-            <div className="space-y-4">
-              <div className="bg-red-50 border-l-4 border-red-400 p-4 rounded">
-                <p className="text-gray-700">
-                  <span className="font-bold text-red-600">Antes:</span> Cerraba caja en 1 hora y siempre faltaba dinero. No sabía si era error mío o alguien se llevaba plata. Perdía ventas porque no sabía qué medicamentos comprar.
-                </p>
-              </div>
-              
-              <div className="bg-green-50 border-l-4 border-green-400 p-4 rounded">
-                <p className="text-gray-700">
-                  <span className="font-bold text-green-600">Ahora:</span> Cierro caja en 1 minuto y sé exactamente cuánto gané hoy. El sistema me avisa cuando se acaba un medicamento. Ya no pierdo ventas.
-                </p>
-              </div>
-            </div>
+            ))}
+          </div>
+        </div>
 
-            <div className="mt-6 pt-6 border-t border-gray-200">
-              <div className="grid md:grid-cols-3 gap-4 text-center">
+        {/* demo card */}
+        <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 24, overflow: 'hidden', boxShadow: '0 24px 60px rgba(12,14,18,0.1)' }}>
+          <div style={{ background: C.ink, padding: '14px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.7)' }}>💊 Nueva Venta</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, fontWeight: 700, color: C.lime }}>
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: C.lime, display: 'inline-block' }} />En vivo
+            </span>
+          </div>
+          <div style={{ padding: 18, display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {[['Paracetamol 500mg','MED-001 · ×2','S/ 5.00','45 en stock'],['Ibuprofeno 400mg','MED-002 · ×1','S/ 3.80','28 en stock']].map(([name,sku,price,stock]) => (
+              <div key={name} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', background: '#F3F2EF', borderRadius: 12, border: `1px solid ${C.border}` }}>
                 <div>
-                  <div className="text-3xl font-bold text-green-600">1 min</div>
-                  <div className="text-sm text-gray-600">Cierre de caja</div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: C.ink, marginBottom: 2 }}>{name}</div>
+                  <div style={{ fontSize: 11, color: '#9CA3AF' }}>{sku}</div>
                 </div>
-                <div>
-                  <div className="text-3xl font-bold text-green-600">+35%</div>
-                  <div className="text-sm text-gray-600">Más ventas</div>
-                </div>
-                <div>
-                  <div className="text-3xl font-bold text-green-600">S/ 0</div>
-                  <div className="text-sm text-gray-600">Dinero perdido</div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 18, fontWeight: 700, color: C.ink }}>{price}</div>
+                  <div style={{ fontSize: 11, color: C.muted }}>{stock}</div>
                 </div>
               </div>
+            ))}
+            <div style={{ background: C.ink, borderRadius: 14, padding: '16px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,0.6)' }}>Total a cobrar</span>
+              <span style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 28, fontWeight: 900, color: C.lime }}>S/ 8.80</span>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8 }}>
+              {[['💵 Efectivo', true],['💳 Tarjeta', false],['📱 Yape', false]].map(([label, active]) => (
+                <div key={String(label)} style={{ padding: 10, borderRadius: 10, fontSize: 12, fontWeight: 700, textAlign: 'center', border: `1.5px solid ${active ? C.ink : C.border}`, color: active ? C.ink : C.muted, background: active ? '#F3F2EF' : 'transparent', cursor: 'pointer' }}>{label}</div>
+              ))}
             </div>
           </div>
-        </ScrollReveal>
+        </div>
       </div>
+      <style>{`@media (max-width: 900px) { .story-botica-grid { grid-template-columns: 1fr !important; gap: 48px !important; } }`}</style>
     </section>
   )
 }

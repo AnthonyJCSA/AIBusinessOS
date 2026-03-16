@@ -1,115 +1,110 @@
 'use client'
 
-import { useState } from 'react'
-import DemoModal from '@/components/DemoModal'
+const C = {
+  ink: '#0C0E12', ink2: '#2D3142', muted: '#6B7280', pale: '#9CA3AF',
+  bg: '#FAFAF8', bg2: '#F3F2EF', card: '#FFFFFF', border: '#E5E3DE', border2: '#D4D2CC',
+  lime: '#C8F23A', orange: '#FF5A1F', green: '#0D9C6E', greenLight: '#E8F8F3',
+  amber: '#E8970A', amberLight: '#FEF6E4', wa: '#25D366',
+}
+
+const WA = "https://wa.me/51913916967?text=Hola,%20tengo%20una%20botica%20y%20quiero%20digitalizar%20mi%20negocio%20con%20Coriva%20Core."
 
 export default function HeroBotica() {
-  const [showModal, setShowModal] = useState(false)
-  const whatsappUrl = "https://wa.me/51913916967?text=Hola,%20tengo%20una%20botica%20y%20quiero%20digitalizar%20mi%20negocio%20con%20Coriva%20Core."
-
   return (
-    <section className="relative min-h-screen flex items-center bg-gradient-to-br from-green-50 via-white to-emerald-50 overflow-hidden">
-      <div className="absolute top-0 right-0 w-96 h-96 bg-green-200 rounded-full blur-3xl opacity-20 -mr-48 -mt-48"></div>
-      <div className="absolute bottom-0 left-0 w-96 h-96 bg-emerald-200 rounded-full blur-3xl opacity-20 -ml-48 -mb-48"></div>
-      
-      <div className="relative max-w-7xl mx-auto px-6 py-20 grid lg:grid-cols-2 gap-12 items-center">
-        <div className="space-y-8">
-          <p className="text-green-600 font-semibold text-sm md:text-base">💊 Sistema especializado para boticas en Perú</p>
-          <h1 className="text-4xl md:text-6xl font-bold text-gray-900 leading-tight">
-            Sistema para boticas que te ayuda a <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-600">vender más y no perder dinero</span>
-          </h1>
-          <p className="text-lg md:text-xl text-gray-600 leading-relaxed">
-            Controla tus ventas, stock y deudas sin cuaderno ni Excel. Desde S/49 al mes.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <a 
-              href={whatsappUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="bg-gradient-to-r from-green-600 to-emerald-600 text-white px-8 py-4 rounded-xl font-bold hover:from-green-700 hover:to-emerald-700 shadow-lg hover:shadow-xl transition-all text-center"
-            >
-              💬 Quiero que me lo instalen (WhatsApp) →
-            </a>
-            <button
-              onClick={() => setShowModal(true)}
-              className="border-2 border-gray-300 px-8 py-4 rounded-xl font-semibold hover:border-green-600 hover:text-green-600 transition-all text-center"
-            >
-              Ver cómo funciona
-            </button>
+    <section style={{ minHeight: '100vh', padding: '100px clamp(20px,5vw,80px) 80px', background: `linear-gradient(180deg, #F0FAF6 0%, ${C.bg} 60%)`, position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto', width: '100%', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 80, alignItems: 'center' }} className="botica-hero-grid">
+
+        {/* LEFT */}
+        <div>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, border: `1.5px solid rgba(13,156,110,0.3)`, borderRadius: 99, padding: '5px 14px 5px 8px', fontSize: 12, fontWeight: 600, color: C.ink2, marginBottom: 24, background: C.greenLight }}>
+            <span style={{ width: 24, height: 24, background: C.green, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12 }}>💊</span>
+            Sistema especializado para boticas en Perú
           </div>
-          <div className="flex flex-wrap gap-6 text-sm text-gray-600">
-            <span className="flex items-center">
-              <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              Implementación gratis
+
+          <h1 style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 'clamp(44px,6vw,76px)', fontWeight: 900, lineHeight: 0.96, letterSpacing: -3, marginBottom: 24, color: C.ink }}>
+            Para boticas<br />que quieren<br />
+            <em style={{ fontStyle: 'italic', color: C.orange, fontWeight: 300, display: 'block' }}>vender</em>
+            <span style={{ position: 'relative', whiteSpace: 'nowrap' }}>
+              más.
+              <span style={{ position: 'absolute', left: 0, bottom: -4, width: '100%', height: 6, background: C.lime, borderRadius: 3, zIndex: -1, transform: 'rotate(-1deg)', display: 'block' }} />
             </span>
-            <span className="flex items-center">
-              <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              Soporte en Perú
-            </span>
-            <span className="flex items-center">
-              <svg className="w-5 h-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-              Desde S/49 al mes
-            </span>
+          </h1>
+
+          <p style={{ fontSize: 18, lineHeight: 1.7, color: C.muted, marginBottom: 28, maxWidth: 480 }}>
+            Controla ventas, stock de medicamentos y caja sin cuaderno ni Excel. Desde <strong style={{ color: C.ink }}>S/ 49 al mes</strong> con implementación gratis.
+          </p>
+
+          {/* mini stats */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 10, marginBottom: 32 }}>
+            {[['1 min','Cierre de caja'],['+35%','Más ventas'],['S/ 0','Dinero perdido']].map(([v,l]) => (
+              <div key={l} style={{ textAlign: 'center', padding: 14, background: C.greenLight, border: '1px solid rgba(13,156,110,0.2)', borderRadius: 14 }}>
+                <div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 24, fontWeight: 900, color: C.green }}>{v}</div>
+                <div style={{ fontSize: 11, color: C.muted, marginTop: 3 }}>{l}</div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <a href={WA} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 9, padding: '15px 28px', borderRadius: 12, fontSize: 16, fontWeight: 700, background: C.wa, color: '#fff', textDecoration: 'none', whiteSpace: 'nowrap' }}>
+              💬 Quiero que me lo instalen →
+            </a>
+            <a href="/demo" style={{ display: 'inline-flex', alignItems: 'center', gap: 9, padding: '15px 26px', borderRadius: 12, fontSize: 16, fontWeight: 600, background: 'transparent', border: `1.5px solid ${C.border2}`, color: C.ink2, textDecoration: 'none' }}>
+              Ver demo
+            </a>
           </div>
         </div>
-        <div className="relative">
-          <div className="bg-white rounded-2xl shadow-2xl p-6 border border-gray-200">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between pb-4 border-b">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-green-600 to-emerald-600 rounded-lg flex items-center justify-center text-white text-xl">💊</div>
-                  <div>
-                    <div className="font-bold text-gray-900">Botica San Juan</div>
-                    <div className="text-xs text-gray-500">Lima, Perú</div>
-                  </div>
+
+        {/* RIGHT */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {/* testimonial */}
+          <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 20, padding: 24, boxShadow: '0 8px 28px rgba(12,14,18,0.08)' }}>
+            <div style={{ color: C.amber, fontSize: 14, marginBottom: 10 }}>★★★★★</div>
+            <p style={{ fontSize: 15, lineHeight: 1.7, color: C.ink2, fontStyle: 'italic', marginBottom: 16 }}>
+              "Antes cerraba caja en 1 hora y <strong style={{ fontStyle: 'normal', color: C.ink }}>siempre faltaba dinero</strong>. Ahora en 1 minuto y sé exactamente cuánto gané."
+            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{ width: 38, height: 38, borderRadius: 10, background: C.green, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, color: '#fff' }}>RM</div>
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: C.ink }}>Rosa Mendoza</div>
+                <div style={{ fontSize: 11, color: C.muted }}>Botica Santa Rosa · San Juan de Lurigancho</div>
+              </div>
+            </div>
+          </div>
+
+          {/* app card */}
+          <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 24, overflow: 'hidden', boxShadow: '0 16px 48px rgba(12,14,18,0.1)' }}>
+            <div style={{ background: C.ink, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{ display: 'flex', gap: 6 }}>
+                {['#FF5F57','#FEBC2E','#28C840'].map(c => <div key={c} style={{ width: 10, height: 10, borderRadius: '50%', background: c }} />)}
+              </div>
+              <span style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.5)', marginLeft: 8 }}>💊 Botica San Juan · Lima</span>
+              <span style={{ marginLeft: 'auto', background: C.lime, color: C.ink, fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 99 }}>En vivo</span>
+            </div>
+            <div style={{ padding: 20 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }}>
+                <div style={{ background: C.bg2, border: `1px solid ${C.border}`, borderRadius: 14, padding: '14px 16px' }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.6px', color: C.muted, marginBottom: 6 }}>Ventas hoy</div>
+                  <div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 26, fontWeight: 700, color: C.green }}>S/ 2,450</div>
+                  <div style={{ fontSize: 11, color: C.pale, marginTop: 4 }}>324 medicamentos</div>
+                </div>
+                <div style={{ background: C.bg2, border: `1px solid ${C.border}`, borderRadius: 14, padding: '14px 16px' }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.6px', color: C.muted, marginBottom: 6 }}>Caja</div>
+                  <div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 26, fontWeight: 700, color: C.ink }}>✅ OK</div>
+                  <div style={{ fontSize: 11, color: C.pale, marginTop: 4 }}>Cierre en 52 seg</div>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-xl border border-green-200">
-                  <div className="text-2xl font-bold text-green-600">S/ 2,450</div>
-                  <div className="text-xs text-gray-600 mt-1">Ventas hoy</div>
-                </div>
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-xl border border-blue-200">
-                  <div className="text-2xl font-bold text-blue-600">324</div>
-                  <div className="text-xs text-gray-600 mt-1">Medicamentos</div>
-                </div>
-              </div>
-              <div className="bg-gradient-to-r from-red-50 to-orange-50 border-2 border-red-300 rounded-xl p-4">
-                <div className="flex items-start space-x-3">
-                  <div className="text-2xl">⚠️</div>
-                  <div className="flex-1">
-                    <div className="font-semibold text-sm text-gray-900">Stock bajo</div>
-                    <div className="text-xs text-gray-600 mt-1">Paracetamol 500mg - Quedan 8 unidades</div>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-300 rounded-xl p-4">
-                <div className="flex items-start space-x-3">
-                  <div className="text-2xl">✅</div>
-                  <div className="flex-1">
-                    <div className="font-semibold text-sm text-gray-900">Caja cerrada</div>
-                    <div className="text-xs text-gray-600 mt-1">S/ 2,450 en ventas - Sin diferencias</div>
-                  </div>
+              <div style={{ background: C.amberLight, border: '1px solid rgba(232,151,10,0.2)', borderRadius: 12, padding: '12px 14px', display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                <span style={{ fontSize: 16, flexShrink: 0 }}>⚠️</span>
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: C.amber, marginBottom: 2 }}>Paracetamol 500mg — 8 unidades</div>
+                  <div style={{ fontSize: 11, color: C.muted }}>IA recomienda pedir hoy · Agotamiento en ~3 días</div>
                 </div>
               </div>
             </div>
           </div>
-          <div className="absolute -top-4 -right-4 bg-gradient-to-r from-red-500 to-orange-500 text-white px-4 py-2 rounded-full shadow-lg font-bold text-sm animate-pulse">
-            🔥 Oferta limitada
-          </div>
         </div>
       </div>
-      <DemoModal 
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        whatsappUrl={whatsappUrl}
-      />
+      <style>{`@media (max-width: 900px) { .botica-hero-grid { grid-template-columns: 1fr !important; gap: 48px !important; } }`}</style>
     </section>
   )
 }
