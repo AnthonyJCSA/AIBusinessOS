@@ -1,3 +1,5 @@
+'use client'
+
 const C = {
   ink: '#0C0E12', muted: '#6B7280',
   bg: '#FAFAF8', card: '#FFFFFF', border: '#E5E3DE',
