@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import { organizationService } from '@/lib/services/organization.service'
 import { productService } from '@/lib/services/product.service'
-import TiendaClient from './TiendaClient'
+import StorePage from './StorePage'
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {
   const org = await organizationService.getBySlug(params.slug)
@@ -18,5 +18,5 @@ export default async function TiendaPage({ params }: { params: { slug: string } 
 
   const products = await productService.getAll(org.id)
 
-  return <TiendaClient org={org} products={products} />
+  return <StorePage org={org} products={products} />
 }
