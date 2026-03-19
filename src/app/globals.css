@@ -4,6 +4,7 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Tema oscuro (default) ── */
 :root {
   --bg: #070B12;
   --sidebar: #0D1117;
@@ -25,6 +26,20 @@
   --pink: #EC4899;
   --gradient: linear-gradient(135deg, #6366F1, #8B5CF6);
   font-family: 'Outfit', sans-serif;
+}
+
+/* ── Tema claro ── */
+html.theme-light {
+  --bg: #F4F6FA;
+  --sidebar: #FFFFFF;
+  --surface: #F0F2F8;
+  --card: #FFFFFF;
+  --card2: #F8F9FC;
+  --border: #E2E6F0;
+  --border2: #D0D6E8;
+  --text: #0F172A;
+  --muted: #64748B;
+  --sub: #94A3B8;
 }
 
 * {

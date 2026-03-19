@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Organization } from '../types'
+import { applyTheme, type ThemeMode } from '@/lib/theme'
 
 const accentColors = ['#6366F1', '#06B6D4', '#10B981', '#F59E0B', '#EF4444', '#EC4899']
 
@@ -18,6 +19,7 @@ export default function SettingsModule({ currentOrg, onUpdate }: { currentOrg: O
     tax_rate: ((currentOrg.settings?.tax_rate || 0.18) * 100),
     receipt_footer: currentOrg.settings?.receipt_footer || 'Gracias por su compra · Coriva POS',
     accent: currentOrg.settings?.theme_color || '#6366F1',
+    theme_mode: (currentOrg.settings?.theme_mode as ThemeMode) || 'dark',
     ai_stock: true, ai_predict: true, ai_messages: true, ai_segment: true,
   })
   const [saving, setSaving] = useState(false)
@@ -29,7 +31,7 @@ export default function SettingsModule({ currentOrg, onUpdate }: { currentOrg: O
       ...currentOrg,
       name: s.name, business_type: s.business_type as any,
       ruc: s.ruc, address: s.address, phone: s.phone, email: s.email,
-      settings: { ...currentOrg.settings, currency: s.currency, tax_rate: s.tax_rate / 100, receipt_footer: s.receipt_footer, theme_color: s.accent },
+      settings: { ...currentOrg.settings, currency: s.currency, tax_rate: s.tax_rate / 100, receipt_footer: s.receipt_footer, theme_color: s.accent, theme_mode: s.theme_mode },
       updated_at: new Date().toISOString(),
     })
     setSaving(false)
@@ -119,6 +121,25 @@ export default function SettingsModule({ currentOrg, onUpdate }: { currentOrg: O
                 <input value={s.receipt_footer} onChange={e => setS(p => ({ ...p, receipt_footer: e.target.value }))}
                   className="px-[13px] py-[9px] rounded-[9px] text-sm outline-none"
                   style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)' }} />
+              </div>
+              <div className="col-span-2 flex flex-col gap-[5px]">
+                <label className="text-[10px] font-bold uppercase tracking-[.5px]" style={{ color: 'var(--muted)' }}>Tema de la Interfaz</label>
+                <div className="flex gap-2 mt-1">
+                  {(['dark', 'light'] as ThemeMode[]).map(mode => (
+                    <button
+                      key={mode}
+                      onClick={() => { setS(p => ({ ...p, theme_mode: mode })); applyTheme(mode, s.accent) }}
+                      className="flex-1 flex items-center justify-center gap-2 py-[9px] rounded-[9px] text-xs font-semibold transition-all border"
+                      style={{
+                        background: s.theme_mode === mode ? 'var(--accent)' : 'var(--surface)',
+                        borderColor: s.theme_mode === mode ? 'var(--accent)' : 'var(--border)',
+                        color: s.theme_mode === mode ? '#fff' : 'var(--muted)',
+                      }}
+                    >
+                      {mode === 'dark' ? '🌙 Oscuro' : '☀️ Claro'}
+                    </button>
+                  ))}
+                </div>
               </div>
               <div className="col-span-2 flex flex-col gap-[5px]">
                 <label className="text-[10px] font-bold uppercase tracking-[.5px]" style={{ color: 'var(--muted)' }}>Color del Sistema</label>

@@ -8,6 +8,7 @@ import {
   cashService,
   authService,
 } from '@/lib/services'
+import { loadThemeFromOrg } from '@/lib/theme'
 
 import Sidebar from '@/components/Sidebar'
 import Topbar from '@/components/Topbar'
@@ -66,13 +67,7 @@ export default function DashboardPage() {
       setCurrentUser(JSON.parse(saved))
       setCurrentOrg(org)
       setIsAuthenticated(true)
-      const themeColor = org?.settings?.theme_color
-      if (themeColor) {
-        const root = document.documentElement
-        root.style.setProperty('--accent', themeColor)
-        root.style.setProperty('--accent3', themeColor)
-        root.style.setProperty('--gradient', `linear-gradient(135deg, ${themeColor}, ${themeColor}CC)`)
-      }
+      loadThemeFromOrg(org)
     } else {
       window.location.href = '/'
     }
