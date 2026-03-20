@@ -169,8 +169,7 @@ export default function POSModule({ products, currentOrg, currentUser, onSaleCom
                   className="text-left rounded-xl p-[14px] transition-all relative disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
                   <div className="text-[10px] font-mono" style={{ color: 'var(--sub)' }}>{p.code}</div>
-                  <div className="text-2xl my-[6px]">{(p as any).icon || '📦'}</div>
-                  <div className="text-[13px] font-bold leading-[1.3] mb-[3px]" style={{ color: 'var(--text)' }}>{p.name}</div>
+                  <div className="text-[13px] font-bold leading-[1.3] mb-[3px] mt-[6px]" style={{ color: 'var(--text)' }}>{p.name}</div>
                   <div className="text-[17px] font-extrabold" style={{ color: 'var(--accent2)' }}>{currency} {p.price.toFixed(2)}</div>
                   <div className="mt-[6px]">
                     <span className="text-[10px] px-2 py-[2px] rounded-full font-semibold"
