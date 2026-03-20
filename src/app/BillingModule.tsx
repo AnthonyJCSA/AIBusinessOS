@@ -51,8 +51,15 @@ const sunatStyles: Record<string, { bg: string; color: string }> = {
   PENDIENTE: { bg: 'rgba(245,158,11,.1)',  color: 'var(--amber)' },
 }
 
-const emptyInvoice = {
-  type: 'FACTURA' as const,
+interface InvoiceForm {
+  type: 'FACTURA' | 'BOLETA' | 'NOTA_CREDITO'
+  client: string; ruc: string; address: string; email: string
+  description: string; quantity: number; unit_price: number
+  igv: number; credit_parts: number
+}
+
+const emptyInvoice: InvoiceForm = {
+  type: 'FACTURA',
   client: '', ruc: '', address: '', email: '',
   description: '', quantity: 1, unit_price: 0,
   igv: 18, credit_parts: 1,
@@ -62,7 +69,7 @@ export default function BillingModule({ currentOrg }: { currentOrg: any }) {
   const [invoices, setInvoices] = useState<Invoice[]>(mockInvoices)
   const [showNew, setShowNew] = useState(false)
   const [selected, setSelected] = useState<Invoice | null>(null)
-  const [form, setForm] = useState(emptyInvoice)
+  const [form, setForm] = useState<InvoiceForm>(emptyInvoice)
   const currency = currentOrg?.settings?.currency || 'S/'
 
   const subtotal = form.quantity * form.unit_price
