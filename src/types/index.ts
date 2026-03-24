@@ -9,7 +9,7 @@ export interface Organization {
   address?: string
   phone?: string
   email?: string
-  logo_url?: string
+  logo_url?: string | null
   settings: OrganizationSettings
   is_active: boolean
   created_at: string
@@ -23,6 +23,11 @@ export interface OrganizationSettings {
   theme_color?: string
   enable_inventory?: boolean
   enable_customers?: boolean
+  plan?: 'starter' | 'pro' | 'premium'
+  language?: 'es' | 'en'
+  timezone?: string
+  tax_name?: string
+  tax_included?: boolean
   [key: string]: any
 }
 
@@ -32,7 +37,7 @@ export interface User {
   username: string
   email: string
   full_name: string
-  role: 'ADMIN' | 'MANAGER' | 'VENDEDOR'
+  role: 'OWNER' | 'ADMIN' | 'MANAGER' | 'VENDEDOR' | 'VIEWER'
   is_active: boolean
   last_login?: string
   created_at: string
@@ -134,4 +139,5 @@ export interface InventoryMovement {
 
 export interface CartItem extends Product {
   quantity: number
+  itemDiscount?: number // descuento por ítem en porcentaje (0-100)
 }

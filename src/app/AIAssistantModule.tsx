@@ -1,6 +1,8 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
+import { QUICK_QUESTIONS } from '@/lib/ai/prompts'
+import { useAIInsights } from '@/modules/ai/useAIInsights'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -14,47 +16,77 @@ interface AIAssistantProps {
   currentOrg: any
 }
 
-const quickQuestions = [
-  { label: '📈 Producto más vendido', q: '¿Cuál es mi producto más vendido esta semana?' },
-  { label: '📦 Reabastecimiento urgente', q: '¿Qué productos debo reabastecer urgente?' },
-  { label: '📱 Mensaje para inactivos', q: 'Genera un mensaje de WhatsApp para clientes inactivos' },
-  { label: '💡 Subir ticket promedio', q: '¿Cómo puedo aumentar mi ticket promedio?' },
-  { label: '🔮 Predicción fin de semana', q: 'Predice mis ventas para este fin de semana' },
-  { label: '🏆 Clientes más valiosos', q: '¿Cuáles son mis clientes más valiosos?' },
-]
+const HISTORY_KEY = (orgId: string) => `coriva_chat_${orgId}`
+const MAX_HISTORY = 40
+
+function loadHistory(orgId: string): Message[] {
+  try {
+    const raw = localStorage.getItem(HISTORY_KEY(orgId))
+    return raw ? JSON.parse(raw) : []
+  } catch { return [] }
+}
+
+function saveHistory(orgId: string, messages: Message[]) {
+  try {
+    localStorage.setItem(HISTORY_KEY(orgId), JSON.stringify(messages.slice(-MAX_HISTORY)))
+  } catch {}
+}
 
 export default function AIAssistantModule({ products, sales, currentOrg }: AIAssistantProps) {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: 'assistant',
-      content: '👋 Hola! Soy tu asistente IA de Coriva. Puedo ayudarte a:\n\n• Analizar tus ventas y predecir tendencias\n• Alertarte sobre stock bajo y recomendar pedidos\n• Crear mensajes para clientes por WhatsApp o email\n• Sugerir promociones basadas en datos reales\n\n¿En qué te ayudo hoy?',
-      time: 'Ahora',
-    },
-  ])
+  const orgId = currentOrg?.id
+  const currency = currentOrg?.settings?.currency || 'S/'
+
+  const { insights, loading: insightsLoading } = useAIInsights(orgId, currentOrg?.business_type ?? 'retail')
+
+  const [messages, setMessages] = useState<Message[]>(() => {
+    if (!orgId) return [defaultWelcome()]
+    const history = loadHistory(orgId)
+    return history.length > 0 ? history : [defaultWelcome()]
+  })
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const bodyRef = useRef<HTMLDivElement>(null)
 
+  // Scroll al fondo cuando llegan mensajes
   useEffect(() => {
     if (bodyRef.current) bodyRef.current.scrollTop = bodyRef.current.scrollHeight
   }, [messages])
 
-  const buildContext = () => ({
-    negocio: currentOrg?.name,
-    tipo: currentOrg?.business_type,
-    moneda: currentOrg?.settings?.currency || 'S/',
-    totalProductos: products.length,
-    stockCritico: products.filter(p => p.stock <= (p.min_stock || 5)).map(p => ({ nombre: p.name, stock: p.stock })),
-    ventasHoy: sales.filter(s => s.created_at?.startsWith(new Date().toISOString().split('T')[0])).length,
-    totalVentas: sales.length,
-    ventasTotales: sales.reduce((sum, s) => sum + (s.total || 0), 0).toFixed(2),
-  })
+  // Persistir historial
+  useEffect(() => {
+    if (orgId) saveHistory(orgId, messages)
+  }, [messages, orgId])
+
+  // Preguntas contextuales basadas en el estado real
+  const contextualQuestions = useCallback(() => {
+    const today = new Date().toISOString().split('T')[0]
+    const todaySales = sales.filter(s => s.created_at?.startsWith(today))
+    const criticalStock = products.filter(p => p.stock <= (p.min_stock || 5))
+    const questions: string[] = []
+
+    if (criticalStock.length > 0)
+      questions.push(`¿Qué hago con los ${criticalStock.length} productos con stock crítico?`)
+    if (todaySales.length === 0)
+      questions.push('¿Por qué no he tenido ventas hoy y qué puedo hacer?')
+    if (todaySales.length > 5)
+      questions.push(`Tuve ${todaySales.length} ventas hoy, ¿cómo optimizo el cierre del día?`)
+    if (products.length > 0)
+      questions.push('¿Cuál es mi producto con mejor margen de ganancia?')
+
+    // Completar con preguntas genéricas si faltan
+    const generic = QUICK_QUESTIONS.filter(q => !questions.includes(q))
+    return [...questions, ...generic].slice(0, 8)
+  }, [products, sales])
 
   const sendMessage = async (text?: string) => {
     const msg = (text || input).trim()
     if (!msg || loading) return
 
-    const userMsg: Message = { role: 'user', content: msg, time: new Date().toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' }) }
+    const userMsg: Message = {
+      role: 'user',
+      content: msg,
+      time: new Date().toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' }),
+    }
     const newMessages = [...messages, userMsg]
     setMessages(newMessages)
     setInput('')
@@ -66,18 +98,17 @@ export default function AIAssistantModule({ products, sales, currentOrg }: AIAss
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: newMessages.map(m => ({ role: m.role, content: m.content })),
-          context: buildContext(),
+          orgId,
+          businessType: currentOrg?.business_type ?? 'retail',
         }),
       })
       const data = await res.json()
-      setMessages(prev => [
-        ...prev,
-        {
-          role: 'assistant',
-          content: data.reply || 'No pude obtener respuesta.',
-          time: 'Coriva IA',
-        },
-      ])
+      const aiMsg: Message = {
+        role: 'assistant',
+        content: data.reply || 'No pude obtener respuesta.',
+        time: 'Coriva IA',
+      }
+      setMessages(prev => [...prev, aiMsg])
     } catch {
       setMessages(prev => [
         ...prev,
@@ -89,144 +120,189 @@ export default function AIAssistantModule({ products, sales, currentOrg }: AIAss
   }
 
   const clearChat = () => {
-    setMessages([{ role: 'assistant', content: 'Chat limpiado. ¿En qué te ayudo?', time: 'Ahora' }])
+    const welcome = defaultWelcome()
+    setMessages([welcome])
+    if (orgId) saveHistory(orgId, [welcome])
   }
 
+  const questions = contextualQuestions()
+  const today = new Date().toISOString().split('T')[0]
+  const todaySales = sales.filter(s => s.created_at?.startsWith(today))
+  const todayTotal = todaySales.reduce((s, v) => s + v.total, 0)
+
   return (
-    <div className="p-5 animate-fade-up">
-      <div
-        className="grid gap-[14px]"
-        style={{ gridTemplateColumns: '1fr', height: 'calc(100vh - 140px)' }}
-      >
-        <div className="grid gap-[14px]" style={{ gridTemplateColumns: '1fr 320px', height: '100%' }}>
+    <div className="p-5 animate-fade-up" style={{ height: 'calc(100vh - 52px)' }}>
+      <div className="grid gap-[14px] h-full" style={{ gridTemplateColumns: '1fr 300px' }}>
 
-          {/* Chat panel */}
-          <div
-            className="rounded-[13px] flex flex-col overflow-hidden"
-            style={{ background: 'var(--card)', border: '1px solid var(--border)' }}
-          >
-            {/* Header */}
-            <div className="px-4 py-3 flex items-center gap-[10px]" style={{ borderBottom: '1px solid var(--border)' }}>
-              <div
-                className="w-[34px] h-[34px] rounded-[10px] flex items-center justify-center text-base flex-shrink-0"
-                style={{ background: 'var(--gradient)' }}
-              >
-                🤖
-              </div>
-              <div>
-                <div className="text-sm font-bold" style={{ color: 'var(--text)' }}>Coriva IA — Asistente de Negocio</div>
-                <div className="text-[10px]" style={{ color: 'var(--green)' }}>● En línea · GPT-4o powered</div>
-              </div>
-              <button
-                onClick={clearChat}
-                className="ml-auto px-3 py-[7px] rounded-[9px] text-xs font-semibold transition-all"
-                style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--muted)' }}
-              >
-                🗑 Limpiar
-              </button>
+        {/* ── Chat panel ──────────────────────────────────── */}
+        <div className="rounded-[13px] flex flex-col overflow-hidden" style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
+          {/* Header */}
+          <div className="px-4 py-3 flex items-center gap-[10px]" style={{ borderBottom: '1px solid var(--border)' }}>
+            <div className="w-[34px] h-[34px] rounded-[10px] flex items-center justify-center text-base flex-shrink-0" style={{ background: 'var(--gradient)' }}>
+              🤖
             </div>
+            <div className="flex-1">
+              <div className="text-sm font-bold" style={{ color: 'var(--text)' }}>Coriva IA — Asistente de Negocio</div>
+              <div className="text-[10px]" style={{ color: 'var(--green)' }}>● En línea · GPT-4o-mini · Contexto real de tu negocio</div>
+            </div>
+            <button
+              onClick={clearChat}
+              className="px-3 py-[7px] rounded-[9px] text-xs font-semibold transition-all"
+              style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--muted)' }}
+            >
+              🗑 Limpiar
+            </button>
+          </div>
 
-            {/* Messages */}
-            <div ref={bodyRef} className="flex-1 overflow-y-auto p-4 flex flex-col gap-3 touch-scroll">
-              {messages.map((m, i) => (
-                <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div
-                    className="max-w-[85%] px-[13px] py-[10px] rounded-xl text-sm leading-relaxed"
-                    style={
-                      m.role === 'user'
-                        ? { background: 'var(--gradient)', color: '#fff', borderRadius: '12px 12px 4px 12px' }
-                        : { background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', borderRadius: '4px 12px 12px 12px' }
-                    }
-                  >
-                    <div style={{ whiteSpace: 'pre-wrap' }}>{m.content}</div>
-                    <div className="text-[10px] mt-[3px]" style={{ color: m.role === 'user' ? 'rgba(255,255,255,.6)' : 'var(--sub)' }}>
-                      {m.time}
-                    </div>
+          {/* Messages */}
+          <div ref={bodyRef} className="flex-1 overflow-y-auto p-4 flex flex-col gap-3 touch-scroll">
+            {messages.map((m, i) => (
+              <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div
+                  className="max-w-[85%] px-[13px] py-[10px] rounded-xl text-sm leading-relaxed"
+                  style={
+                    m.role === 'user'
+                      ? { background: 'var(--gradient)', color: '#fff', borderRadius: '12px 12px 4px 12px' }
+                      : { background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)', borderRadius: '4px 12px 12px 12px' }
+                  }
+                >
+                  <div style={{ whiteSpace: 'pre-wrap' }}>{m.content}</div>
+                  <div className="text-[10px] mt-[3px]" style={{ color: m.role === 'user' ? 'rgba(255,255,255,.6)' : 'var(--sub)' }}>
+                    {m.time}
                   </div>
                 </div>
-              ))}
-              {loading && (
-                <div className="flex justify-start">
-                  <div
-                    className="px-[13px] py-[10px] rounded-xl text-sm"
-                    style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--muted)', borderRadius: '4px 12px 12px 12px' }}
-                  >
-                    <span className="animate-pulse-dot">● ● ●</span>
+              </div>
+            ))}
+            {loading && (
+              <div className="flex justify-start">
+                <div
+                  className="px-[13px] py-[10px] rounded-xl text-sm"
+                  style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--muted)', borderRadius: '4px 12px 12px 12px' }}
+                >
+                  <span className="animate-pulse">● ● ●</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Input */}
+          <div className="px-[14px] py-3 flex gap-2" style={{ borderTop: '1px solid var(--border)' }}>
+            <input
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && !e.shiftKey && sendMessage()}
+              placeholder="Ej: ¿Cuáles son mis productos con más margen?"
+              className="flex-1 px-[13px] py-[9px] rounded-[9px] text-sm outline-none"
+              style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)' }}
+              disabled={loading}
+            />
+            <button
+              onClick={() => sendMessage()}
+              disabled={loading || !input.trim()}
+              className="px-[14px] py-[7px] rounded-[9px] text-xs font-semibold text-white disabled:opacity-50"
+              style={{ background: 'var(--gradient)' }}
+            >
+              Enviar ↗
+            </button>
+          </div>
+        </div>
+
+        {/* ── Right panel ─────────────────────────────────── */}
+        <div className="flex flex-col gap-[10px] overflow-y-auto touch-scroll">
+
+          {/* Insights del día */}
+          <div className="rounded-[13px] overflow-hidden" style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
+            <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--border)' }}>
+              <span className="text-sm font-bold" style={{ color: 'var(--text)' }}>📊 Estado del Negocio</span>
+            </div>
+            <div className="p-3 space-y-2">
+              {insightsLoading ? (
+                <div className="text-xs text-center py-4 animate-pulse" style={{ color: 'var(--muted)' }}>Analizando…</div>
+              ) : insights ? (
+                <>
+                  <div className="p-3 rounded-[11px]" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+                    <div className="text-xs font-bold mb-1" style={{ color: 'var(--text)' }}>
+                      {insights.trend === 'up' ? '📈' : insights.trend === 'down' ? '📉' : '➡️'} {insights.summary}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: 'var(--border)' }}>
+                        <div
+                          className="h-full rounded-full"
+                          style={{
+                            width: `${insights.score}%`,
+                            background: insights.score >= 70 ? 'var(--green)' : insights.score >= 40 ? 'var(--amber)' : 'var(--red)',
+                          }}
+                        />
+                      </div>
+                      <span className="text-[10px] font-bold" style={{ color: 'var(--muted)' }}>{insights.score}/100</span>
+                    </div>
+                  </div>
+                  {insights.highlight && (
+                    <div className="text-[11px] px-3 py-2 rounded-lg" style={{ background: 'rgba(99,102,241,.06)', color: 'var(--muted)', border: '1px solid rgba(99,102,241,.15)' }}>
+                      💡 {insights.highlight}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="p-3 rounded-[11px]" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+                  <div className="text-xs font-bold mb-1" style={{ color: 'var(--text)' }}>Hoy</div>
+                  <div className="text-[11px]" style={{ color: 'var(--muted)' }}>
+                    {todaySales.length} ventas · {currency} {todayTotal.toFixed(2)}
                   </div>
                 </div>
               )}
             </div>
+          </div>
 
-            {/* Input */}
-            <div className="px-[14px] py-3 flex gap-2" style={{ borderTop: '1px solid var(--border)' }}>
-              <input
-                value={input}
-                onChange={e => setInput(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && sendMessage()}
-                placeholder="Ej: ¿Cuáles son mis productos con más margen?"
-                className="flex-1 px-[13px] py-[9px] rounded-[9px] text-sm outline-none transition-all"
-                style={{
-                  background: 'var(--surface)',
-                  border: '1px solid var(--border)',
-                  color: 'var(--text)',
-                }}
-                disabled={loading}
-              />
-              <button
-                onClick={() => sendMessage()}
-                disabled={loading || !input.trim()}
-                className="px-[14px] py-[7px] rounded-[9px] text-xs font-semibold text-white transition-all disabled:opacity-50"
-                style={{ background: 'var(--gradient)' }}
-              >
-                Enviar ↗
-              </button>
+          {/* KPIs rápidos */}
+          <div className="rounded-[13px] overflow-hidden" style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
+            <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--border)' }}>
+              <span className="text-sm font-bold" style={{ color: 'var(--text)' }}>📈 KPIs Clave</span>
+            </div>
+            <div className="p-3 grid grid-cols-2 gap-2">
+              {[
+                { val: String(products.length),                                                                    lbl: 'Productos' },
+                { val: String(sales.length),                                                                       lbl: 'Ventas total' },
+                { val: String(products.filter(p => p.stock <= (p.min_stock || 5)).length),                        lbl: 'Stock crítico' },
+                { val: `${currency} ${sales.reduce((s, v) => s + (v.total || 0), 0).toFixed(0)}`,                 lbl: 'Ingresos' },
+              ].map(k => (
+                <div key={k.lbl} className="text-center p-[10px] rounded-[9px]" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+                  <div className="text-lg font-extrabold" style={{ color: 'var(--accent)' }}>{k.val}</div>
+                  <div className="text-[10px]" style={{ color: 'var(--muted)' }}>{k.lbl}</div>
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* Right panel */}
-          <div className="flex flex-col gap-[10px] overflow-y-auto touch-scroll">
-            {/* Quick questions */}
-            <div className="rounded-[13px] overflow-hidden" style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
-              <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--border)' }}>
-                <span className="text-sm font-bold" style={{ color: 'var(--text)' }}>⚡ Preguntas Rápidas</span>
-              </div>
-              <div className="p-[10px] flex flex-col gap-[6px]">
-                {quickQuestions.map(qq => (
-                  <button
-                    key={qq.q}
-                    onClick={() => sendMessage(qq.q)}
-                    className="w-full text-left p-3 rounded-[11px] transition-all"
-                    style={{ background: 'var(--card2)', border: '1px solid var(--border)' }}
-                  >
-                    <div className="text-xs font-bold" style={{ color: 'var(--text)' }}>{qq.label}</div>
-                  </button>
-                ))}
-              </div>
+          {/* Preguntas contextuales */}
+          <div className="rounded-[13px] overflow-hidden" style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
+            <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--border)' }}>
+              <span className="text-sm font-bold" style={{ color: 'var(--text)' }}>⚡ Preguntas Rápidas</span>
             </div>
-
-            {/* KPIs */}
-            <div className="rounded-[13px] overflow-hidden" style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
-              <div className="px-4 py-3" style={{ borderBottom: '1px solid var(--border)' }}>
-                <span className="text-sm font-bold" style={{ color: 'var(--text)' }}>📊 KPIs Clave</span>
-              </div>
-              <div className="p-3 grid grid-cols-2 gap-2">
-                {[
-                  { val: String(products.length), lbl: 'Productos' },
-                  { val: String(sales.length), lbl: 'Ventas total' },
-                  { val: String(products.filter(p => p.stock <= (p.min_stock || 5)).length), lbl: 'Stock crítico' },
-                  { val: `${currentOrg?.settings?.currency || 'S/'} ${sales.reduce((s, v) => s + (v.total || 0), 0).toFixed(0)}`, lbl: 'Ingresos' },
-                ].map(k => (
-                  <div key={k.lbl} className="text-center p-[10px] rounded-[9px]" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
-                    <div className="text-lg font-extrabold" style={{ color: 'var(--accent)' }}>{k.val}</div>
-                    <div className="text-[10px]" style={{ color: 'var(--muted)' }}>{k.lbl}</div>
-                  </div>
-                ))}
-              </div>
+            <div className="p-[10px] flex flex-col gap-[6px]">
+              {questions.map(q => (
+                <button
+                  key={q}
+                  onClick={() => sendMessage(q)}
+                  disabled={loading}
+                  className="w-full text-left p-3 rounded-[11px] transition-all hover:opacity-80 disabled:opacity-50"
+                  style={{ background: 'var(--card2)', border: '1px solid var(--border)' }}
+                >
+                  <div className="text-xs" style={{ color: 'var(--text)' }}>{q}</div>
+                </button>
+              ))}
             </div>
           </div>
-
         </div>
       </div>
     </div>
   )
+}
+
+function defaultWelcome(): Message {
+  return {
+    role: 'assistant',
+    content: '👋 Hola! Soy tu asistente IA de Coriva.\n\nPuedo ayudarte a:\n• Analizar ventas y predecir tendencias\n• Alertarte sobre stock bajo y recomendar pedidos\n• Crear mensajes para clientes por WhatsApp\n• Sugerir promociones basadas en datos reales\n\n¿En qué te ayudo hoy?',
+    time: 'Ahora',
+  }
 }

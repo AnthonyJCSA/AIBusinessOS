@@ -5,9 +5,11 @@ import { useRouter } from 'next/navigation'
 import OnboardingWizard from '@/app/OnboardingWizard'
 import { Organization } from '@/types'
 import { organizationService, productService, authService } from '@/lib/services'
+import { useSessionStore } from '@/state/session.store'
 
 export default function RegistroPage() {
   const router = useRouter()
+  const setSession = useSessionStore((s) => s.setSession)
   const [loading, setLoading] = useState(false)
 
   const handleOnboardingComplete = async (org: Organization, products: any[], isDemo: boolean) => {
@@ -46,17 +48,11 @@ export default function RegistroPage() {
         logo_url: createdOrg.logo_url || null
       }
       
-      // Guardar sesión
-      sessionStorage.setItem('coriva_user', JSON.stringify(adminUser))
-      sessionStorage.setItem('coriva_org', JSON.stringify(completeOrg))
-      
-      console.log('Session saved, redirecting to dashboard')
-      
-      // Esperar un momento para asegurar que la sesión se guardó
-      await new Promise(resolve => setTimeout(resolve, 500))
-      
+      // Guardar sesión con Zustand
+      setSession(adminUser, completeOrg)
+
       // Redirigir al dashboard
-      window.location.href = '/dashboard'
+      router.push('/dashboard')
     } catch (error: any) {
       console.error('Error completing onboarding:', error)
       const errorMessage = error?.message || error?.code || 'Error desconocido'

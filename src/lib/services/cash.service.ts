@@ -1,4 +1,4 @@
-import { supabase, isSupabaseConfigured } from '../supabase'
+import { supabase, isSupabaseConfigured } from '@/lib/supabase'
 import { DBCashMovement, CashSummaryRow } from '@/types/database.types'
 
 const TABLE = 'corivacore_cash_movements'

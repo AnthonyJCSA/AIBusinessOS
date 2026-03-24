@@ -1,13 +1,9 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Organization, User, Product, CartItem, Sale } from '@/types'
-import {
-  productService,
-  saleService,
-  cashService,
-  authService,
-} from '@/lib/services'
+import { useRouter } from 'next/navigation'
+import { useSessionStore } from '@/state/session.store'
+import { productService, saleService, cashService } from '@/lib/services'
 import { loadThemeFromOrg } from '@/lib/theme'
 
 import Sidebar from '@/components/Sidebar'
@@ -26,54 +22,49 @@ import ReportsModule from '@/app/ReportsModule'
 import UsersModule from '@/app/UsersModule'
 import SettingsModule from '@/app/SettingsModule'
 import BillingModule from '@/app/BillingModule'
+import PurchasesModule from '@/app/PurchasesModule'
+import AutomationsModule from '@/app/AutomationsModule'
+import LeadsModule from '@/app/LeadsModule'
 
-const tabs = [
-  'dashboard', 'asistente', 'pos', 'cash', 'inventory',
-  'store', 'catalog', 'communications', 'customers', 'reports', 'users', 'settings',
-]
-
-const tabLabels: Record<string, string> = {
-  dashboard: 'Dashboard', asistente: 'IA Asistente', pos: 'POS', cash: 'Caja',
-  inventory: 'Inventario', store: 'Tienda', catalog: 'Catálogo',
-  communications: 'Comunicaciones', customers: 'Clientes',
-  reports: 'Reportes', users: 'Usuarios', settings: 'Config',
-}
+import type { Product, Sale } from '@/types'
+import { useAutomationEngine } from '@/modules/ai/useAutomationEngine'
 
 export default function DashboardPage() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [currentUser, setCurrentUser] = useState<User | null>(null)
-  const [currentOrg, setCurrentOrg] = useState<Organization | null>(null)
+  const router = useRouter()
+  const { user: currentUser, org: currentOrg, isAuthenticated, setSession, updateOrg, clearSession } = useSessionStore()
+
   const [activeModule, setActiveModule] = useState('dashboard')
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [loading, setLoading] = useState(true)
   const [cajaOpen, setCajaOpen] = useState(false)
-
-  // Login state
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const [loginError, setLoginError] = useState('')
-  const [loginLoading, setLoginLoading] = useState(false)
-
-  // Data
   const [products, setProducts] = useState<Product[]>([])
   const [sales, setSales] = useState<Sale[]>([])
-  const [customers, setCustomers] = useState<any[]>([])
+  const [customers] = useState<any[]>([])
+  const [showCatalogModal, setShowCatalogModal] = useState(false)
 
-  // ── Session check ──────────────────────────────────────────
+  // ── Auth check: migrar desde sessionStorage si existe ──────
   useEffect(() => {
-    const saved = sessionStorage.getItem('coriva_user')
-    const savedOrg = sessionStorage.getItem('coriva_org')
-    if (saved && savedOrg) {
-      const org = JSON.parse(savedOrg)
-      setCurrentUser(JSON.parse(saved))
-      setCurrentOrg(org)
-      setIsAuthenticated(true)
-      loadThemeFromOrg(org)
-    } else {
-      window.location.href = '/'
+    // Compatibilidad: si hay sesión en sessionStorage (legacy), migrar a Zustand
+    if (!isAuthenticated) {
+      const savedUser = sessionStorage.getItem('coriva_user')
+      const savedOrg = sessionStorage.getItem('coriva_org')
+      if (savedUser && savedOrg) {
+        const user = JSON.parse(savedUser)
+        const org = JSON.parse(savedOrg)
+        setSession(user, org)
+        loadThemeFromOrg(org)
+        // Limpiar sessionStorage legacy
+        sessionStorage.removeItem('coriva_user')
+        sessionStorage.removeItem('coriva_org')
+      } else {
+        router.push('/login')
+        return
+      }
+    } else if (currentOrg) {
+      loadThemeFromOrg(currentOrg)
     }
     setLoading(false)
-  }, [])
+  }, [isAuthenticated, currentOrg, setSession, router])
 
   // ── Load data ──────────────────────────────────────────────
   const loadProducts = useCallback(async () => {
@@ -104,183 +95,42 @@ export default function DashboardPage() {
     }
   }, [isAuthenticated, currentOrg, loadProducts, loadSales, loadCajaStatus])
 
-  // ── Login ──────────────────────────────────────────────────
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoginError('')
-    setLoginLoading(true)
-    try {
-      const result = await authService.login(username, password)
-      if (result) {
-        setCurrentUser(result.user)
-        setCurrentOrg(result.org)
-        setIsAuthenticated(true)
-        sessionStorage.setItem('coriva_user', JSON.stringify(result.user))
-        sessionStorage.setItem('coriva_org', JSON.stringify(result.org))
-      } else {
-        setLoginError('Usuario o contraseña incorrectos')
-      }
-    } catch {
-      setLoginError('Error al iniciar sesión')
-    } finally {
-      setLoginLoading(false)
-    }
+  const handleLogout = () => {
+    clearSession()
+    router.push('/login')
   }
 
-  // ── Product handlers ───────────────────────────────────────
-  const updateProduct = async (p: Product) => {
-    await productService.update(p.id, p)
-    await loadProducts()
-  }
-  const addProduct = async (p: Omit<Product, 'id'>) => {
-    if (!currentOrg) return
-    await productService.create(currentOrg.id, p)
-    await loadProducts()
-  }
-  const deleteProduct = async (id: string) => {
-    await loadProducts()
-  }
+  // ── Automation engine ─────────────────────────────────────
+  useAutomationEngine({
+    orgId:    currentOrg?.id ?? '',
+    orgName:  currentOrg?.name ?? '',
+    products: products,
+    sales:    sales,
+    currency: currentOrg?.settings?.currency ?? 'S/',
+  })
 
-  const updateOrganization = (org: Organization) => {
-    setCurrentOrg(org)
-    sessionStorage.setItem('coriva_org', JSON.stringify(org))
-  }
+  const updateOrganization = (org: any) => updateOrg(org)
 
-  const lowStockCount = products.filter(p => p.stock <= (p.min_stock || 5)).length
-
-  // ── Catalog modal ──────────────────────────────────────────
-  const [showCatalogModal, setShowCatalogModal] = useState(false)
   const storeUrl = typeof window !== 'undefined'
     ? `${window.location.origin}/tienda/${currentOrg?.slug || 'mi-negocio'}`
     : `/tienda/${currentOrg?.slug || 'mi-negocio'}`
 
-  // ── Loading screen ─────────────────────────────────────────
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg)' }}>
         <div className="flex flex-col items-center gap-4">
           <div
-            className="w-16 h-16 rounded-full border-4 border-t-transparent animate-spin-slow"
+            className="w-16 h-16 rounded-full border-4 border-t-transparent animate-spin"
             style={{ borderColor: 'var(--accent)', borderTopColor: 'transparent' }}
           />
-          <div className="text-sm font-semibold" style={{ color: 'var(--muted)' }}>Cargando Coriva Core…</div>
+          <div className="text-sm font-semibold" style={{ color: 'var(--muted)' }}>Cargando Coriva OS…</div>
         </div>
       </div>
     )
   }
 
-  // ── Login screen ───────────────────────────────────────────
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex" style={{ background: 'var(--bg)' }}>
-        {/* Left branding */}
-        <div
-          className="hidden lg:flex lg:w-1/2 p-12 flex-col justify-between relative overflow-hidden"
-          style={{ background: 'linear-gradient(135deg, #0D1117 0%, #161D2E 100%)', borderRight: '1px solid var(--border)' }}
-        >
-          <div className="absolute top-0 right-0 w-96 h-96 rounded-full -mr-48 -mt-48" style={{ background: 'var(--accent)', opacity: 0.05 }} />
-          <div className="absolute bottom-0 left-0 w-96 h-96 rounded-full -ml-48 -mb-48" style={{ background: 'var(--accent3)', opacity: 0.05 }} />
+  if (!isAuthenticated || !currentUser || !currentOrg) return null
 
-          <div className="relative z-10">
-            <div className="flex items-center gap-3 mb-10">
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl" style={{ background: 'var(--gradient)' }}>🚀</div>
-              <span className="text-2xl font-extrabold" style={{ background: 'var(--gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                Coriva Core
-              </span>
-            </div>
-            <h1 className="text-5xl font-extrabold leading-tight mb-4" style={{ color: 'var(--text)' }}>
-              Gestiona tu negocio<br />
-              <span style={{ color: 'var(--muted)' }}>con IA integrada</span>
-            </h1>
-            <p className="text-lg" style={{ color: 'var(--muted)' }}>
-              Sistema POS + IA para cualquier tipo de negocio. Ventas, inventario, tienda virtual y asistente inteligente.
-            </p>
-          </div>
-
-          <div className="relative z-10 space-y-4">
-            {[
-              { icon: '🤖', title: 'Asistente IA', desc: 'GPT-4 analiza tu negocio en tiempo real' },
-              { icon: '🛍️', title: 'Tienda Virtual', desc: 'Recibe pedidos por WhatsApp y web' },
-              { icon: '📊', title: 'Reportes IA', desc: 'Predicciones y alertas automáticas' },
-            ].map(f => (
-              <div key={f.title} className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center text-base flex-shrink-0 mt-0.5"
-                  style={{ background: 'rgba(99,102,241,.15)', border: '1px solid rgba(99,102,241,.2)' }}>
-                  {f.icon}
-                </div>
-                <div>
-                  <div className="text-sm font-bold" style={{ color: 'var(--text)' }}>{f.title}</div>
-                  <div className="text-xs" style={{ color: 'var(--muted)' }}>{f.desc}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Right login */}
-        <div className="flex-1 flex items-center justify-center p-8">
-          <div className="w-full max-w-md">
-            {/* Mobile logo */}
-            <div className="lg:hidden flex items-center gap-3 mb-8">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xl" style={{ background: 'var(--gradient)' }}>🚀</div>
-              <span className="text-xl font-extrabold" style={{ background: 'var(--gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                Coriva Core
-              </span>
-            </div>
-
-            <div className="mb-8">
-              <h2 className="text-3xl font-extrabold mb-2" style={{ color: 'var(--text)' }}>Bienvenido de nuevo</h2>
-              <p className="text-sm" style={{ color: 'var(--muted)' }}>Ingresa tus credenciales para continuar</p>
-            </div>
-
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="flex flex-col gap-[5px]">
-                <label className="text-[10px] font-bold uppercase tracking-[.5px]" style={{ color: 'var(--muted)' }}>Usuario</label>
-                <input
-                  type="text" value={username} onChange={e => setUsername(e.target.value)}
-                  className="px-4 py-3 rounded-xl outline-none text-sm transition-all"
-                  style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)' }}
-                  placeholder="Ingresa tu usuario" required autoComplete="username"
-                />
-              </div>
-              <div className="flex flex-col gap-[5px]">
-                <label className="text-[10px] font-bold uppercase tracking-[.5px]" style={{ color: 'var(--muted)' }}>Contraseña</label>
-                <input
-                  type="password" value={password} onChange={e => setPassword(e.target.value)}
-                  className="px-4 py-3 rounded-xl outline-none text-sm transition-all"
-                  style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)' }}
-                  placeholder="Ingresa tu contraseña" required autoComplete="current-password"
-                />
-              </div>
-
-              {loginError && (
-                <div className="px-4 py-3 rounded-xl text-sm font-medium"
-                  style={{ background: 'rgba(239,68,68,.08)', border: '1px solid rgba(239,68,68,.2)', color: 'var(--red)' }}>
-                  ⚠️ {loginError}
-                </div>
-              )}
-
-              <button type="submit" disabled={loginLoading}
-                className="w-full py-3 rounded-xl text-sm font-bold text-white transition-all disabled:opacity-60"
-                style={{ background: 'var(--gradient)', boxShadow: '0 0 20px rgba(99,102,241,.3)' }}>
-                {loginLoading ? '⏳ Iniciando...' : 'Iniciar Sesión'}
-              </button>
-            </form>
-
-            <div className="mt-5 px-4 py-3 rounded-xl"
-              style={{ background: 'rgba(99,102,241,.06)', border: '1px solid rgba(99,102,241,.15)' }}>
-              <p className="text-xs font-semibold mb-1" style={{ color: 'var(--accent)' }}>ℹ️ Acceso</p>
-              <p className="text-xs" style={{ color: 'var(--muted)' }}>
-                Usa las credenciales de tu organización creada en Supabase
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  // ── Render module ──────────────────────────────────────────
   const renderModule = () => {
     switch (activeModule) {
       case 'dashboard':
@@ -299,8 +149,10 @@ export default function DashboardPage() {
       case 'inventory':
         return (
           <InventoryModule
-            products={products} onUpdateProduct={updateProduct}
-            onAddProduct={addProduct} onDeleteProduct={deleteProduct}
+            products={products}
+            onUpdateProduct={async (p) => { await productService.update(p.id, p); await loadProducts() }}
+            onAddProduct={async (p) => { await productService.create(currentOrg.id, p); await loadProducts() }}
+            onDeleteProduct={async () => { await loadProducts() }}
             currentUser={currentUser}
           />
         )
@@ -312,24 +164,27 @@ export default function DashboardPage() {
         return <CommunicationsModule currentOrg={currentOrg} customers={customers} />
       case 'customers':
         return <CustomersModule currentUser={currentUser} />
+      case 'purchases':
+        return <PurchasesModule currentUser={currentUser} orgId={currentOrg.id} />
+      case 'automations':
+        return <AutomationsModule currentUser={currentUser} orgId={currentOrg.id} />
+      case 'leads':
+        return <LeadsModule currentUser={currentUser} orgId={currentOrg.id} />
       case 'reports':
         return <ReportsModule sales={sales} currentUser={currentUser} />
       case 'users':
-        return <UsersModule currentUser={currentUser!} organizationId={currentOrg!.id} />
+        return <UsersModule currentUser={currentUser} organizationId={currentOrg.id} />
       case 'billing':
         return <BillingModule currentOrg={currentOrg} />
       case 'settings':
-        return <SettingsModule currentOrg={currentOrg!} onUpdate={updateOrganization} />
+        return <SettingsModule currentOrg={currentOrg} onUpdate={updateOrganization} />
       default:
         return <DashboardModule sales={sales} products={products} currentOrg={currentOrg} onNavigate={setActiveModule} />
     }
   }
 
-  // ── Main shell ─────────────────────────────────────────────
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg)', fontFamily: "'Outfit', sans-serif" }}>
-
-      {/* Sidebar */}
       <Sidebar
         currentUser={currentUser}
         currentOrg={currentOrg}
@@ -337,22 +192,17 @@ export default function DashboardPage() {
         setActiveModule={setActiveModule}
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
+        onLogout={handleLogout}
       />
 
-      {/* Main */}
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
-
-        {/* Topbar */}
         <Topbar
           activeModule={activeModule}
           cajaOpen={cajaOpen}
           onHamburger={() => setSidebarOpen(true)}
           onAIClick={() => setActiveModule('asistente')}
           onCatalogClick={() => setShowCatalogModal(true)}
-          lowStockCount={lowStockCount}
         />
-
-        {/* Content */}
         <div className="flex-1 overflow-y-auto touch-scroll" style={{ background: 'var(--bg)' }}>
           {renderModule()}
         </div>
@@ -369,25 +219,23 @@ export default function DashboardPage() {
                 style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--muted)' }}>✕</button>
             </div>
             <p className="text-xs mb-4 text-center" style={{ color: 'var(--muted)' }}>Comparte este enlace con tus clientes</p>
-            <div className="px-[14px] py-[10px] rounded-[9px] mb-4 text-center"
-              style={{ background: 'var(--surface)', border: '1px solid var(--border2)', fontFamily: "'DM Mono', monospace", fontSize: '12px', color: 'var(--accent2)', wordBreak: 'break-all' }}>
+            <div className="px-[14px] py-[10px] rounded-[9px] mb-4 text-center break-all"
+              style={{ background: 'var(--surface)', border: '1px solid var(--border2)', fontFamily: "'DM Mono', monospace", fontSize: '12px', color: 'var(--accent2)' }}>
               {storeUrl}
             </div>
             <div className="flex flex-col gap-2">
-              <button
-                onClick={() => { navigator.clipboard.writeText(storeUrl).catch(() => {}); setShowCatalogModal(false) }}
-                className="w-full py-[10px] rounded-[9px] text-xs font-semibold transition-all"
+              <button onClick={() => { navigator.clipboard.writeText(storeUrl).catch(() => {}); setShowCatalogModal(false) }}
+                className="w-full py-[10px] rounded-[9px] text-xs font-semibold"
                 style={{ background: 'rgba(16,185,129,.1)', border: '1px solid rgba(16,185,129,.25)', color: 'var(--green)' }}>
                 📋 Copiar Enlace
               </button>
-              <button
-                onClick={() => { window.open(`https://wa.me/?text=${encodeURIComponent(`¡Hola! Te comparto el catálogo de ${currentOrg?.name} 🛍️\n${storeUrl}`)}`, '_blank'); setShowCatalogModal(false) }}
-                className="w-full py-[10px] rounded-[9px] text-xs font-semibold transition-all"
+              <button onClick={() => { window.open(`https://wa.me/?text=${encodeURIComponent(`¡Hola! Te comparto el catálogo de ${currentOrg?.name} 🛍️\n${storeUrl}`)}`, '_blank'); setShowCatalogModal(false) }}
+                className="w-full py-[10px] rounded-[9px] text-xs font-semibold"
                 style={{ background: 'rgba(37,211,102,.1)', color: '#25D366', border: '1px solid rgba(37,211,102,.3)' }}>
                 📱 Compartir por WhatsApp
               </button>
               <button onClick={() => setShowCatalogModal(false)}
-                className="w-full py-[10px] rounded-[9px] text-xs font-semibold transition-all"
+                className="w-full py-[10px] rounded-[9px] text-xs font-semibold"
                 style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--muted)' }}>
                 Cerrar
               </button>
@@ -396,14 +244,10 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* WhatsApp flotante */}
-      <a
-        href="https://wa.me/51913916967?text=Hola,%20necesito%20ayuda%20con%20Coriva%20Core"
+      <a href="https://wa.me/51913916967?text=Hola,%20necesito%20ayuda%20con%20Coriva%20Core"
         target="_blank" rel="noopener noreferrer"
         className="fixed bottom-6 right-6 w-14 h-14 rounded-full flex items-center justify-center text-2xl transition-all hover:scale-110 z-50"
-        style={{ background: '#25D366', boxShadow: '0 4px 20px rgba(37,211,102,.4)' }}
-        title="Soporte por WhatsApp"
-      >
+        style={{ background: '#25D366', boxShadow: '0 4px 20px rgba(37,211,102,.4)' }}>
         💬
       </a>
     </div>

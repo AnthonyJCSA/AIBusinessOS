@@ -17,9 +17,12 @@ export default function SettingsModule({ currentOrg, onUpdate }: { currentOrg: O
     web: '',
     currency: currentOrg.settings?.currency || 'S/',
     tax_rate: ((currentOrg.settings?.tax_rate || 0.18) * 100),
+    tax_name: currentOrg.settings?.tax_name || 'IGV',
+    tax_included: currentOrg.settings?.tax_included !== false,
     receipt_footer: currentOrg.settings?.receipt_footer || 'Gracias por su compra · Coriva POS',
     accent: currentOrg.settings?.theme_color || '#6366F1',
     theme_mode: (currentOrg.settings?.theme_mode as ThemeMode) || 'dark',
+    plan: currentOrg.settings?.plan || 'starter',
     ai_stock: true, ai_predict: true, ai_messages: true, ai_segment: true,
   })
   const [saving, setSaving] = useState(false)
@@ -31,7 +34,17 @@ export default function SettingsModule({ currentOrg, onUpdate }: { currentOrg: O
       ...currentOrg,
       name: s.name, business_type: s.business_type as any,
       ruc: s.ruc, address: s.address, phone: s.phone, email: s.email,
-      settings: { ...currentOrg.settings, currency: s.currency, tax_rate: s.tax_rate / 100, receipt_footer: s.receipt_footer, theme_color: s.accent, theme_mode: s.theme_mode },
+      settings: {
+        ...currentOrg.settings,
+        currency: s.currency,
+        tax_rate: s.tax_rate / 100,
+        tax_name: s.tax_name,
+        tax_included: s.tax_included,
+        receipt_footer: s.receipt_footer,
+        theme_color: s.accent,
+        theme_mode: s.theme_mode,
+        plan: s.plan,
+      },
       updated_at: new Date().toISOString(),
     })
     setSaving(false)
@@ -116,6 +129,25 @@ export default function SettingsModule({ currentOrg, onUpdate }: { currentOrg: O
                 </select>
               </div>
               {fi('IGV (%)', 'tax_rate', 'number')}
+              <div className="flex flex-col gap-[5px]">
+                <label className="text-[10px] font-bold uppercase tracking-[.5px]" style={{ color: 'var(--muted)' }}>Nombre del Impuesto</label>
+                <input value={s.tax_name} onChange={e => setS(p => ({ ...p, tax_name: e.target.value }))}
+                  placeholder="IGV, IVA, Tax..."
+                  className="px-[13px] py-[9px] rounded-[9px] text-sm outline-none"
+                  style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)' }} />
+              </div>
+              <div className="flex items-center justify-between col-span-2">
+                <div>
+                  <div className="text-sm font-semibold" style={{ color: 'var(--text)' }}>Precio incluye impuesto</div>
+                  <div className="text-[11px]" style={{ color: 'var(--muted)' }}>El precio de venta ya incluye el IGV</div>
+                </div>
+                <button onClick={() => setS(p => ({ ...p, tax_included: !p.tax_included }))}
+                  className="relative flex-shrink-0 transition-all"
+                  style={{ width: '38px', height: '22px', borderRadius: '99px', background: s.tax_included ? 'var(--green)' : 'var(--border2)' }}>
+                  <div className="absolute top-[2px] w-[18px] h-[18px] rounded-full bg-white transition-all"
+                    style={{ left: s.tax_included ? 'calc(100% - 20px)' : '2px' }} />
+                </button>
+              </div>
               <div className="col-span-2 flex flex-col gap-[5px]">
                 <label className="text-[10px] font-bold uppercase tracking-[.5px]" style={{ color: 'var(--muted)' }}>Pie de Comprobante</label>
                 <input value={s.receipt_footer} onChange={e => setS(p => ({ ...p, receipt_footer: e.target.value }))}

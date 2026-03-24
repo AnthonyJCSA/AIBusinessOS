@@ -1,4 +1,4 @@
-import { supabase, isSupabaseConfigured } from '../supabase'
+import { supabase, isSupabaseConfigured } from '@/lib/supabase'
 import { DBProduct, ExpiringProductRow } from '@/types/database.types'
 import { Product } from '@/types'
 

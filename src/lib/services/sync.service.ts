@@ -1,7 +1,7 @@
 import { productService } from './product.service'
 import { saleService } from './sale.service'
 import { cashService } from './cash.service'
-import { isSupabaseConfigured } from '../supabase'
+import { isSupabaseConfigured } from '@/lib/supabase'
 import { Product, Sale } from '@/types'
 
 const SYNC_KEY = 'coriva_sync_status'

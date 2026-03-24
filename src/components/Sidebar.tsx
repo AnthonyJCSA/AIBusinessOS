@@ -9,6 +9,7 @@ interface SidebarProps {
   setActiveModule: (m: string) => void
   isOpen: boolean
   onClose: () => void
+  onLogout?: () => void
 }
 
 const navSections = [
@@ -31,6 +32,7 @@ const navSections = [
     label: 'Inventario & IA',
     items: [
       { id: 'inventory', icon: <BoxIcon />, label: 'Inventario', badge: null, badgeColor: 'red' },
+      { id: 'purchases', icon: <TruckIcon />, label: 'Compras', badge: null, badgeColor: null },
     ],
   },
   {
@@ -50,12 +52,19 @@ const navSections = [
     label: 'CRM',
     items: [
       { id: 'customers', icon: <UsersIcon />, label: 'Clientes', badge: null, badgeColor: null },
+      { id: 'leads', icon: <FunnelIcon />, label: 'Pipeline Leads', badge: 'NUEVO', badgeColor: 'green' },
     ],
   },
   {
     label: 'Análisis',
     items: [
       { id: 'reports', icon: <ChartIcon />, label: 'Reportes IA', badge: null, badgeColor: null },
+    ],
+  },
+  {
+    label: 'Automatización',
+    items: [
+      { id: 'automations', icon: <AutoIcon />, label: 'Automatizaciones', badge: 'NUEVO', badgeColor: 'green' },
     ],
   },
   {
@@ -74,7 +83,7 @@ const badgeStyles: Record<string, string> = {
   amber: 'bg-amber-500/15 text-amber-400',
 }
 
-export default function Sidebar({ currentUser, currentOrg, activeModule, setActiveModule, isOpen, onClose }: SidebarProps) {
+export default function Sidebar({ currentUser, currentOrg, activeModule, setActiveModule, isOpen, onClose, onLogout }: SidebarProps) {
   const initials = currentUser?.full_name
     ?.split(' ')
     .map((n: string) => n[0])
@@ -218,8 +227,12 @@ export default function Sidebar({ currentUser, currentOrg, activeModule, setActi
             className="w-full py-[9px] rounded-[9px] text-white text-xs font-bold transition-all"
             style={{ background: 'var(--gradient)', boxShadow: '0 0 15px rgba(99,102,241,.25)' }}
             onClick={() => {
-              sessionStorage.clear()
-              window.location.href = '/'
+              if (onLogout) {
+                onLogout()
+              } else {
+                sessionStorage.clear()
+                window.location.href = '/login'
+              }
             }}
           >
             Cerrar Sesión
@@ -269,4 +282,13 @@ function UserIcon() {
 }
 function SettingsIcon() {
   return <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2"/></svg>
+}
+function TruckIcon() {
+  return <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full"><path d="M1 3h9v8H1zM10 6h3l2 3v2h-5V6z"/><circle cx="4" cy="13" r="1.5"/><circle cx="12" cy="13" r="1.5"/></svg>
+}
+function AutoIcon() {
+  return <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full"><path d="M8 1v3M8 12v3M1 8h3M12 8h3"/><circle cx="8" cy="8" r="3"/><path d="M3.5 3.5l2 2M10.5 10.5l2 2M3.5 12.5l2-2M10.5 5.5l2-2"/></svg>
+}
+function FunnelIcon() {
+  return <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full"><path d="M2 2h12l-4 6v5l-4-2V8L2 2z"/></svg>
 }

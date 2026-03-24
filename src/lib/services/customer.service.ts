@@ -1,4 +1,4 @@
-import { supabase, isSupabaseConfigured } from '../supabase'
+import { supabase, isSupabaseConfigured } from '@/lib/supabase'
 import { DBCustomer } from '@/types/database.types'
 
 const TABLE = 'corivacore_customers'

@@ -1,4 +1,4 @@
-import { supabase, isSupabaseConfigured } from '../supabase'
+import { supabase, isSupabaseConfigured } from '@/lib/supabase'
 import { DBInvoice, DBInvoiceCredit } from '@/types/database.types'
 
 const INV_TABLE    = 'corivacore_invoices'
