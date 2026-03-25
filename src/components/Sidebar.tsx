@@ -9,6 +9,7 @@ interface SidebarProps {
   setActiveModule: (m: string) => void
   isOpen: boolean
   onClose: () => void
+  onLogout?: () => void
 }
 
 const navSections = [
@@ -50,6 +51,19 @@ const navSections = [
     label: 'CRM',
     items: [
       { id: 'customers', icon: <UsersIcon />, label: 'Clientes', badge: null, badgeColor: null },
+      { id: 'leads', icon: <LeadsIcon />, label: 'Leads & Pipeline', badge: null, badgeColor: null },
+    ],
+  },
+  {
+    label: 'Compras',
+    items: [
+      { id: 'purchases', icon: <PurchasesIcon />, label: 'Compras', badge: null, badgeColor: null },
+    ],
+  },
+  {
+    label: 'Automatizaciones',
+    items: [
+      { id: 'automations', icon: <AutoIcon />, label: 'Automatizaciones', badge: 'IA', badgeColor: 'green' },
     ],
   },
   {
@@ -74,7 +88,7 @@ const badgeStyles: Record<string, string> = {
   amber: 'bg-amber-500/15 text-amber-400',
 }
 
-export default function Sidebar({ currentUser, currentOrg, activeModule, setActiveModule, isOpen, onClose }: SidebarProps) {
+export default function Sidebar({ currentUser, currentOrg, activeModule, setActiveModule, isOpen, onClose, onLogout }: SidebarProps) {
   const initials = currentUser?.full_name
     ?.split(' ')
     .map((n: string) => n[0])
@@ -218,8 +232,7 @@ export default function Sidebar({ currentUser, currentOrg, activeModule, setActi
             className="w-full py-[9px] rounded-[9px] text-white text-xs font-bold transition-all"
             style={{ background: 'var(--gradient)', boxShadow: '0 0 15px rgba(99,102,241,.25)' }}
             onClick={() => {
-              sessionStorage.clear()
-              window.location.href = '/'
+              if (onLogout) { onLogout() } else { sessionStorage.clear(); window.location.href = '/' }
             }}
           >
             Cerrar Sesión
@@ -269,4 +282,13 @@ function UserIcon() {
 }
 function SettingsIcon() {
   return <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2"/></svg>
+}
+function LeadsIcon() {
+  return <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full"><path d="M3 12V5l5-3 5 3v7l-5 3-5-3z"/><path d="M8 2v13M3 5l5 3 5-3"/></svg>
+}
+function PurchasesIcon() {
+  return <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full"><path d="M2 2h2l2 7h6l2-5H6"/><circle cx="7" cy="13" r="1"/><circle cx="12" cy="13" r="1"/></svg>
+}
+function AutoIcon() {
+  return <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full"><path d="M8 1v4M8 11v4M1 8h4M11 8h4"/><circle cx="8" cy="8" r="3"/></svg>
 }

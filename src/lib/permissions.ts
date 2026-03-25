@@ -1,6 +1,6 @@
 // Roles and Permissions System
 
-export type Role = 'ADMIN' | 'MANAGER' | 'VENDEDOR'
+export type Role = 'OWNER' | 'ADMIN' | 'MANAGER' | 'VENDEDOR' | 'VIEWER'
 
 export interface Permission {
   module: string
@@ -8,6 +8,23 @@ export interface Permission {
 }
 
 export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
+  OWNER: [
+    { module: 'dashboard', actions: ['view'] },
+    { module: 'asistente', actions: ['view'] },
+    { module: 'pos', actions: ['view', 'create', 'cancel'] },
+    { module: 'cash', actions: ['view', 'open', 'close'] },
+    { module: 'inventory', actions: ['view', 'create', 'edit', 'delete'] },
+    { module: 'billing', actions: ['view', 'create', 'cancel'] },
+    { module: 'store', actions: ['view', 'edit'] },
+    { module: 'catalog', actions: ['view', 'edit'] },
+    { module: 'communications', actions: ['view', 'create'] },
+    { module: 'reports', actions: ['view', 'export'] },
+    { module: 'customers', actions: ['view', 'create', 'edit', 'delete'] },
+    { module: 'leads', actions: ['view', 'create', 'edit', 'delete'] },
+    { module: 'purchases', actions: ['view', 'create', 'edit', 'delete'] },
+    { module: 'settings', actions: ['view', 'edit'] },
+    { module: 'users', actions: ['view', 'create', 'edit', 'delete'] },
+  ],
   ADMIN: [
     { module: 'dashboard', actions: ['view'] },
     { module: 'asistente', actions: ['view'] },
@@ -20,6 +37,9 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     { module: 'communications', actions: ['view', 'create'] },
     { module: 'reports', actions: ['view', 'export'] },
     { module: 'customers', actions: ['view', 'create', 'edit', 'delete'] },
+    { module: 'leads', actions: ['view', 'create', 'edit', 'delete'] },
+    { module: 'purchases', actions: ['view', 'create', 'edit', 'delete'] },
+    { module: 'automations', actions: ['view', 'create', 'edit', 'delete'] },
     { module: 'settings', actions: ['view', 'edit'] },
     { module: 'users', actions: ['view', 'create', 'edit', 'delete'] }
   ],
@@ -34,13 +54,20 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     { module: 'catalog', actions: ['view'] },
     { module: 'communications', actions: ['view', 'create'] },
     { module: 'reports', actions: ['view'] },
-    { module: 'customers', actions: ['view', 'create', 'edit'] }
+    { module: 'customers', actions: ['view', 'create', 'edit'] },
+    { module: 'leads', actions: ['view', 'create', 'edit'] },
+    { module: 'purchases', actions: ['view', 'create'] },
+    { module: 'automations', actions: ['view'] }
   ],
   VENDEDOR: [
     { module: 'dashboard', actions: ['view'] },
     { module: 'pos', actions: ['view', 'create'] },
-    { module: 'customers', actions: ['view', 'create'] }
-  ]
+    { module: 'customers', actions: ['view', 'create'] },
+  ],
+  VIEWER: [
+    { module: 'dashboard', actions: ['view'] },
+    { module: 'reports', actions: ['view'] },
+  ],
 }
 
 export const hasPermission = (role: Role, module: string, action: string): boolean => {

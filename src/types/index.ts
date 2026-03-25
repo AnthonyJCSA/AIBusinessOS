@@ -32,7 +32,7 @@ export interface User {
   username: string
   email: string
   full_name: string
-  role: 'ADMIN' | 'MANAGER' | 'VENDEDOR'
+  role: 'OWNER' | 'ADMIN' | 'MANAGER' | 'VENDEDOR' | 'VIEWER'
   is_active: boolean
   last_login?: string
   created_at: string
