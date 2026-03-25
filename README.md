@@ -1,24 +1,30 @@
-# Coriva Core — Sistema POS Multi-Tenant SaaS
+# Coriva OS — AI Business OS
 
-Plataforma de punto de venta para cualquier tipo de negocio: bodegas, boticas, tiendas de ropa, barberías, restaurantes y más.
+Sistema operativo para negocios: POS + CRM + Inventario + IA, construido como SaaS multi-tenant para Perú y USA.
 
-## Stack Tecnológico
+## Stack
 
-- **Frontend**: Next.js 14 + TypeScript + Tailwind CSS
-- **Base de Datos**: Supabase (PostgreSQL)
-- **Deploy**: Vercel
-- **Analytics**: Google Analytics 4 + Google Tag Manager
-- **IA**: OpenAI API (asistente y predicciones)
+| Capa | Tecnología |
+|---|---|
+| Frontend | Next.js 14 · TypeScript · Tailwind CSS |
+| Estado | Zustand (session, cart, notifications) |
+| Base de datos | Supabase (PostgreSQL + RLS) |
+| IA | OpenAI GPT-4o-mini (server-side) |
+| Deploy | Vercel |
+| Analytics | Google Analytics 4 + Google Tag Manager |
 
 ## Instalación
 
 ```bash
-git clone https://github.com/coriva/coriva-core.git
-cd coriva-core
+git clone https://github.com/AnthonyJCSA/AIBusinessOS.git
+cd AIBusinessOS
 npm install
+cp .env.example .env.local
+npm run dev
+# http://localhost:3000
 ```
 
-Copia `.env.example` a `.env.local` y completa las variables:
+## Variables de entorno
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
@@ -28,12 +34,7 @@ NEXT_PUBLIC_GTM_ID=GTM-XXXXXXX
 NEXT_PUBLIC_GA4_ID=G-XXXXXXXXXX
 ```
 
-```bash
-npm run dev
-# http://localhost:3000
-```
-
-## Arquitectura Multi-Tenant
+## Arquitectura multi-tenant
 
 ```
 corivacore_organizations
@@ -41,116 +42,159 @@ corivacore_organizations
   ├── corivacore_products
   ├── corivacore_sales
   │   └── corivacore_sale_items
-  └── corivacore_cash_movements
+  ├── corivacore_cash_movements
+  ├── corivacore_cash_sessions
+  ├── corivacore_inventory_movements
+  ├── corivacore_customers
+  ├── corivacore_leads
+  ├── corivacore_pipeline_deals
+  ├── corivacore_suppliers
+  ├── corivacore_purchases
+  │   └── corivacore_purchase_items
+  └── corivacore_automations
 ```
 
-Cada organización tiene aislamiento total. Los servicios siempre filtran por `org_id`.
+Cada organización tiene aislamiento total via RLS. Todos los servicios filtran por `org_id`.
+
+## Módulos del dashboard (`/src/app/`)
+
+| Módulo | Descripción |
+|---|---|
+| `DashboardModule` | KPIs reales desde Supabase, gráfico 7 días, top productos, pipeline |
+| `POSModule` | Punto de venta con atajos F1/F2/ESC, carrito Zustand, descuentos |
+| `CashRegisterModule` | Apertura/cierre de caja con reconciliación |
+| `InventoryModule` | CRUD productos, ajuste de stock con motivo |
+| `PurchasesModule` | Órdenes de compra, proveedores, recepción con auto-stock |
+| `CustomersModule` | CRM con perfil, historial, segmentación automática |
+| `LeadsModule` | Pipeline Kanban drag & drop, 6 etapas |
+| `ReportsModule` | Ventas por período, top productos, métodos de pago |
+| `AIAssistantModule` | Chat GPT-4o-mini con contexto real del negocio + insights proactivos |
+| `AutomationsModule` | Reglas de automatización por templates |
+| `UsersModule` | CRUD usuarios con Supabase, 5 roles, reset password |
+| `SettingsModule` | Configuración del negocio, tema, impuestos, IA |
+| `BillingModule` | Facturación electrónica SUNAT |
+| `CommunicationsModule` | Email & WhatsApp |
+| `VirtualStoreModule` | Tienda online por slug |
+| `CatalogModule` | Catálogo digital compartible |
 
 ## Servicios (`/src/lib/services/`)
 
 | Servicio | Descripción |
 |---|---|
-| `authService` | Login, creación de usuarios, obtener organización |
-| `productService` | CRUD productos, control de stock, migración desde localStorage |
-| `saleService` | Crear ventas, items, actualizar stock vía RPC, ventas del día |
-| `cashService` | Sesiones de caja, movimientos |
+| `authService` | Login con tabla `corivacore_users` |
+| `productService` | CRUD productos, control de stock |
+| `saleService` | Crear ventas, items, RPC de stock |
+| `cashService` | Movimientos de caja legacy |
+| `cashSessionService` | Sesiones formales open/close/reconciliation |
 | `customerService` | CRUD clientes |
-| `organizationService` | Crear/actualizar organizaciones, buscar por slug |
-| `syncService` | Sincronización localStorage ↔ Supabase (migración) |
+| `inventoryService` | Movimientos, ajuste de stock via RPC |
+| `purchaseService` | Suppliers CRUD + Purchases + receive RPC |
+| `userService` | CRUD usuarios en Supabase |
+| `organizationService` | Crear/actualizar orgs, buscar por slug |
+| `invoiceService` | Facturación electrónica |
+| `syncService` | Migración localStorage → Supabase |
 
-## Módulos del Sistema (`/src/app/`)
+## Estado global (`/src/state/`)
 
-- **POSModule** — Punto de venta con atajos de teclado (F1, F2, ESC, ENTER)
-- **InventoryModule** — CRUD productos, ajuste de stock, importación CSV/Excel
-- **CashRegisterModule** — Apertura/cierre de caja, seguimiento en tiempo real
-- **ReportsModule** — Ventas por período, anulaciones, exportación Excel
-- **CustomersModule** — Base de clientes, historial de compras
-- **UsersModule** — CRUD usuarios, roles y permisos
-- **SettingsModule** — Configuración del negocio, logo, impuestos, colores
-- **AIAssistantModule** — Asistente IA con OpenAI
-- **NotificationsPanel** — Alertas de stock bajo, resumen de ventas
+| Store | Descripción |
+|---|---|
+| `session.store.ts` | Usuario y org autenticados, persiste en localStorage |
+| `cart.store.ts` | Carrito POS con descuentos por ítem y global |
+| `notifications.store.ts` | Notificaciones del sistema, máx. 50 |
 
-## Roles y Permisos
+## Roles y permisos
 
 | Rol | Acceso |
 |---|---|
-| `ADMIN` | Todo el sistema |
-| `MANAGER` | POS, Caja, Inventario, Reportes, Clientes |
+| `OWNER` | Todo el sistema + billing |
+| `ADMIN` | Todo excepto billing admin |
+| `MANAGER` | POS, Caja, Inventario, Reportes, Clientes, Leads, Compras |
 | `VENDEDOR` | Solo POS y registro de clientes |
+| `VIEWER` | Solo Dashboard y Reportes (lectura) |
 
-## Tipos de Negocio Soportados
+## Planes y feature flags
 
-`pharmacy` · `hardware` · `clothing` · `barbershop` · `restaurant` · `retail` · `other`
+| Plan | Módulos incluidos |
+|---|---|
+| `starter` | POS, Inventario, Caja, Clientes, Reportes |
+| `pro` | + Leads, Compras, Comunicaciones, Asistente IA |
+| `premium` | + Facturación, Tienda Virtual, Catálogo, Automatizaciones |
 
-## Landing Pages
+## Inteligencia Artificial
+
+### Asistente conversacional (`/api/ai/chat`)
+- Modelo: `gpt-4o-mini` via OpenAI API (server-side)
+- `buildBusinessContext(orgId)` — fetches datos reales de Supabase
+- `buildSystemPrompt(ctx)` — genera prompt con contexto del negocio
+- Panel de insights proactivos: stock crítico, leads sin contactar, ventas del día
+
+### IA predictiva de stock (`/src/lib/ai-predictions.ts`)
+- Lógica local, analiza historial de ventas 30 días
+- Niveles: `critical` (≤3 días), `warning` (≤7 días), `ok`
+
+## Migraciones SQL (`/database/migrations/`)
+
+| Archivo | Contenido |
+|---|---|
+| `001_inventory_cash_rls.sql` | inventory_movements, cash_sessions legacy, RLS real, RPCs de stock |
+| `002_purchases_suppliers.sql` | suppliers, purchases, purchase_items, RPC receive_purchase |
+| `003_customers_leads_pipeline.sql` | métricas customers, leads, pipeline_stages, pipeline_deals |
+| `004_purchase_number_rls.sql` | RPC generate_purchase_number, RLS suppliers/purchases, triggers |
+| `005_cash_sessions.sql` | cash_sessions formal con RLS |
+| `006_automations.sql` | automations table con RLS + trigger updated_at |
+
+> Ejecutar en orden en Supabase SQL Editor.
+
+## RPCs de Supabase
+
+| Función | Descripción |
+|---|---|
+| `generate_sale_number(p_org_id)` | Número correlativo de venta |
+| `generate_purchase_number(p_org_id)` | Número correlativo de compra |
+| `decrement_product_stock(p_product_id, p_quantity)` | Decrementa stock atómicamente |
+| `adjust_product_stock(p_org_id, p_product_id, p_new_stock, p_reason, p_user_id)` | Ajuste con log |
+| `receive_purchase(p_purchase_id, p_received_by)` | Recibe OC y actualiza stock |
+| `get_customer_stats(p_customer_id, p_org_id)` | Estadísticas de compras del cliente |
+| `get_user_org_id()` | Retorna org_id del usuario autenticado (usado en RLS) |
+
+## Landing pages
 
 - `/` — Home principal
 - `/bodega` — Bodegas y minimarkets
 - `/botica` — Farmacias y boticas
-- `/tienda` — Tiendas de ropa
-- `/precios` — Planes (Starter / Pro / Premium)
+- `/precios` — Planes Starter / Pro / Premium
 - `/comparacion` — Comparativa con competidores
-- `/casos-de-uso` — Por tipo de negocio
+- `/casos-de-uso/[tipo]` — Por tipo de negocio
 - `/demo` — Demo interactivo
-- `/registro` — Onboarding wizard (3 pasos)
-
-## Variables de Entorno
-
-| Variable | Descripción |
-|---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` | URL del proyecto Supabase |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Clave anon de Supabase |
-| `OPENAI_API_KEY` | API key de OpenAI (server-side) |
-| `NEXT_PUBLIC_GTM_ID` | ID de Google Tag Manager |
-| `NEXT_PUBLIC_GA4_ID` | ID de Google Analytics 4 |
+- `/registro` — Onboarding wizard
+- `/tienda/[slug]` — Tienda virtual pública
 
 ## Deploy
 
-El proyecto está desplegado en Vercel con framework preset `nextjs`. Las variables de entorno se configuran directamente en el dashboard de Vercel.
-
 ```bash
-npm run build   # build de producción
+npm run build   # build de producción (debe salir exit 0)
 npm run start   # servidor de producción
+vercel deploy   # deploy a Vercel
 ```
 
-## Base de Datos
+Variables de entorno configuradas en Vercel dashboard.
 
-Los schemas SQL están en `/database/`. El schema principal es `corivacore-mvp-schema.sql`.
+## Tipos de negocio soportados
 
-Funciones RPC usadas:
-- `generate_sale_number(p_org_id)` — Genera número correlativo de venta
-- `decrement_product_stock(p_product_id, p_quantity)` — Decrementa stock atómicamente
-
-## Inteligencia Artificial
-
-El sistema tiene dos capas de IA:
-
-### 1. Asistente Conversacional (`AIAssistantModule` + `/api/ai/chat`)
-
-- Modelo: `gpt-4o-mini` vía OpenAI API (server-side)
-- El frontend envía el historial de mensajes + un contexto del negocio al endpoint `POST /api/ai/chat`
-- El contexto incluye: nombre del negocio, tipo, moneda, total de productos, productos en stock crítico, ventas del día e ingresos totales
-- El system prompt instruye al asistente a responder en español, de forma concisa y accionable, usando los datos reales del negocio
-- Preguntas rápidas predefinidas: producto más vendido, reabastecimiento urgente, mensaje para clientes inactivos, predicción de ventas, etc.
-
-### 2. IA Predictiva de Stock (`StockPredictionAI` en `/src/lib/ai-predictions.ts`)
-
-- Lógica local (sin API externa), analiza el historial de ventas de los últimos 30 días
-- Calcula el promedio diario de ventas por producto y predice cuándo se agotará el stock
-- Niveles de alerta: `critical` (≤3 días), `warning` (≤7 días), `ok`
-- Genera recomendaciones de compra: cantidad sugerida para cubrir 30 días de stock
-- Usada por `NotificationsPanel` para mostrar alertas proactivas
+`pharmacy` · `hardware` · `clothing` · `barbershop` · `restaurant` · `retail` · `other`
 
 ## Roadmap
 
-- [ ] Autenticación con hash de passwords (bcrypt)
-- [ ] Billing y planes (Stripe)
+- [ ] Autenticación Supabase Auth (migrar de tabla custom)
+- [ ] Billing con Stripe
 - [ ] Multi-sucursal
-- [ ] Códigos de barras
-- [ ] App móvil
-- [ ] API pública
+- [ ] Códigos de barras (ZXing)
+- [ ] App móvil (React Native / Expo)
+- [ ] API pública con API keys
+- [ ] Webhooks para integraciones
 
 ## Soporte
 
 - Email: soporte@corivape.com
 - WhatsApp: +51 913 916 967
+- Repositorio: https://github.com/AnthonyJCSA/AIBusinessOS

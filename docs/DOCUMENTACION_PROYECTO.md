@@ -1,237 +1,185 @@
-# 📋 DOCUMENTACIÓN DEL PROYECTO - Coriva Core
+# Documentación del Proyecto — Coriva OS
 
-## 🎯 Resumen Ejecutivo
+## Resumen ejecutivo
 
-**Coriva Core** es un sistema POS (Punto de Venta) multi-tenant SaaS diseñado para adaptarse a cualquier tipo de negocio: farmacias, ferreterías, tiendas de ropa, barberías, restaurantes y más.
+**Coriva OS** es un sistema operativo para negocios: POS + CRM + Inventario + IA, construido como SaaS multi-tenant para el mercado peruano y latinoamericano.
 
-### Objetivos del Proyecto
-- ✅ **Sistema Multi-Tenant**: Múltiples negocios en una sola plataforma
-- ✅ **Adaptabilidad**: Configuración personalizada por tipo de negocio
-- ✅ **Velocidad**: Interfaz optimizada con atajos de teclado
-- ✅ **Control de inventario**: Gestión automática de stock
-- ✅ **Escalabilidad**: Arquitectura preparada para crecer
+**Estado actual**: Producción — 7 sprints completados, build limpio, listo para deploy.
 
-## 🏢 Modelo de Negocio
-
-### SaaS Multi-Tenant
-Coriva Core es una plataforma donde cada negocio (tenant) tiene:
-- **Datos aislados**: Información completamente separada
-- **Configuración propia**: Personalización según tipo de negocio
-- **Usuarios independientes**: Gestión de equipo por organización
-- **Branding personalizado**: Logo, colores, comprobantes
-
-### Tipos de Negocio Soportados
-
-#### 💊 Farmacias
-- Control de medicamentos con principios activos
-- Gestión de genéricos vs. marcas
-- Alertas de vencimiento
-- Recetas médicas
-
-#### 🔧 Ferreterías
-- Inventario por categorías (herramientas, materiales)
-- Control de medidas y presentaciones
-- Gestión de proveedores
-
-#### 👕 Tiendas de Ropa
-- Inventario por tallas y colores
-- Temporadas y colecciones
-- Promociones y descuentos
-
-#### ✂️ Barberías/Peluquerías
-- Servicios y productos
-- Historial de clientes
-- Agenda de citas (futuro)
-
-#### 🍔 Restaurantes
-- Menú y comandas
-- Gestión de mesas
-- Cocina y delivery
-
-## 🏗️ Arquitectura Técnica
-
-### Stack Tecnológico
-
-#### Frontend
-- **Framework**: Next.js 14 (React)
-- **Lenguaje**: TypeScript
-- **Estilos**: Tailwind CSS
-- **Estado**: React Hooks
-
-#### Base de Datos (Futuro)
-- **Opción 1**: Supabase (PostgreSQL)
-- **Opción 2**: MongoDB Atlas
-- **Opción 3**: AWS DynamoDB
-
-#### Infraestructura
-- **Demo**: Lovable
-- **Producción**: Vercel / Netlify
-- **Storage**: AWS S3 / Cloudinary
-
-### Arquitectura Multi-Tenant
-
-```
-┌─────────────────────────────────────┐
-│      Coriva Core Platform           │
-└─────────────────────────────────────┘
-                 │
-    ┌────────────┼────────────┐
-    │            │            │
-┌───▼───┐   ┌───▼───┐   ┌───▼───┐
-│Tenant1│   │Tenant2│   │Tenant3│
-│Farmacia   │Ferret.│   │Barbería
-└───┬───┘   └───┬───┘   └───┬───┘
-    │           │           │
-┌───▼───────────▼───────────▼───┐
-│  Users, Products, Sales, etc  │
-└───────────────────────────────┘
-```
-
-### Modelo de Datos
-
-#### Entidades Principales
-1. **Organizations**: Negocios/Tenants
-2. **Users**: Usuarios por organización
-3. **Products**: Productos/Servicios
-4. **Customers**: Clientes finales
-5. **Sales**: Ventas y transacciones
-6. **Inventory**: Movimientos de stock
-
-#### Relaciones
-```
-Organization (1) ──→ (N) Users
-Organization (1) ──→ (N) Products
-Organization (1) ──→ (N) Customers
-Organization (1) ──→ (N) Sales
-Product (1) ──→ (N) Sale_Items
-Sale (1) ──→ (N) Sale_Items
-```
-
-## 🚀 Funcionalidades
-
-### ✅ Versión Demo (Actual)
-- [x] Sistema multi-tenant básico
-- [x] POS completo con teclado
-- [x] Gestión de productos genéricos
-- [x] Control de stock automático
-- [x] Emisión de comprobantes
-- [x] Búsqueda inteligente
-- [x] Múltiples métodos de pago
-- [x] Gestión de usuarios por negocio
-
-### 🚧 Roadmap
-
-#### Fase 1: Base de Datos Real (Q1 2024)
-- [ ] Integración con Supabase
-- [ ] Autenticación OAuth
-- [ ] Persistencia de datos
-- [ ] Backup automático
-
-#### Fase 2: Funcionalidades Avanzadas (Q2 2024)
-- [ ] Módulo de inventario completo
-- [ ] Reportes y analytics avanzados
-- [ ] Gestión de proveedores
-- [ ] Códigos de barras
-- [ ] Exportación de datos
-
-#### Fase 3: Integraciones (Q3 2024)
-- [ ] WhatsApp Business API
-- [ ] Email marketing
-- [ ] Facturación electrónica
-- [ ] Pasarelas de pago
-
-#### Fase 4: Mobile & API (Q4 2024)
-- [ ] App móvil nativa
-- [ ] PWA completa
-- [ ] API pública
-- [ ] Webhooks
-
-## 💰 Modelo de Precios (Futuro)
-
-### Plan Gratuito
-- 1 usuario
-- 100 productos
-- 500 ventas/mes
-- Soporte por email
-
-### Plan Básico - $29/mes
-- 3 usuarios
-- 1,000 productos
-- Ventas ilimitadas
-- Soporte prioritario
-
-### Plan Pro - $79/mes
-- 10 usuarios
-- Productos ilimitados
-- Reportes avanzados
-- API access
-- Soporte 24/7
-
-### Plan Enterprise - Custom
-- Usuarios ilimitados
-- Multi-sucursal
-- Personalización completa
-- Soporte dedicado
-
-## 🔒 Seguridad
-
-### Medidas Implementadas
-- **Aislamiento de datos**: Cada tenant completamente separado
-- **Autenticación**: Sistema de login seguro
-- **Validaciones**: Control de acceso por roles
-- **Auditoría**: Registro de todas las acciones
-
-### Compliance (Futuro)
-- GDPR compliance
-- SOC 2 Type II
-- ISO 27001
-- PCI DSS (para pagos)
-
-## 📊 Métricas de Éxito
-
-### KPIs Técnicos
-- Tiempo de carga: < 2 segundos
-- Disponibilidad: 99.9%
-- Tiempo de respuesta: < 500ms
-- Errores: < 0.1%
-
-### KPIs de Negocio
-- Negocios activos
-- Ventas procesadas
-- Usuarios activos diarios
-- Tasa de retención
-
-## 🎓 Casos de Uso
-
-### Caso 1: Farmacia Pequeña
-**Problema**: Control manual de inventario, pérdidas por vencimiento
-**Solución**: Coriva Core con alertas automáticas y control de lotes
-**Resultado**: 95% reducción en pérdidas, 40% más rápido en ventas
-
-### Caso 2: Ferretería Mediana
-**Problema**: Múltiples categorías, difícil búsqueda de productos
-**Solución**: Sistema de categorización y búsqueda inteligente
-**Resultado**: 60% reducción en tiempo de búsqueda
-
-### Caso 3: Cadena de Barberías
-**Problema**: Gestión de múltiples locales, reportes consolidados
-**Solución**: Multi-sucursal con reportes centralizados
-**Resultado**: Visibilidad completa, decisiones basadas en datos
-
-## 📞 Contacto y Soporte
-
-### Información
-- **Email**: soporte@corivape.com
-- **Web**: https://coriva.com
-- **Docs**: https://docs.coriva.com
-
-### Recursos
-- GitHub: https://github.com/coriva/coriva-core
-- Discord: https://discord.gg/coriva
-- YouTube: Tutoriales y demos
+**Repositorio**: https://github.com/AnthonyJCSA/AIBusinessOS
 
 ---
 
-**📅 Última actualización**: Enero 2024  
-**📋 Versión**: 1.0.0 (Demo)  
-**✅ Estado**: En desarrollo activo
+## Modelo de negocio
+
+### SaaS multi-tenant
+Cada negocio (tenant) tiene datos completamente aislados via RLS en Supabase. Un solo deployment sirve a todos los clientes.
+
+### Planes
+
+| Plan | Precio | Módulos |
+|---|---|---|
+| Starter | $19/mes | POS, Inventario, Caja, Clientes, Reportes |
+| Pro | $49/mes | + Leads, Compras, Comunicaciones, Asistente IA |
+| Premium | $99/mes | + Facturación SUNAT, Tienda Virtual, Automatizaciones |
+
+### Tipos de negocio soportados
+`pharmacy` · `hardware` · `clothing` · `barbershop` · `restaurant` · `retail` · `other`
+
+---
+
+## Funcionalidades implementadas
+
+### Operaciones (Core)
+- **POS** — Punto de venta con atajos de teclado (F1 limpiar, F2 procesar), carrito Zustand con descuentos por ítem y global, múltiples métodos de pago, impresión de comprobante
+- **Caja** — Apertura/cierre formal con reconciliación (esperado vs. contado), historial de sesiones, registro de gastos
+- **Inventario** — CRUD productos, ajuste de stock con motivo (reabastecimiento, merma, robo, corrección), log de movimientos
+- **Compras** — Órdenes de compra con número correlativo (OC-YY-0001), gestión de proveedores, recepción automática actualiza stock via RPC
+
+### CRM & Crecimiento
+- **Clientes** — Perfil completo, historial de compras, segmentación automática (nuevo/regular/frecuente/VIP/inactivo), métricas (ticket promedio, días desde última compra), botón WhatsApp directo
+- **Leads** — Pipeline Kanban con 6 etapas (Nuevo → Contactado → Calificado → Propuesta → Ganado → Perdido), drag & drop HTML5 nativo, link directo a WhatsApp
+
+### Análisis
+- **Dashboard** — KPIs reales desde Supabase: ventas hoy, gráfico 7 días con datos reales, top productos por ventas, leads activos, compras pendientes
+- **Reportes** — Ventas por período, top productos, desglose por método de pago, exportación
+
+### Inteligencia Artificial
+- **Asistente IA** — Chat GPT-4o-mini con contexto real del negocio (ventas hoy, stock crítico, tipo de negocio), panel de insights proactivos, 6 preguntas rápidas predefinidas
+- **Insights proactivos** — Detecta automáticamente: productos sin stock, stock bajo, leads sin contactar, ventas del día
+- **Predicción de stock** — Lógica local que analiza historial 30 días y predice agotamiento
+
+### Sistema
+- **Usuarios** — CRUD completo en Supabase, 5 roles (OWNER/ADMIN/MANAGER/VENDEDOR/VIEWER), toggle activo/inactivo, reset de contraseña
+- **Automatizaciones** — Templates: alerta stock crítico, bienvenida cliente nuevo, resumen diario, reactivar clientes inactivos
+- **Configuración** — Nombre, tipo de negocio, RUC, moneda, IGV, pie de comprobante, tema (dark/light), color del sistema, toggles de IA
+- **Notificaciones** — Campana en Topbar conectada a Zustand store, severidades (info/warning/critical), marcar como leídas
+
+---
+
+## Arquitectura técnica
+
+### Stack
+- **Frontend**: Next.js 14 App Router + TypeScript + Tailwind CSS
+- **Estado**: Zustand (session, cart, notifications) con persist middleware
+- **Base de datos**: Supabase (PostgreSQL + RLS)
+- **IA**: OpenAI GPT-4o-mini (server-side via `/api/ai/chat`)
+- **Deploy**: Vercel
+- **Analytics**: Google Analytics 4 + Google Tag Manager
+
+### Patrones clave
+- **Multi-tenant via RLS**: `get_user_org_id()` filtra automáticamente por organización
+- **Services layer**: 12 servicios Supabase como objetos planos con métodos async
+- **Feature flags**: Plan-based gating via `useFeatureFlag(feature)`
+- **RBAC**: `canAccessModule(role, module)` en Sidebar, `usePermission(module, action)` en componentes
+- **Demo mode**: `isSupabaseConfigured()` — si no hay credenciales, los servicios retornan arrays vacíos sin errores
+
+### Base de datos — tablas principales
+
+| Tabla | Descripción |
+|---|---|
+| `corivacore_organizations` | Tenants del sistema |
+| `corivacore_users` | Usuarios por organización |
+| `corivacore_products` | Catálogo de productos |
+| `corivacore_sales` + `sale_items` | Ventas e ítems |
+| `corivacore_cash_movements` | Movimientos de caja legacy |
+| `corivacore_cash_sessions` | Sesiones formales de caja |
+| `corivacore_inventory_movements` | Log de movimientos de stock |
+| `corivacore_customers` | Base de clientes |
+| `corivacore_leads` | Pipeline de prospectos |
+| `corivacore_pipeline_stages` + `pipeline_deals` | CRM pipeline |
+| `corivacore_suppliers` | Proveedores |
+| `corivacore_purchases` + `purchase_items` | Órdenes de compra |
+| `corivacore_automations` | Reglas de automatización |
+
+---
+
+## Seguridad
+
+### Autenticación actual
+- Tabla `corivacore_users` con `password_hash` (comparación directa — deuda técnica)
+- Sesión persistida en Zustand + localStorage (`coriva-session`)
+- Middleware Next.js verifica cookie en rutas `/dashboard/*`
+
+### Deuda técnica de seguridad
+- Passwords en texto plano → migrar a bcrypt o Supabase Auth
+- Sin rate limiting en login
+- Sin 2FA
+
+### RLS (Row Level Security)
+Todas las tablas tienen RLS habilitado. La función `get_user_org_id()` vincula `auth.uid()` con `corivacore_users.org_id`. Actualmente las migraciones 001-006 deben ejecutarse para activar RLS real (sin ellas, las políticas son permisivas).
+
+---
+
+## Migraciones pendientes
+
+Ejecutar en orden en Supabase SQL Editor:
+
+```
+database/migrations/001_inventory_cash_rls.sql
+database/migrations/002_purchases_suppliers.sql
+database/migrations/003_customers_leads_pipeline.sql
+database/migrations/004_purchase_number_rls.sql
+database/migrations/005_cash_sessions.sql
+database/migrations/006_automations.sql
+```
+
+---
+
+## Deploy
+
+### Vercel (producción)
+1. Conectar repositorio GitHub en Vercel
+2. Framework preset: `Next.js`
+3. Configurar variables de entorno en Vercel dashboard
+4. Deploy automático en cada push a `main`
+
+### Variables requeridas en Vercel
+```
+NEXT_PUBLIC_SUPABASE_URL
+NEXT_PUBLIC_SUPABASE_ANON_KEY
+OPENAI_API_KEY
+NEXT_PUBLIC_GTM_ID
+NEXT_PUBLIC_GA4_ID
+```
+
+---
+
+## Sprints completados
+
+| Sprint | Contenido | Estado |
+|---|---|---|
+| Sprint 1 | Supabase client/server, middleware auth, Zustand stores, RBAC, feature flags | ✅ |
+| Sprint 2 | POS refactor con hooks, CartStore, DashboardShell, AI context builder | ✅ |
+| Sprint 3 | Cash sessions, Purchases+Suppliers, Customers CRM, Reports reales, Settings | ✅ |
+| Sprint 4 | PurchasesModule UI, LeadsModule Kanban, NotificationsPanel Zustand, Topbar | ✅ |
+| Sprint 5 | DashboardModule KPIs reales, UsersModule Supabase, AIAssistant insights | ✅ |
+| Sprint 6 | API IA con contexto real, todos los servicios en disco, middleware, shared hooks | ✅ |
+| Sprint 7 | StockAdjustModal, cart.store, DashboardShell, AutomationsModule, migrations 005-006 | ✅ |
+
+---
+
+## Roadmap
+
+### Próximo (Sprint 8)
+- [ ] Migrar autenticación a Supabase Auth (bcrypt + JWT)
+- [ ] Billing con Stripe (planes, suscripciones, webhooks)
+- [ ] Onboarding wizard conectado a Supabase
+
+### Futuro
+- [ ] Multi-sucursal
+- [ ] Códigos de barras (ZXing)
+- [ ] App móvil (React Native / Expo)
+- [ ] API pública con API keys
+- [ ] Webhooks para integraciones externas
+- [ ] Facturación electrónica SUNAT real
+
+---
+
+## Contacto
+
+- Email: soporte@corivape.com
+- WhatsApp: +51 913 916 967
+- Repositorio: https://github.com/AnthonyJCSA/AIBusinessOS
+
+**Última actualización**: Sprint 7 completado — build limpio ✅

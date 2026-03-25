@@ -1,346 +1,338 @@
-# 📋 DOCUMENTACIÓN TÉCNICA - FarmaZi POS
+# Documentación Técnica — Coriva OS
 
-## 🏗️ Arquitectura del Sistema
+## Stack tecnológico
 
-### Stack Tecnológico
-- **Frontend**: Next.js 14 + TypeScript + Tailwind CSS
-- **Base de Datos**: AWS DynamoDB
-- **Autenticación**: AWS Cognito Identity Pool
-- **Despliegue**: AWS S3 + CloudFront
-- **Tiempo Real**: DynamoDB Streams (futuro)
+| Tecnología | Versión | Uso |
+|---|---|---|
+| Next.js | 14.0.4 | Framework frontend + API routes |
+| TypeScript | 5.x | Type safety en todo el proyecto |
+| Tailwind CSS | 3.x | Layout y spacing (colores via CSS vars) |
+| Zustand | 4.x | Estado global (session, cart, notifications) |
+| @supabase/supabase-js | 2.x | Cliente Supabase |
+| OpenAI | API REST | GPT-4o-mini server-side |
+| Vercel | — | Deploy y hosting |
 
-### Estructura del Proyecto
-```
-farmazi/
-├── src/
-│   ├── app/
-│   │   ├── page.tsx              # Componente principal POS
-│   │   ├── InventoryModule.tsx   # Módulo de inventario
-│   │   ├── ReportsModule.tsx     # Módulo de reportes
-│   │   └── globals.css           # Estilos globales
-│   ├── lib/
-│   │   ├── bellafarma-dynamo.ts  # Servicios DynamoDB
-│   │   ├── api-client.ts         # Cliente API (fallback)
-│   │   └── aws-dynamodb.ts       # Servicio local (fallback)
-│   └── types/
-├── docs/                         # Documentación
-└── out/                         # Build estático
+---
+
+## Configuración del proyecto
+
+### Variables de entorno (`.env.local`)
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=xxxx
+OPENAI_API_KEY=xxxx                    # Solo server-side
+NEXT_PUBLIC_GTM_ID=GTM-XXXXXXX
+NEXT_PUBLIC_GA4_ID=G-XXXXXXXXXX
 ```
 
-## 🗄️ Base de Datos - DynamoDB
+### `tsconfig.json`
+- Path alias `@/*` → `./src/*`
+- Excluye: `coriva-tienda-nextjs`, `database`, `docs`, `email-templates`
 
-### Tablas Principales
+### `next.config.js`
+- webpack watchOptions ignora `coriva-tienda-nextjs/`
 
-#### 1. bellafarma-products
+---
+
+## Cliente Supabase
+
+### `src/lib/supabase.ts`
 ```typescript
-{
-  id: string,                    // PK: prod_timestamp
-  code: string,                  // Código único del producto
-  name: string,                  // Nombre del producto
-  active_ingredient?: string,    // Principio activo
-  brand?: string,               // Marca
-  is_generic: boolean,          // Es genérico
-  price: number,                // Precio de venta
-  cost?: number,                // Costo
-  stock: number,                // Stock actual
-  min_stock: number,            // Stock mínimo
-  category?: string,            // Categoría
-  laboratory?: string,          // Laboratorio
-  active: boolean,              // Activo/Inactivo
-  created_at: string,           // Fecha creación
-  updated_at: string,           // Fecha actualización
-  deleted_at?: string,          // Fecha eliminación
-  deleted_by?: string           // Usuario que eliminó
+export const supabase = createClient(
+  supabaseUrl || 'https://placeholder.supabase.co',
+  supabaseAnonKey || 'placeholder-key'
+)
+export const isSupabaseConfigured = () => !!supabaseUrl && !!supabaseAnonKey
+```
+
+El cliente siempre se crea (con URLs placeholder si no hay config). `isSupabaseConfigured()` se usa en todos los servicios para retornar datos vacíos en modo demo.
+
+### `src/lib/supabase/index.ts`
+Re-export para compatibilidad con imports `@/lib/supabase`.
+
+---
+
+## Servicios Supabase (`/src/lib/services/`)
+
+Todos los servicios siguen el mismo patrón:
+```typescript
+export const xService = {
+  async method(orgId: string, ...): Promise<T> {
+    if (!isSupabaseConfigured()) return [] // o null o throw
+    const { data, error } = await supabase.from('table')...
+    if (error) throw error
+    return data as T
+  }
 }
 ```
 
-#### 2. bellafarma-sales
+### `auth.service.ts`
+- `login(username, password)` — query a `corivacore_users` JOIN `corivacore_organizations`
+- `createUser(userData)` — INSERT en `corivacore_users`
+- `getOrganization(orgId)` — SELECT `corivacore_organizations`
+
+> ⚠️ Passwords comparados en texto plano. Deuda técnica: migrar a bcrypt o Supabase Auth.
+
+### `product.service.ts`
+- `getAll(orgId)`, `create(orgId, data)`, `update(id, data)`, `delete(id)`
+- `getByCode(orgId, code)`, `getLowStock(orgId)`
+
+### `sale.service.ts`
+- `create(orgId, saleData)` — usa RPC `generate_sale_number` + `decrement_product_stock`
+- `getAll(orgId)`, `getToday(orgId)`, `getLast7Days(orgId)`, `getTopProducts(orgId)`
+
+### `cashSession.service.ts`
+- `getActive(orgId)` — sesión con status `'open'`
+- `open(orgId, openingAmount, userId)` — INSERT nueva sesión
+- `close(sessionId, closingAmount, expectedAmount, userId, notes?)` — UPDATE con diferencia calculada
+- `getHistory(orgId, limit?)` — últimas N sesiones
+
+### `inventory.service.ts`
+- `getMovements(orgId, limit?)` — con JOIN a `corivacore_products`
+- `adjustStock(orgId, productId, newStock, reason, userId)` — RPC `adjust_product_stock`
+- `getMovementsSummary(orgId)` — conteo IN/OUT/ADJUSTMENT últimos 30 días
+
+### `purchase.service.ts`
+- `getSuppliers(orgId)`, `createSupplier(orgId, data)`
+- `getAll(orgId)` — con JOIN a suppliers e items
+- `create(orgId, {supplier_id, items, notes, expected_at})` — usa RPC `generate_purchase_number`
+- `receive(purchaseId, receivedBy?)` — RPC `receive_purchase` (actualiza stock + log)
+- `cancel(purchaseId)`
+
+### `customer.service.ts`
+- `getAll(orgId)`, `create(orgId, data)`, `update(id, data)`
+- `getStats(customerId, orgId)` — RPC `get_customer_stats`
+- `getPurchaseHistory(customerId, orgId)`
+
+### `user.service.ts`
+- `getAll(orgId)` — mapea `org_id` → `organization_id`
+- `create(orgId, {username, password, full_name, email, role})`
+- `update(userId, payload)`, `toggleActive(userId, isActive)`
+- `resetPassword(userId, newPassword)`
+
+---
+
+## Estado global (Zustand)
+
+### `session.store.ts`
 ```typescript
-{
-  id: string,                    // PK: sale_timestamp
-  sale_number: string,           // Número de venta
-  customer_id?: string,          // ID cliente
-  customer_name?: string,        // Nombre cliente
-  user_id: string,              // ID usuario vendedor
-  subtotal: number,             // Subtotal
-  tax: number,                  // IGV
-  discount: number,             // Descuento
-  total: number,                // Total
-  payment_method: string,       // Método de pago
-  receipt_type: string,         // Tipo comprobante
-  status: string,               // Estado
-  created_at: string,           // Fecha venta
-  items: Array<{               // Items vendidos
-    product_id: string,
-    quantity: number,
-    unit_price: number,
-    subtotal: number,
-    current_stock: number
-  }>
+interface SessionState {
+  user: User | null
+  org: Organization | null
+  isAuthenticated: boolean
+  setSession(user, org): void
+  updateOrg(org): void
+  clearSession(): void
+}
+// persist → localStorage key: 'coriva-session'
+```
+
+### `cart.store.ts`
+```typescript
+interface CartState {
+  items: CartItem[]           // CartItem extends Product + { quantity, itemDiscount }
+  globalDiscount: number      // 0-100 porcentaje
+  paymentMethod: 'EFECTIVO' | 'TARJETA' | 'YAPE' | 'PLIN' | 'TRANSFERENCIA'
+  amountPaid: number
+  receiptType: 'BOLETA' | 'FACTURA' | 'TICKET'
+  customerName: string
+  // Computed
+  subtotal(): number          // precio × qty × (1 - itemDiscount/100)
+  totalDiscount(): number     // subtotal × globalDiscount/100
+  tax(): number               // (subtotal - totalDiscount) × 0.18/1.18
+  total(): number             // subtotal - totalDiscount
+  change(): number            // max(0, amountPaid - total)
 }
 ```
 
-#### 3. bellafarma-inventory-movements
+### `notifications.store.ts`
 ```typescript
-{
-  id: string,                    // PK: mov_timestamp
-  product_id: string,           // ID producto
-  movement_type: string,        // SALE, ADJUSTMENT, PURCHASE
-  quantity: number,             // Cantidad (+ o -)
-  previous_stock?: number,      // Stock anterior
-  new_stock: number,           // Stock nuevo
-  reason: string,              // Razón del movimiento
-  created_at: string           // Fecha movimiento
+interface AppNotification {
+  id: string
+  type: 'stock_alert' | 'insight' | 'task' | 'sale' | 'system'
+  title: string
+  body: string
+  severity: 'info' | 'warning' | 'critical'
+  isRead: boolean
+  createdAt: string
+}
+// Máximo 50 notificaciones (slice al agregar)
+```
+
+---
+
+## Middleware de autenticación
+
+### `middleware.ts`
+```typescript
+// Protege /dashboard/*
+// Verifica cookie 'coriva-session' (Zustand persist)
+// Permite acceso si Supabase no está configurado (demo mode)
+// Redirige a /login?from=<pathname> si no hay sesión
+```
+
+---
+
+## Inteligencia Artificial
+
+### `src/lib/ai/context-builder.ts` (server-side)
+```typescript
+async function buildBusinessContext(orgId: string) {
+  // Queries paralelas a Supabase:
+  // - corivacore_organizations (nombre, tipo, moneda)
+  // - corivacore_sales (ventas de hoy)
+  // - corivacore_products (total y stock crítico)
+  return { businessName, businessType, currency, productsCount, lowStockCount, todaySales, todayRevenue }
 }
 ```
 
-#### 4. bellafarma-product-audit
+### `src/lib/ai/prompts.ts`
 ```typescript
-{
-  id: string,                    // PK: audit_timestamp
-  product_id: string,           // ID producto
-  product_code: string,         // Código producto
-  product_name: string,         // Nombre producto
-  action: string,               // CREATE, UPDATE, DELETE
-  changes: {                    // Cambios realizados
-    previous: object,
-    new: object
-  },
-  user_id: string,             // ID usuario
-  user_name: string,           // Nombre usuario
-  timestamp: string,           // Fecha auditoría
-  reason: string               // Razón del cambio
+export const QUICK_QUESTIONS: string[]  // 6 preguntas predefinidas
+export function buildSystemPrompt(ctx): string  // System prompt con datos reales
+```
+
+### `/api/ai/chat/route.ts`
+```
+POST { messages, orgId, businessType }
+→ buildBusinessContext(orgId)
+→ buildSystemPrompt(ctx)
+→ OpenAI gpt-4o-mini (max_tokens: 600, temperature: 0.7)
+← { reply: string }
+```
+
+---
+
+## RBAC — Permisos
+
+### `src/lib/permissions.ts`
+```typescript
+export type Role = 'OWNER' | 'ADMIN' | 'MANAGER' | 'VENDEDOR' | 'VIEWER'
+
+export const ROLE_PERMISSIONS: Record<Role, Permission[]>
+export function hasPermission(role, module, action): boolean
+export function canAccessModule(role, module): boolean
+```
+
+### Shared hooks
+```typescript
+useCurrentUser()           // → User | null desde Zustand
+useOrganization()          // → Organization | null desde Zustand
+usePermission(module, action?)  // → boolean (RBAC check)
+useFeatureFlag(feature)    // → boolean (plan-based gating)
+```
+
+---
+
+## Tipos principales (`/src/types/index.ts`)
+
+```typescript
+interface Organization {
+  id: string; name: string; slug: string
+  business_type: 'pharmacy' | 'hardware' | 'clothing' | 'barbershop' | 'restaurant' | 'retail' | 'other'
+  settings: OrganizationSettings  // currency, tax_rate, plan, theme_color, tax_name, tax_included, ...
+}
+
+interface User {
+  id: string; organization_id: string; username: string
+  role: 'OWNER' | 'ADMIN' | 'MANAGER' | 'VENDEDOR' | 'VIEWER'
+  is_active: boolean
+}
+
+interface Product {
+  id: string; code: string; name: string
+  price: number; cost?: number; stock: number; min_stock: number
+  metadata?: ProductMetadata  // campos específicos por tipo de negocio
+}
+
+interface CartItem extends Product {
+  quantity: number
+  itemDiscount: number  // porcentaje 0-100
 }
 ```
 
-#### 5. bellafarma-users
-```typescript
-{
-  id: string,                    // PK: user_id
-  username: string,             // Usuario único
-  password: string,             // Contraseña (hash en producción)
-  name: string,                 // Nombre completo
-  email?: string,               // Email
-  role: string,                 // ADMINISTRADOR, FARMACEUTICO, VENDEDOR
-  active: boolean,              // Activo/Inactivo
-  created_at: string,           // Fecha creación
-  last_login?: string           // Último login
-}
-```
+---
 
-### Índices GSI (Global Secondary Index)
-- **code-index**: Búsqueda por código de producto
-- **username-index**: Búsqueda por username
+## Convenciones de código
 
-## 🔧 Servicios y APIs
+### Módulos del dashboard
+- Siempre `'use client'`
+- Props mínimas: `currentUser: User`, `orgId: string` o `currentOrg: Organization`
+- Carga de datos con `useCallback` + `useEffect`
+- Error handling: estado `error: string` local, no `alert()`
 
-### BellafarmaDynamoService
-Clase principal para operaciones CRUD en DynamoDB:
+### Servicios
+- Objetos planos (no clases)
+- Siempre verificar `isSupabaseConfigured()` primero
+- Lanzar el error de Supabase directamente (`if (error) throw error`)
+- Retornar tipos explícitos con `as T`
 
-```typescript
-class BellafarmaDynamoService {
-  static async create(tableName: string, item: any)
-  static async getById(tableName: string, id: string)
-  static async getAll(tableName: string, filter?, values?)
-  static async update(tableName: string, id: string, updates: any)
-  static async delete(tableName: string, id: string)
-  static async query(tableName: string, keyName: string, keyValue: string)
-  static async searchProducts(searchTerm: string)
-}
-```
+### CSS
+- Colores y tema: CSS variables (`var(--text)`, `var(--accent)`, `var(--green)`, etc.)
+- Layout/spacing: clases Tailwind
+- Bordes y fondos de cards: inline styles con CSS vars
+- No usar colores Tailwind directamente (para soportar dark/light mode)
 
-### Servicios Específicos
+### Nombres de tablas
+- Prefijo `corivacore_` en todas las tablas
+- IDs: UUID via `gen_random_uuid()`
+- Timestamps: `TIMESTAMPTZ DEFAULT NOW()`
+- Soft delete: columna `is_active` (no DELETE físico en producción)
 
-#### bellafarmaProductService
-```typescript
-{
-  getAll(): Promise<Product[]>
-  searchIntelligent(term: string): Promise<Product[]>
-  updateStock(id: string, newStock: number): Promise<void>
-  decreaseStock(id: string, quantity: number, reason?: string): Promise<number>
-  createProduct(product: any): Promise<Product>
-  updateProduct(product: any, userId: string, userName: string): Promise<Product>
-  deleteProduct(id: string, userId: string, userName: string): Promise<boolean>
-}
-```
+---
 
-#### bellafarmaSaleService
-```typescript
-{
-  create(saleData: any): Promise<Sale>
-  getAll(): Promise<Sale[]>
-}
-```
+## RPCs de Supabase
 
-#### bellafarmaAuthService
-```typescript
-{
-  login(username: string, password: string): Promise<User | null>
-}
-```
-
-## 🔐 Seguridad
-
-### Autenticación
-- AWS Cognito Identity Pool para acceso anónimo a DynamoDB
-- Validación de roles en frontend
-- Sesiones locales con localStorage
-
-### Autorización por Roles
-```typescript
-ADMINISTRADOR: {
-  - Acceso completo al sistema
-  - Gestión de usuarios
-  - Reportes avanzados
-  - Auditoría completa
-}
-
-FARMACEUTICO: {
-  - Punto de venta
-  - Gestión de inventario
-  - Reportes básicos
-  - Auditoría de productos
-}
-
-VENDEDOR: {
-  - Solo punto de venta
-  - Consulta de productos
-  - Sin acceso a inventario
-}
-```
-
-### Auditoría
-- Registro completo de cambios en productos
-- Tracking de usuario y timestamp
-- Movimientos de inventario detallados
-- Logs de ventas con trazabilidad
-
-## 🚀 Despliegue
-
-### Configuración AWS
-```bash
-# Variables de entorno requeridas
-NEXT_PUBLIC_COGNITO_IDENTITY_POOL_ID=us-east-1:xxx
-NEXT_PUBLIC_AWS_REGION=us-east-1
-```
-
-### Build y Deploy
-```bash
-npm run build
-aws s3 sync out/ s3://app.bellafarma --delete
-```
-
-### Estructura S3
-```
-s3://app.bellafarma/
-├── index.html
-├── _next/static/
-└── assets/
-```
-
-## 📊 Flujos de Datos
-
-### Flujo de Venta
-1. Usuario busca producto → `searchIntelligent()`
-2. Agrega al carrito → Validación de stock local
-3. Procesa venta → `saleService.create()`
-4. Actualiza stock → `decreaseStock()` con auditoría
-5. Genera comprobante → Impresión local
-
-### Flujo de Inventario
-1. Carga productos → `getAll()`
-2. Edita producto → `updateProduct()` con auditoría
-3. Actualiza stock → `updateStock()` con movimiento
-4. Elimina producto → Soft delete con auditoría
-
-## 🔄 Manejo de Estados
-
-### Estados Principales
-```typescript
-// Estado global del POS
-const [products, setProducts] = useState<Product[]>([])
-const [cart, setCart] = useState<CartItem[]>([])
-const [sales, setSales] = useState<Sale[]>([])
-const [currentUser, setCurrentUser] = useState<User | null>(null)
-
-// Estados de UI
-const [loading, setLoading] = useState(false)
-const [activeModule, setActiveModule] = useState('pos')
-```
-
-### Sincronización
-- Estado local + DynamoDB
-- Recarga automática después de operaciones
-- Fallback a localStorage en caso de error
-
-## 🐛 Manejo de Errores
-
-### Estrategia de Fallback
-1. **DynamoDB** → Operación principal
-2. **localStorage** → Backup local
-3. **Mock Data** → Datos de prueba
-
-### Logging
-```typescript
-console.log('Debug info:', data)
-console.error('Error:', error)
-// Logs visibles en consola del navegador
-```
-
-## 📱 Responsive Design
-
-### Breakpoints
-- **Mobile**: < 768px
-- **Tablet**: 768px - 1024px  
-- **Desktop**: > 1024px
-
-### Componentes Adaptativos
-- Grid responsivo para productos
-- Modales adaptables
-- Navegación colapsable
-
-## ⚡ Performance
-
-### Optimizaciones
-- Lazy loading de módulos
-- Paginación en listas grandes
-- Debounce en búsquedas
-- Caché local con localStorage
-
-### Métricas
-- First Load JS: ~149 kB
-- Tiempo de carga: < 2s
-- Búsqueda: < 500ms
-
-## 🔧 Mantenimiento
-
-### Logs de Auditoría
 ```sql
--- Consultar cambios de precios
-SELECT * FROM bellafarma-product-audit 
-WHERE action = 'UPDATE' 
-AND changes.new.price != changes.previous.price
+-- Genera número correlativo de venta
+generate_sale_number(p_org_id UUID) → TEXT  -- V-YY-0001
 
--- Movimientos de stock
-SELECT * FROM bellafarma-inventory-movements 
-WHERE movement_type = 'SALE'
-ORDER BY created_at DESC
+-- Genera número correlativo de compra
+generate_purchase_number(p_org_id UUID) → TEXT  -- OC-YY-0001
+
+-- Decrementa stock (usado en ventas)
+decrement_product_stock(p_product_id UUID, p_quantity INT) → VOID
+
+-- Ajusta stock con log de movimiento
+adjust_product_stock(p_org_id UUID, p_product_id UUID, p_new_stock INT, p_reason TEXT, p_user_id UUID) → VOID
+
+-- Recibe una orden de compra y actualiza stock
+receive_purchase(p_purchase_id UUID, p_received_by UUID) → VOID
+
+-- Estadísticas de un cliente
+get_customer_stats(p_customer_id UUID, p_org_id UUID) → TABLE(total_purchases, total_spent, avg_ticket, last_purchase, first_purchase)
+
+-- Retorna org_id del usuario autenticado (usado en RLS)
+get_user_org_id() → UUID
 ```
 
-### Backup y Recuperación
-- Export DynamoDB → S3
-- Backup diario automático
-- Restore point-in-time disponible
+---
 
-## 📈 Escalabilidad
+## Migraciones SQL
 
-### Límites Actuales
-- DynamoDB: 40,000 RCU/WCU
-- S3: Ilimitado
-- Cognito: 50,000 usuarios
+Ubicación: `database/migrations/`
 
-### Futuras Mejoras
-- DynamoDB Streams para tiempo real
-- Lambda functions para procesamiento
-- API Gateway para endpoints seguros
-- CloudWatch para monitoreo
+| Archivo | Descripción |
+|---|---|
+| `001_inventory_cash_rls.sql` | Tablas inventory_movements, ai_insights. RLS real via get_user_org_id(). RPCs decrement y adjust stock |
+| `002_purchases_suppliers.sql` | Tablas suppliers, purchases, purchase_items. RPC receive_purchase |
+| `003_customers_leads_pipeline.sql` | Columnas métricas en customers. RPC get_customer_stats. Tablas leads, pipeline_stages, pipeline_deals |
+| `004_purchase_number_rls.sql` | RPC generate_purchase_number. RLS para suppliers/purchases/purchase_items. Triggers updated_at |
+| `005_cash_sessions.sql` | Tabla cash_sessions con RLS |
+| `006_automations.sql` | Tabla automations con RLS + trigger updated_at |
+
+> Ejecutar en orden. Requiere que `get_user_org_id()` exista (creada en 001).
+
+---
+
+## Performance
+
+- `/dashboard` First Load JS: ~178 kB (incluye todos los módulos)
+- Todos los módulos en el mismo bundle (no lazy loading aún)
+- Queries Supabase en paralelo con `Promise.allSettled()` en DashboardModule
+- `useCallback` en todos los data loaders para evitar re-renders
+
+### Optimizaciones pendientes
+- Lazy loading de módulos con `dynamic(() => import(...))`
+- Paginación en tablas grandes (productos, ventas, movimientos)
+- Debounce en búsquedas del POS e Inventario
