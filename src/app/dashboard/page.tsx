@@ -160,14 +160,14 @@ export default function DashboardPage() {
         onLogout={handleLogout}
       />
 
-      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
+      <div className="flex flex-col overflow-hidden" style={{ flex: '1 1 0', minWidth: 0 }}>
         <Topbar
           activeModule={activeModule} cajaOpen={cajaOpen}
           onHamburger={() => setSidebarOpen(true)}
           onAIClick={() => setActiveModule('asistente')}
           onCatalogClick={() => setShowCatalogModal(true)}
         />
-        <div className="flex-1 overflow-y-auto touch-scroll" style={{ background: 'var(--bg)' }}>
+        <div className="flex-1 overflow-y-auto overflow-x-hidden touch-scroll" style={{ background: 'var(--bg)' }}>
           {renderModule()}
         </div>
       </div>

@@ -54,9 +54,19 @@ async function postToNubefact(
   const body = await res.json()
 
   if (!res.ok) {
-    const errBody = body as NubefactErrorResponse
-    const msg = errBody.errors?.join(' | ') ?? `HTTP ${res.status}`
-    log.error('Respuesta de error', { status: res.status, errors: errBody.errors })
+    // Nubefact puede devolver errors como array, objeto {campo: msg} o string
+    let msg = `HTTP ${res.status}`
+    const raw = (body as any)?.errors
+    if (Array.isArray(raw)) {
+      msg = raw.join(' | ')
+    } else if (raw && typeof raw === 'object') {
+      msg = Object.values(raw).flat().join(' | ')
+    } else if (typeof raw === 'string') {
+      msg = raw
+    } else if ((body as any)?.message) {
+      msg = (body as any).message
+    }
+    log.error('Respuesta de error Nubefact', { status: res.status, body })
     throw new IntegrationError('Nubefact', msg)
   }
 

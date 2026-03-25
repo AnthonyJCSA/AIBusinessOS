@@ -113,7 +113,7 @@ export default function Sidebar({ currentUser, currentOrg, activeModule, setActi
       <aside
         className={`
           fixed top-0 left-0 h-full z-[200] flex flex-col
-          w-[240px] min-w-[240px]
+          w-[240px] flex-shrink-0
           transition-transform duration-250
           md:relative md:translate-x-0
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}
