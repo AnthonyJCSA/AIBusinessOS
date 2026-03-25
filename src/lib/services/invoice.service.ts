@@ -1,135 +1,202 @@
-import { supabase, isSupabaseConfigured } from '../supabase'
-import { DBInvoice, DBInvoiceCredit } from '@/types/database.types'
+import { supabase } from '@/lib/supabase'
+import { nubefactProvider } from '@/lib/integrations/nubefact/nubefact.service'
+import {
+  IInvoiceProvider,
+  EmitInvoiceInput,
+  EmitInvoiceResult,
+  InvoiceType,
+  DocumentType,
+} from '@/lib/integrations/nubefact/nubefact.types'
+import { DBSale, DBSaleItem } from '@/types/database.types'
+import { NotFoundError, ConflictError, ValidationError } from '@/lib/errors'
+import { createLogger } from '@/lib/logger'
 
-const INV_TABLE    = 'corivacore_invoices'
-const CREDIT_TABLE = 'corivacore_invoice_credits'
+const log = createLogger('InvoiceService')
+
+// Inyección del proveedor — cambiar nubefactProvider por otro para swapear
+const provider: IInvoiceProvider = nubefactProvider
+
+export interface CreateInvoiceDTO {
+  saleId: string
+  orgId: string
+  clientDocType?: DocumentType
+  clientDocNumber?: string
+  clientName?: string
+  clientAddress?: string
+  clientEmail?: string
+  // Solo para notas
+  modifiesType?: InvoiceType
+  modifiesSeries?: string
+  modifiesNumber?: number
+  creditNoteType?: number
+  debitNoteType?: number
+}
+
+export interface InvoiceRecord {
+  id: string
+  invoice_number: string
+  status: string
+  sunat_status: string
+  pdf_url: string | null
+  xml_url: string | null
+  total: number
+}
 
 export const invoiceService = {
-  async create(orgId: string, invoice: {
-    saleId?: string
-    type: DBInvoice['type']
-    series: string
-    clientName: string
-    clientDocType?: string
-    clientDoc?: string
-    clientAddress?: string
-    clientEmail?: string
-    subtotal: number
-    igv: number
-    total: number
-    creditDays?: number
-    creditParts?: number
-    createdBy?: string
-  }): Promise<DBInvoice> {
-    if (!isSupabaseConfigured()) throw new Error('Supabase not configured')
+  async create(dto: CreateInvoiceDTO): Promise<{ invoice: InvoiceRecord; result: EmitInvoiceResult }> {
+    // 1. Guardar que no exista ya un comprobante activo para esta venta
+    const { data: existing } = await supabase
+      .from('corivacore_invoices')
+      .select('id, status')
+      .eq('sale_id', dto.saleId)
+      .in('status', ['EMITIDA', 'ACEPTADA'])
+      .maybeSingle()
 
-    // Generar número correlativo atómico
-    const { data: numData, error: numError } = await supabase
-      .rpc('generate_invoice_number', { p_org_id: orgId, p_series: invoice.series })
-    if (numError) throw numError
-
-    const row = numData?.[0]
-    const { data, error } = await supabase
-      .from(INV_TABLE)
-      .insert({
-        org_id:         orgId,
-        sale_id:        invoice.saleId || null,
-        invoice_number: row.invoice_number,
-        series:         invoice.series,
-        correlative:    row.correlative,
-        type:           invoice.type,
-        client_name:    invoice.clientName,
-        client_doc_type: invoice.clientDocType,
-        client_doc:     invoice.clientDoc,
-        client_address: invoice.clientAddress,
-        client_email:   invoice.clientEmail,
-        subtotal:       invoice.subtotal,
-        igv:            invoice.igv,
-        total:          invoice.total,
-        credit_days:    invoice.creditDays || 0,
-        due_date:       invoice.creditDays
-          ? new Date(Date.now() + invoice.creditDays * 86400000).toISOString().split('T')[0]
-          : null,
-        status:         'EMITIDA',
-        sunat_status:   'PENDIENTE',
-        created_by:     invoice.createdBy,
-      })
-      .select().single()
-    if (error) throw error
-
-    // Crear cuotas si aplica
-    if (invoice.creditParts && invoice.creditParts > 1) {
-      const partAmount = Math.round((invoice.total / invoice.creditParts) * 100) / 100
-      const credits = Array.from({ length: invoice.creditParts }, (_, i) => ({
-        invoice_id: data.id,
-        org_id:     orgId,
-        part:       i + 1,
-        amount:     i === invoice.creditParts! - 1
-          ? invoice.total - partAmount * (invoice.creditParts! - 1) // última cuota ajusta diferencia
-          : partAmount,
-        due_date: new Date(Date.now() + (i + 1) * 30 * 86400000).toISOString().split('T')[0],
-        paid: false,
-      }))
-      const { error: creditError } = await supabase.from(CREDIT_TABLE).insert(credits)
-      if (creditError) throw creditError
+    if (existing) {
+      throw new ConflictError('Esta venta ya tiene un comprobante emitido')
     }
 
-    return data as DBInvoice
+    // 2. Obtener venta
+    const { data: sale, error: saleErr } = await supabase
+      .from('corivacore_sales')
+      .select('*')
+      .eq('id', dto.saleId)
+      .single()
+
+    if (saleErr || !sale) throw new NotFoundError('Venta')
+
+    const dbSale = sale as DBSale
+    if (dbSale.status === 'cancelled') {
+      throw new ValidationError('No se puede emitir comprobante para una venta anulada')
+    }
+
+    // 3. Obtener ítems de la venta
+    const { data: items, error: itemsErr } = await supabase
+      .from('corivacore_sale_items')
+      .select('*')
+      .eq('sale_id', dto.saleId)
+
+    if (itemsErr || !items?.length) throw new NotFoundError('Ítems de la venta')
+
+    // 4. Obtener serie activa para el tipo de comprobante
+    const receiptType = dbSale.receipt_type as InvoiceType
+    const { data: seriesRow, error: seriesErr } = await supabase
+      .from('corivacore_invoice_series')
+      .select('*')
+      .eq('org_id', dto.orgId)
+      .eq('type', receiptType)
+      .eq('is_active', true)
+      .maybeSingle()
+
+    if (seriesErr || !seriesRow) {
+      throw new ValidationError(
+        `No hay serie activa configurada para ${receiptType}. ` +
+        `Ve a Configuración → Facturación y agrega una serie (ej: B001 para Boletas, F001 para Facturas).`
+      )
+    }
+
+    const correlative = seriesRow.last_number + 1
+
+    // 5. Construir input para el proveedor
+    const emitInput: EmitInvoiceInput = {
+      orgId:           dto.orgId,
+      saleId:          dto.saleId,
+      type:            receiptType,
+      series:          seriesRow.series,
+      correlative,
+      fechaEmision:    dbSale.created_at ?? new Date().toISOString(),
+      clientDocType:   dto.clientDocType ?? '',
+      clientDocNumber: dto.clientDocNumber ?? '',
+      clientName:      dto.clientName ?? dbSale.customer_name ?? 'CLIENTE VARIOS',
+      clientAddress:   dto.clientAddress ?? '',
+      clientEmail:     dto.clientEmail ?? '',
+      items:           (items as DBSaleItem[]).map(i => ({
+        codigo:         i.product_code ?? 'PROD',
+        descripcion:    i.product_name,
+        cantidad:       i.quantity,
+        precioUnitario: i.unit_price,
+      })),
+      modifiesType:    dto.modifiesType,
+      modifiesSeries:  dto.modifiesSeries,
+      modifiesNumber:  dto.modifiesNumber,
+      creditNoteType:  dto.creditNoteType,
+      debitNoteType:   dto.debitNoteType,
+    }
+
+    // 6. Llamar al proveedor
+    const result = await provider.emit(emitInput)
+
+    // 7. Determinar estado final
+    const invoiceStatus = result.success
+      ? (result.accepted ? 'ACEPTADA' : 'RECHAZADA')
+      : 'PENDIENTE'
+
+    // 8. Persistir comprobante (siempre, incluso si fue rechazado — para auditoría)
+    const { data: invoice, error: insertErr } = await supabase
+      .from('corivacore_invoices')
+      .insert({
+        org_id:          dto.orgId,
+        sale_id:         dto.saleId,
+        invoice_number:  result.invoiceNumber,
+        series:          seriesRow.series,
+        correlative,
+        type:            receiptType,
+        client_name:     emitInput.clientName,
+        client_doc_type: emitInput.clientDocType || null,
+        client_doc:      emitInput.clientDocNumber || null,
+        client_address:  emitInput.clientAddress || null,
+        client_email:    emitInput.clientEmail || null,
+        subtotal:        dbSale.subtotal,
+        igv:             dbSale.tax,
+        total:           dbSale.total,
+        currency:        'PEN',
+        status:          invoiceStatus,
+        sunat_status:    result.accepted ? 'ACEPTADA' : 'PENDIENTE',
+        sunat_response:  result.rawResponse,
+        pdf_url:         result.pdfUrl,
+        xml_url:         result.xmlUrl,
+      })
+      .select('id, invoice_number, status, sunat_status, pdf_url, xml_url, total')
+      .single()
+
+    if (insertErr) {
+      log.error('Comprobante emitido pero no persistido', {
+        invoiceNumber: result.invoiceNumber,
+        error: insertErr.message,
+      })
+      // No lanzamos error — el comprobante ya fue enviado a SUNAT
+      // Devolvemos el resultado con advertencia
+    }
+
+    // 9. Actualizar correlativo solo si la emisión fue exitosa
+    if (result.success) {
+      await supabase
+        .from('corivacore_invoice_series')
+        .update({ last_number: correlative })
+        .eq('id', seriesRow.id)
+    }
+
+    return { invoice: invoice as InvoiceRecord, result }
   },
 
-  async getAll(orgId: string): Promise<DBInvoice[]> {
-    if (!isSupabaseConfigured()) return []
+  async getById(id: string): Promise<InvoiceRecord> {
     const { data, error } = await supabase
-      .from(INV_TABLE).select('*').eq('org_id', orgId)
-      .order('created_at', { ascending: false })
-    if (error) throw error
-    return data as DBInvoice[]
+      .from('corivacore_invoices')
+      .select('id, invoice_number, status, sunat_status, pdf_url, xml_url, total')
+      .eq('id', id)
+      .single()
+
+    if (error || !data) throw new NotFoundError('Comprobante')
+    return data as InvoiceRecord
   },
 
-  async getCredits(invoiceId: string): Promise<DBInvoiceCredit[]> {
-    if (!isSupabaseConfigured()) return []
-    const { data, error } = await supabase
-      .from(CREDIT_TABLE).select('*').eq('invoice_id', invoiceId).order('part')
-    if (error) throw error
-    return data as DBInvoiceCredit[]
-  },
+  async getBySaleId(saleId: string): Promise<InvoiceRecord | null> {
+    const { data } = await supabase
+      .from('corivacore_invoices')
+      .select('id, invoice_number, status, sunat_status, pdf_url, xml_url, total')
+      .eq('sale_id', saleId)
+      .maybeSingle()
 
-  async getPendingCredits(orgId: string): Promise<(DBInvoiceCredit & { invoice_number: string; client_name: string })[]> {
-    if (!isSupabaseConfigured()) return []
-    const { data, error } = await supabase
-      .from(CREDIT_TABLE)
-      .select('*, invoice:corivacore_invoices(invoice_number, client_name)')
-      .eq('org_id', orgId).eq('paid', false)
-      .order('due_date')
-    if (error) throw error
-    return (data || []).map((c: any) => ({
-      ...c,
-      invoice_number: c.invoice?.invoice_number,
-      client_name:    c.invoice?.client_name,
-    }))
-  },
-
-  async markCreditPaid(creditId: string, paidBy: string): Promise<void> {
-    if (!isSupabaseConfigured()) throw new Error('Supabase not configured')
-    const { error } = await supabase
-      .from(CREDIT_TABLE)
-      .update({ paid: true, paid_at: new Date().toISOString(), paid_by: paidBy })
-      .eq('id', creditId)
-    if (error) throw error
-  },
-
-  async cancel(invoiceId: string): Promise<void> {
-    if (!isSupabaseConfigured()) throw new Error('Supabase not configured')
-    const { error } = await supabase
-      .from(INV_TABLE).update({ status: 'ANULADA' }).eq('id', invoiceId)
-    if (error) throw error
-  },
-
-  async getBySaleId(saleId: string): Promise<DBInvoice | null> {
-    if (!isSupabaseConfigured()) return null
-    const { data, error } = await supabase
-      .from(INV_TABLE).select('*').eq('sale_id', saleId).single()
-    if (error) return null
-    return data as DBInvoice
+    return data as InvoiceRecord | null
   },
 }

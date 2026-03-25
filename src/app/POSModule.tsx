@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Product, CartItem, Organization, User } from '@/types'
 import { saleService, cashService } from '@/lib/services'
+import { InvoiceModal } from '@/modules/billing'
 
 interface POSProps {
   products: Product[]
@@ -31,6 +32,7 @@ export default function POSModule({ products, currentOrg, currentUser, onSaleCom
   const [amountPaid, setAmountPaid] = useState('')
   const [processing, setProcessing] = useState(false)
   const [showSuccess, setShowSuccess] = useState<{ number: string; total: number } | null>(null)
+  const [pendingInvoice, setPendingInvoice] = useState<{ saleId: string; total: number } | null>(null)
 
   const currency = currentOrg?.settings?.currency || 'S/'
 
@@ -102,6 +104,10 @@ export default function POSModule({ products, currentOrg, currentUser, onSaleCom
       await onSaleComplete()
       printReceipt(sale.sale_number)
       setShowSuccess({ number: sale.sale_number, total })
+      // Guardar venta pendiente de comprobante electrónico
+      if (receiptType !== 'TICKET') {
+        setPendingInvoice({ saleId: sale.id, total })
+      }
       setCart([]); setCustomerName(''); setAmountPaid('')
     } catch (e) {
       console.error(e); alert('❌ Error al procesar la venta')
@@ -321,7 +327,7 @@ export default function POSModule({ products, currentOrg, currentUser, onSaleCom
       </div>
 
       {/* Success modal */}
-      {showSuccess && (
+      {showSuccess && !pendingInvoice && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
           <div className="w-full max-w-sm rounded-2xl p-6 text-center" style={{ background: 'var(--card)', border: '1px solid var(--border2)' }}>
             <div className="text-5xl mb-3">🎉</div>
@@ -329,7 +335,7 @@ export default function POSModule({ products, currentOrg, currentUser, onSaleCom
               {currency} {showSuccess.total.toFixed(2)}
             </div>
             <div className="text-xs mb-5" style={{ color: 'var(--muted)' }}>
-              {showSuccess.number} — Boleta generada exitosamente
+              {showSuccess.number} — Venta registrada exitosamente
             </div>
             <div className="flex gap-2 justify-center">
               <button onClick={() => setShowSuccess(null)}
@@ -337,7 +343,7 @@ export default function POSModule({ products, currentOrg, currentUser, onSaleCom
                 style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--muted)' }}>
                 Cerrar
               </button>
-              <button onClick={() => { setShowSuccess(null) }}
+              <button onClick={() => setShowSuccess(null)}
                 className="px-4 py-[9px] rounded-[9px] text-xs font-semibold text-white transition-all"
                 style={{ background: 'var(--gradient)' }}>
                 Nueva Venta
@@ -345,6 +351,24 @@ export default function POSModule({ products, currentOrg, currentUser, onSaleCom
             </div>
           </div>
         </div>
+      )}
+
+      {/* Modal de comprobante electrónico */}
+      {pendingInvoice && currentOrg && (
+        <InvoiceModal
+          saleId={pendingInvoice.saleId}
+          orgId={currentOrg.id}
+          total={pendingInvoice.total}
+          currency={currency}
+          onSuccess={() => {
+            setPendingInvoice(null)
+            setShowSuccess(null)
+          }}
+          onClose={() => {
+            setPendingInvoice(null)
+            setShowSuccess(null)
+          }}
+        />
       )}
     </div>
   )

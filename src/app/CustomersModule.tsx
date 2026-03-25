@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import { customerService } from '@/lib/services'
 import { exportCustomersToCSV } from '../lib/export'
+import { DocumentSearchInput } from '@/modules/billing'
+import { DniResult } from '@/lib/integrations/peruapi/peruapi.types'
 
 interface Customer {
   id: string; org_id?: string; name: string; document_type?: string
@@ -19,6 +21,15 @@ export default function CustomersModule({ currentUser }: { currentUser: any }) {
   const [editing, setEditing] = useState<Customer | null>(null)
   const [newC, setNewC] = useState(emptyC)
   const [loading, setLoading] = useState(true)
+
+  function handleDniFound(raw: Record<string, string>) {
+    const r = raw as unknown as DniResult
+    setNewC(p => ({
+      ...p,
+      document_number: r.dni,
+      name: r.nombreCompleto,
+    }))
+  }
 
   useEffect(() => { loadCustomers() }, [])
 
@@ -188,6 +199,12 @@ export default function CustomersModule({ currentUser }: { currentUser: any }) {
       {showAdd && (
         <DarkModal title="➕ Agregar Cliente" onClose={() => setShowAdd(false)}>
           <form onSubmit={handleAdd} className="space-y-4">
+            {/* Búsqueda automática por DNI */}
+            {newC.document_type === 'DNI' && (
+              <FI label="Buscar por DNI" full>
+                <DocumentSearchInput type="DNI" onFound={handleDniFound} />
+              </FI>
+            )}
             <div className="grid grid-cols-2 gap-3">
               <FI label="Tipo Doc"><select className="fi-dark" value={newC.document_type} onChange={e => setNewC(p => ({ ...p, document_type: e.target.value }))}><option>DNI</option><option>RUC</option><option>CE</option></select></FI>
               <FI label="Número *"><input className="fi-dark" value={newC.document_number} onChange={e => setNewC(p => ({ ...p, document_number: e.target.value }))} required /></FI>
