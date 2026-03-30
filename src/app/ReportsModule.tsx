@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { exportSalesToCSV }  from '../lib/export'
 import { InvoiceReport }     from '@/modules/reports/components/InvoiceReport'
 import { StockReport }       from '@/modules/reports/components/StockReport'
+import { OPPFReport }        from '@/modules/reports/components/OPPFReport'
 import { ExpiryAlerts }      from '@/modules/pharma/components/ExpiryAlerts'
 import { useFeatureFlag }    from '@/shared/hooks/useFeatureFlag'
 import { useSessionStore }   from '@/state/session.store'
@@ -13,7 +14,7 @@ interface Sale {
   customer_name?: string; payment_method: string; status?: string; receipt_type?: string
 }
 
-type Tab = 'ventas' | 'comprobantes' | 'stock' | 'farmacia'
+type Tab = 'ventas' | 'comprobantes' | 'stock' | 'farmacia' | 'oppf'
 
 export default function ReportsModule({ sales, currentUser }: { sales: Sale[]; currentUser: any }) {
   const [tab, setTab]             = useState<Tab>('ventas')
@@ -51,6 +52,7 @@ export default function ReportsModule({ sales, currentUser }: { sales: Sale[]; c
     ...(hasBilling ? [{ key: 'comprobantes' as Tab, label: 'Comprobantes', icon: '🧾' }] : []),
     { key: 'stock'        as Tab, label: 'Stock',         icon: '📦' },
     ...(hasPharma  ? [{ key: 'farmacia'     as Tab, label: 'Farmacia',     icon: '💊' }] : []),
+    ...(hasPharma  ? [{ key: 'oppf'         as Tab, label: 'OPPF/SNIPPF',  icon: '📋' }] : []),
   ]
 
   // Si el tab activo ya no existe (ej: perdió acceso), volver a ventas
@@ -223,6 +225,11 @@ export default function ReportsModule({ sales, currentUser }: { sales: Sale[]; c
       {/* ── STOCK ───────────────────────────────────────────────────────────── */}
       {tab === 'stock' && orgId && (
         <StockReport orgId={orgId} />
+      )}
+
+      {/* ── OPPF/SNIPPF ─────────────────────────────────────────────────────── */}
+      {tab === 'oppf' && orgId && (
+        <OPPFReport orgId={orgId} />
       )}
 
       {/* ── FARMACIA ────────────────────────────────────────────────────────── */}

@@ -67,7 +67,7 @@ Cada organización tiene aislamiento total via RLS. Todos los servicios filtran 
 | `PurchasesModule` | Órdenes de compra, proveedores, recepción con auto-stock |
 | `CustomersModule` | CRM con perfil, historial, segmentación automática |
 | `LeadsModule` | Pipeline Kanban drag & drop, 6 etapas |
-| `ReportsModule` | Ventas por período, top productos, métodos de pago |
+| `ReportsModule` | Ventas por período, top productos, métodos de pago, OPPF/SNIPPF DIGEMID |
 | `AIAssistantModule` | Chat GPT-4o-mini con contexto real del negocio + insights proactivos |
 | `AutomationsModule` | Reglas de automatización por templates |
 | `UsersModule` | CRUD usuarios con Supabase, 5 roles, reset password |
@@ -93,6 +93,7 @@ Cada organización tiene aislamiento total via RLS. Todos los servicios filtran 
 | `organizationService` | Crear/actualizar orgs, buscar por slug |
 | `invoiceService` | Facturación electrónica |
 | `syncService` | Migración localStorage → Supabase |
+| `oppfService` | Reporte OPPF/SNIPPF para DIGEMID |
 
 ## Estado global (`/src/state/`)
 
@@ -142,6 +143,7 @@ Cada organización tiene aislamiento total via RLS. Todos los servicios filtran 
 | `004_purchase_number_rls.sql` | RPC generate_purchase_number, RLS suppliers/purchases, triggers |
 | `005_cash_sessions.sql` | cash_sessions formal con RLS |
 | `006_automations.sql` | automations table con RLS + trigger updated_at |
+| `012_oppf_snippf.sql` | Campos DIGEMID, RPC generate_oppf_report |
 
 > Ejecutar en orden en Supabase SQL Editor.
 
@@ -156,6 +158,7 @@ Cada organización tiene aislamiento total via RLS. Todos los servicios filtran 
 | `receive_purchase(p_purchase_id, p_received_by)` | Recibe OC y actualiza stock |
 | `get_customer_stats(p_customer_id, p_org_id)` | Estadísticas de compras del cliente |
 | `get_user_org_id()` | Retorna org_id del usuario autenticado (usado en RLS) |
+| `generate_oppf_report(p_org_id, p_month, p_year)` | Genera reporte mensual OPPF/SNIPPF para DIGEMID |
 
 ## Landing pages
 
