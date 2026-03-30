@@ -32,10 +32,14 @@ export function validateCreateInvoice(body: unknown): CreateInvoiceDTO {
   if (b.modifiesType && !VALID_INVOICE_TYPES.includes(b.modifiesType as InvoiceType)) {
     throw new ValidationError(`modifiesType inválido. Valores permitidos: ${VALID_INVOICE_TYPES.join(', ')}`)
   }
+  if (b.invoiceType && !VALID_INVOICE_TYPES.includes(b.invoiceType as InvoiceType)) {
+    throw new ValidationError(`invoiceType inválido. Valores permitidos: ${VALID_INVOICE_TYPES.join(', ')}`)
+  }
 
   return {
     saleId:          b.saleId as string,
     orgId:           b.orgId as string,
+    invoiceType:     b.invoiceType as InvoiceType | undefined,
     clientDocType:   (b.clientDocType as DocumentType) ?? '',
     clientDocNumber: b.clientDocNumber ? String(b.clientDocNumber) : '',
     clientName:      b.clientName ? String(b.clientName) : undefined,

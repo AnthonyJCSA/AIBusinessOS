@@ -3,7 +3,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Product, CartItem, Organization, User } from '@/types'
 import { saleService, cashService } from '@/lib/services'
-import { InvoiceModal } from '@/modules/billing'
+import { InvoiceModal }      from '@/modules/billing'
+import { PrescriptionBadge } from '@/modules/pharma'
 
 interface POSProps {
   products: Product[]
@@ -33,6 +34,8 @@ export default function POSModule({ products, currentOrg, currentUser, onSaleCom
   const [processing, setProcessing] = useState(false)
   const [showSuccess, setShowSuccess] = useState<{ number: string; total: number } | null>(null)
   const [pendingInvoice, setPendingInvoice] = useState<{ saleId: string; total: number } | null>(null)
+
+  const [posTab, setPosTab] = useState<'productos' | 'carrito'>('productos')
 
   const currency = currentOrg?.settings?.currency || 'S/'
 
@@ -129,8 +132,9 @@ export default function POSModule({ products, currentOrg, currentUser, onSaleCom
   }, [handleKey])
 
   return (
-    <div className="animate-fade-up" style={{ height: 'calc(100vh - 100px)' }}>
-      <div className="grid h-full" style={{ gridTemplateColumns: '1fr 340px', gap: '14px', padding: '20px' }}>
+    <div className="animate-fade-up" style={{ height: 'calc(100dvh - 52px)' }}>
+      {/* ── DESKTOP: dos columnas ─────────────────────────────────────────── */}
+      <div className="hidden lg:grid h-full" style={{ gridTemplateColumns: '1fr 340px', gap: '14px', padding: '20px' }}>
 
         {/* Left — productos */}
         <div className="flex flex-col gap-[10px] min-h-0">
@@ -170,16 +174,18 @@ export default function POSModule({ products, currentOrg, currentUser, onSaleCom
                 slow: { bg: 'rgba(245,158,11,.1)', color: 'var(--amber)', label: `⚠️ ${p.stock} uds` },
                 sout: { bg: 'rgba(239,68,68,.1)', color: 'var(--red)', label: '🚨 Sin stock' },
               }[stockStatus]
+              const needsRx = (p as any).requires_prescription
               return (
                 <button key={p.id} onClick={() => addToCart(p)} disabled={p.stock === 0}
                   className="text-left rounded-xl p-[14px] transition-all relative disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
+                  style={{ background: 'var(--card)', border: `1px solid ${needsRx ? 'rgba(245,158,11,.3)' : 'var(--border)'}` }}>
                   <div className="text-[10px] font-mono" style={{ color: 'var(--sub)' }}>{p.code}</div>
                   <div className="text-[13px] font-bold leading-[1.3] mb-[3px] mt-[6px]" style={{ color: 'var(--text)' }}>{p.name}</div>
                   <div className="text-[17px] font-extrabold" style={{ color: 'var(--accent2)' }}>{currency} {p.price.toFixed(2)}</div>
-                  <div className="mt-[6px]">
+                  <div className="mt-[6px] flex items-center gap-[5px] flex-wrap">
                     <span className="text-[10px] px-2 py-[2px] rounded-full font-semibold"
                       style={{ background: stockStyles.bg, color: stockStyles.color }}>{stockStyles.label}</span>
+                    <PrescriptionBadge requires={needsRx} isControlled={(p as any).is_controlled} size="xs" />
                   </div>
                 </button>
               )
@@ -198,6 +204,15 @@ export default function POSModule({ products, currentOrg, currentUser, onSaleCom
             <span className="text-[10px] px-2 py-[2px] rounded-full font-bold"
               style={{ background: 'var(--accent)', color: '#fff' }}>{cart.length} items</span>
           </div>
+
+          {/* Alerta de receta en carrito */}
+          {cart.some(i => (i as any).requires_prescription) && (
+            <div className="mx-[10px] mt-[8px] flex items-center gap-[8px] px-[10px] py-[7px] rounded-[8px] text-[11px] flex-shrink-0"
+              style={{ background: 'rgba(245,158,11,.08)', border: '1px solid rgba(245,158,11,.25)', color: 'var(--amber)' }}>
+              <span>📋</span>
+              <span>El carrito contiene productos que requieren receta médica</span>
+            </div>
+          )}
 
           {/* Cart items */}
           <div className="flex-1 overflow-y-auto p-[10px] touch-scroll">
@@ -324,7 +339,193 @@ export default function POSModule({ products, currentOrg, currentUser, onSaleCom
             </button>
           </div>
         </div>
-      </div>
+      </div>{/* fin desktop */}
+
+      {/* ── MÓVIL / TABLET: tabs Productos | Carrito ────────────────────── */}
+      <div className="flex lg:hidden flex-col h-full">
+        {/* Tab bar */}
+        <div className="flex gap-[4px] p-[3px] mx-3 mt-3 rounded-[10px] flex-shrink-0"
+          style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+          <button onClick={() => setPosTab('productos')}
+            className="flex-1 py-[8px] rounded-[7px] text-[12px] font-bold transition-all"
+            style={{
+              background: posTab === 'productos' ? 'var(--card)' : 'transparent',
+              color:      posTab === 'productos' ? 'var(--text)' : 'var(--muted)',
+              boxShadow:  posTab === 'productos' ? '0 1px 4px rgba(0,0,0,.15)' : 'none',
+            }}>
+            🛍️ Productos
+          </button>
+          <button onClick={() => setPosTab('carrito')}
+            className="flex-1 py-[8px] rounded-[7px] text-[12px] font-bold transition-all relative"
+            style={{
+              background: posTab === 'carrito' ? 'var(--card)' : 'transparent',
+              color:      posTab === 'carrito' ? 'var(--text)' : 'var(--muted)',
+              boxShadow:  posTab === 'carrito' ? '0 1px 4px rgba(0,0,0,.15)' : 'none',
+            }}>
+            🛒 Carrito
+            {cart.length > 0 && (
+              <span className="absolute top-[4px] right-[8px] w-[16px] h-[16px] rounded-full text-[9px] font-bold flex items-center justify-center"
+                style={{ background: 'var(--accent)', color: '#fff' }}>
+                {cart.length}
+              </span>
+            )}
+          </button>
+        </div>
+
+        {/* Productos tab */}
+        {posTab === 'productos' && (
+          <div className="flex flex-col gap-[8px] flex-1 min-h-0 p-3">
+            {/* Search */}
+            <div className="flex items-center gap-2 px-3 h-[42px] rounded-[9px] flex-shrink-0"
+              style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="var(--sub)" strokeWidth="1.5"><circle cx="6.5" cy="6.5" r="4.5"/><path d="M11 11l3 3"/></svg>
+              <input value={search} onChange={e => setSearch(e.target.value)}
+                placeholder="Buscar producto…"
+                className="flex-1 bg-transparent outline-none text-sm" style={{ color: 'var(--text)' }} />
+            </div>
+            {/* Grid productos */}
+            <div className="grid overflow-y-auto touch-scroll flex-1 pb-1"
+              style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '8px', alignContent: 'start' }}>
+              {filtered.length === 0 ? (
+                <div className="col-span-full text-center py-10 text-sm" style={{ color: 'var(--sub)' }}>Sin resultados</div>
+              ) : filtered.map(p => {
+                const stockStatus = p.stock === 0 ? 'sout' : p.stock <= (p.min_stock || 5) ? 'slow' : 'sok'
+                const stockStyles = {
+                  sok:  { bg: 'rgba(16,185,129,.1)', color: 'var(--green)', label: `${p.stock} uds` },
+                  slow: { bg: 'rgba(245,158,11,.1)', color: 'var(--amber)', label: `⚠️ ${p.stock}` },
+                  sout: { bg: 'rgba(239,68,68,.1)',  color: 'var(--red)',   label: '🚨 Agotado' },
+                }[stockStatus]
+                const needsRx = (p as any).requires_prescription
+                return (
+                  <button key={p.id} onClick={() => { addToCart(p); setPosTab('carrito') }} disabled={p.stock === 0}
+                    className="text-left rounded-xl p-[12px] transition-all disabled:opacity-50"
+                    style={{ background: 'var(--card)', border: `1px solid ${needsRx ? 'rgba(245,158,11,.3)' : 'var(--border)'}` }}>
+                    <div className="text-[10px] font-mono" style={{ color: 'var(--sub)' }}>{p.code}</div>
+                    <div className="text-[13px] font-bold leading-[1.3] my-[4px]" style={{ color: 'var(--text)' }}>{p.name}</div>
+                    <div className="text-[16px] font-extrabold" style={{ color: 'var(--accent2)' }}>{currency} {p.price.toFixed(2)}</div>
+                    <div className="mt-[5px] flex items-center gap-[4px] flex-wrap">
+                      <span className="text-[10px] px-2 py-[2px] rounded-full font-semibold"
+                        style={{ background: stockStyles.bg, color: stockStyles.color }}>{stockStyles.label}</span>
+                      <PrescriptionBadge requires={needsRx} isControlled={(p as any).is_controlled} size="xs" />
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Carrito tab */}
+        {posTab === 'carrito' && (
+          <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
+            {/* Alerta receta */}
+            {cart.some(i => (i as any).requires_prescription) && (
+              <div className="mx-3 mt-3 flex items-center gap-[8px] px-[10px] py-[7px] rounded-[8px] text-[11px] flex-shrink-0"
+                style={{ background: 'rgba(245,158,11,.08)', border: '1px solid rgba(245,158,11,.25)', color: 'var(--amber)' }}>
+                <span>📋</span><span>Productos con receta médica en el carrito</span>
+              </div>
+            )}
+            {/* Items */}
+            <div className="flex-1 overflow-y-auto p-3 touch-scroll">
+              {cart.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center gap-2" style={{ color: 'var(--sub)' }}>
+                  <div className="text-4xl opacity-20">🛍️</div>
+                  <div className="text-sm font-bold">Carrito vacío</div>
+                  <button onClick={() => setPosTab('productos')}
+                    className="mt-2 px-4 py-2 rounded-[9px] text-xs font-semibold text-white"
+                    style={{ background: 'var(--gradient)' }}>Ver productos</button>
+                </div>
+              ) : cart.map(item => (
+                <div key={item.id} className="flex items-center gap-2 p-[10px] rounded-[9px] mb-[6px]"
+                  style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-bold truncate" style={{ color: 'var(--text)' }}>{item.name}</div>
+                    <div className="text-[11px]" style={{ color: 'var(--accent2)' }}>
+                      {currency} {item.price.toFixed(2)} × {item.quantity} = <strong>{currency} {(item.price * item.quantity).toFixed(2)}</strong>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    <button onClick={() => updateQty(item.id, -1)}
+                      className="w-[26px] h-[26px] rounded-[6px] flex items-center justify-center text-sm font-bold"
+                      style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)' }}>−</button>
+                    <span className="text-sm font-bold w-[20px] text-center" style={{ color: 'var(--text)' }}>{item.quantity}</span>
+                    <button onClick={() => updateQty(item.id, 1)}
+                      className="w-[26px] h-[26px] rounded-[6px] flex items-center justify-center text-sm font-bold"
+                      style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)' }}>+</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {/* Footer carrito móvil */}
+            <div className="p-3 flex-shrink-0" style={{ borderTop: '1px solid var(--border)', background: 'var(--card)' }}>
+              {/* Cliente */}
+              <div className="flex items-center gap-2 px-[11px] py-2 rounded-lg mb-[8px]"
+                style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+                <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="var(--muted)" strokeWidth="1.5"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.31 2.69-6 6-6s6 2.69 6 6"/></svg>
+                <input value={customerName} onChange={e => setCustomerName(e.target.value)}
+                  placeholder="Agregar cliente" className="flex-1 bg-transparent outline-none text-xs" style={{ color: 'var(--text)' }} />
+              </div>
+              {/* Comprobante + Pago en grid */}
+              <div className="grid grid-cols-2 gap-[6px] mb-[8px]">
+                <div>
+                  <div className="text-[10px] font-bold uppercase tracking-[.5px] mb-[4px]" style={{ color: 'var(--sub)' }}>Comprobante</div>
+                  <div className="flex gap-[4px]">
+                    {(['BOLETA', 'FACTURA', 'TICKET'] as const).map(t => (
+                      <button key={t} onClick={() => setReceiptType(t)}
+                        className="flex-1 py-[5px] rounded-[7px] text-[9px] font-bold transition-all"
+                        style={{
+                          background: receiptType === t ? 'rgba(6,182,212,.12)' : 'var(--surface)',
+                          border: `1px solid ${receiptType === t ? 'var(--accent2)' : 'var(--border)'}`,
+                          color: receiptType === t ? 'var(--accent2)' : 'var(--muted)',
+                        }}>{t}</button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[10px] font-bold uppercase tracking-[.5px] mb-[4px]" style={{ color: 'var(--sub)' }}>Pago</div>
+                  <div className="flex gap-[4px]">
+                    {(['EFECTIVO', 'TARJETA', 'YAPE'] as const).map(m => (
+                      <button key={m} onClick={() => setPaymentMethod(m)}
+                        className="flex-1 py-[5px] rounded-[7px] text-[9px] font-bold transition-all"
+                        style={{
+                          background: paymentMethod === m ? 'rgba(6,182,212,.12)' : 'var(--surface)',
+                          border: `1px solid ${paymentMethod === m ? 'var(--accent2)' : 'var(--border)'}`,
+                          color: paymentMethod === m ? 'var(--accent2)' : 'var(--muted)',
+                        }}>{m === 'EFECTIVO' ? '💵' : m === 'TARJETA' ? '💳' : '📱'}</button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              {/* Monto efectivo */}
+              {paymentMethod === 'EFECTIVO' && (
+                <div className="mb-[8px]">
+                  <input type="number" step="0.01" value={amountPaid} onChange={e => setAmountPaid(e.target.value)}
+                    placeholder="Monto recibido"
+                    className="w-full px-3 py-2 rounded-lg text-sm font-bold outline-none"
+                    style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--text)' }} />
+                  {amountPaid && Number(amountPaid) >= total && (
+                    <div className="flex justify-between text-xs font-bold px-2 py-1 rounded-lg mt-1"
+                      style={{ background: 'rgba(16,185,129,.08)', border: '1px solid rgba(16,185,129,.2)', color: 'var(--green)' }}>
+                      <span>💰 VUELTO</span><span>{currency} {change.toFixed(2)}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+              {/* Total + botón */}
+              <div className="flex items-center justify-between mb-[8px]">
+                <span className="text-sm font-extrabold" style={{ color: 'var(--text)' }}>TOTAL</span>
+                <span className="text-2xl font-extrabold" style={{ color: 'var(--green)' }}>{currency} {total.toFixed(2)}</span>
+              </div>
+              <button onClick={processSale}
+                disabled={cart.length === 0 || processing || (paymentMethod === 'EFECTIVO' && (!amountPaid || Number(amountPaid) < total))}
+                className="w-full py-3 rounded-xl text-sm font-bold text-white transition-all disabled:opacity-40"
+                style={{ background: 'rgba(16,185,129,.9)' }}>
+                {processing ? '⏳ Procesando...' : '✓ Procesar Venta'}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>{/* fin móvil */}
 
       {/* Success modal */}
       {showSuccess && !pendingInvoice && (

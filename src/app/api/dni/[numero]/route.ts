@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { peruApiService } from '@/lib/integrations/peruapi/peruapi.service'
+import { peruApiService }   from '@/lib/integrations/peruapi/peruapi.service'
+import { documentCache }    from '@/lib/integrations/peruapi/document.cache'
 import { validateDniParam } from '@/lib/integrations/validators'
-import { PeruApiError } from '@/lib/integrations/peruapi/peruapi.types'
-import { toHttpError, ValidationError } from '@/lib/errors'
+import { PeruApiError }     from '@/lib/integrations/peruapi/peruapi.types'
+import { toHttpError }      from '@/lib/errors'
 
 const ERROR_STATUS: Record<PeruApiError['code'], number> = {
   INVALID_FORMAT: 400,
@@ -12,15 +13,34 @@ const ERROR_STATUS: Record<PeruApiError['code'], number> = {
 }
 
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: { numero: string } },
 ) {
   try {
     validateDniParam(params.numero)
+
+    // 1. Intentar caché
+    const cached = await documentCache.get('DNI', params.numero)
+    if (cached) {
+      await documentCache.logQuery('DNI', params.numero, true)
+      return NextResponse.json(cached, {
+        headers: { 'X-Cache': 'HIT' },
+      })
+    }
+
+    // 2. Consultar PeruAPI
     const result = await peruApiService.searchDni(params.numero)
-    return NextResponse.json(result)
+
+    // 3. Guardar en caché y auditar (no bloquean la respuesta)
+    await Promise.allSettled([
+      documentCache.set('DNI', params.numero, result),
+      documentCache.logQuery('DNI', params.numero, false),
+    ])
+
+    return NextResponse.json(result, {
+      headers: { 'X-Cache': 'MISS' },
+    })
   } catch (err: unknown) {
-    // Errores tipados de PeruAPI
     const apiErr = err as PeruApiError
     if (apiErr?.code && ERROR_STATUS[apiErr.code]) {
       return NextResponse.json(
@@ -28,8 +48,7 @@ export async function GET(
         { status: ERROR_STATUS[apiErr.code] },
       )
     }
-    // Errores de validación propios
-    const { status, body } = toHttpError(err instanceof ValidationError ? err : err)
+    const { status, body } = toHttpError(err)
     return NextResponse.json(body, { status })
   }
 }

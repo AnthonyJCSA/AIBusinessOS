@@ -22,26 +22,28 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     { module: 'customers', actions: ['view', 'create', 'edit', 'delete'] },
     { module: 'leads', actions: ['view', 'create', 'edit', 'delete'] },
     { module: 'purchases', actions: ['view', 'create', 'edit', 'delete'] },
+    { module: 'pharma',   actions: ['view', 'create', 'edit'] },
     { module: 'settings', actions: ['view', 'edit'] },
-    { module: 'users', actions: ['view', 'create', 'edit', 'delete'] },
+    { module: 'users',    actions: ['view', 'create', 'edit', 'delete'] },
   ],
   ADMIN: [
-    { module: 'dashboard', actions: ['view'] },
-    { module: 'asistente', actions: ['view'] },
-    { module: 'pos', actions: ['view', 'create', 'cancel'] },
-    { module: 'cash', actions: ['view', 'open', 'close'] },
-    { module: 'inventory', actions: ['view', 'create', 'edit', 'delete'] },
-    { module: 'billing', actions: ['view', 'create', 'cancel'] },
-    { module: 'store', actions: ['view', 'edit'] },
-    { module: 'catalog', actions: ['view', 'edit'] },
+    { module: 'dashboard',      actions: ['view'] },
+    { module: 'asistente',      actions: ['view'] },
+    { module: 'pos',            actions: ['view', 'create', 'cancel'] },
+    { module: 'cash',           actions: ['view', 'open', 'close'] },
+    { module: 'inventory',      actions: ['view', 'create', 'edit', 'delete'] },
+    { module: 'billing',        actions: ['view', 'create', 'cancel'] },
+    { module: 'store',          actions: ['view', 'edit'] },
+    { module: 'catalog',        actions: ['view', 'edit'] },
     { module: 'communications', actions: ['view', 'create'] },
-    { module: 'reports', actions: ['view', 'export'] },
-    { module: 'customers', actions: ['view', 'create', 'edit', 'delete'] },
-    { module: 'leads', actions: ['view', 'create', 'edit', 'delete'] },
-    { module: 'purchases', actions: ['view', 'create', 'edit', 'delete'] },
-    { module: 'automations', actions: ['view', 'create', 'edit', 'delete'] },
-    { module: 'settings', actions: ['view', 'edit'] },
-    { module: 'users', actions: ['view', 'create', 'edit', 'delete'] }
+    { module: 'reports',        actions: ['view', 'export'] },
+    { module: 'customers',      actions: ['view', 'create', 'edit', 'delete'] },
+    { module: 'leads',          actions: ['view', 'create', 'edit', 'delete'] },
+    { module: 'purchases',      actions: ['view', 'create', 'edit', 'delete'] },
+    { module: 'pharma',         actions: ['view', 'create', 'edit'] },
+    { module: 'automations',    actions: ['view', 'create', 'edit', 'delete'] },
+    { module: 'settings',       actions: ['view', 'edit'] },
+    { module: 'users',          actions: ['view', 'create', 'edit', 'delete'] },
   ],
   MANAGER: [
     { module: 'dashboard', actions: ['view'] },
@@ -56,8 +58,9 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     { module: 'reports', actions: ['view'] },
     { module: 'customers', actions: ['view', 'create', 'edit'] },
     { module: 'leads', actions: ['view', 'create', 'edit'] },
-    { module: 'purchases', actions: ['view', 'create'] },
-    { module: 'automations', actions: ['view'] }
+    { module: 'purchases',   actions: ['view', 'create'] },
+    { module: 'pharma',      actions: ['view', 'create'] },
+    { module: 'automations', actions: ['view'] },
   ],
   VENDEDOR: [
     { module: 'dashboard', actions: ['view'] },
@@ -77,7 +80,11 @@ export const hasPermission = (role: Role, module: string, action: string): boole
 }
 
 export const canAccessModule = (role: Role, module: string): boolean => {
-  const permissions = ROLE_PERMISSIONS[role]
-  if (!permissions) return false
+  // Normalizar el rol por si viene en formato incorrecto
+  const normalizedRole = (role || '').toUpperCase() as Role
+  const permissions = ROLE_PERMISSIONS[normalizedRole]
+  if (!permissions) {
+    return ['dashboard', 'pos', 'inventory', 'cash', 'customers', 'reports'].includes(module)
+  }
   return permissions.some(p => p.module === module)
 }

@@ -6,6 +6,23 @@ import { createLogger } from '@/lib/logger'
 
 const log = createLogger('API:invoices')
 
+export async function GET(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url)
+    const orgId  = searchParams.get('orgId')
+    const saleId = searchParams.get('saleId') ?? undefined
+    const limit  = Number(searchParams.get('limit') ?? 50)
+
+    if (!orgId) return NextResponse.json({ error: 'orgId requerido', code: 'VALIDATION_ERROR' }, { status: 400 })
+
+    const invoices = await invoiceService.listByOrg(orgId, { saleId, limit })
+    return NextResponse.json({ invoices })
+  } catch (err) {
+    const { status, body } = toHttpError(err)
+    return NextResponse.json(body, { status })
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()

@@ -6,23 +6,23 @@ const TABLE = 'corivacore_organizations'
 export const organizationService = {
   async create(org: Omit<Organization, 'id' | 'created_at' | 'updated_at'>): Promise<Organization> {
     if (!isSupabaseConfigured()) throw new Error('Supabase not configured')
-    
-    // Generar ID único
-    const orgId = `org_${Date.now()}`
-    
+
+    // La tabla usa id TEXT — generamos un UUID v4 real en el código
+    const orgId = crypto.randomUUID()
+
     const { data, error } = await supabase
       .from(TABLE)
       .insert({
-        id: orgId,
-        slug: org.slug,
-        name: org.name,
+        id:            orgId,
+        slug:          org.slug,
+        name:          org.name,
         business_type: org.business_type,
-        ruc: org.ruc,
-        address: org.address,
-        phone: org.phone,
-        email: org.email,
-        settings: org.settings,
-        is_active: org.is_active !== false
+        ruc:           org.ruc     || null,
+        address:       org.address || null,
+        phone:         org.phone   || null,
+        email:         org.email   || null,
+        settings:      org.settings,
+        is_active:     org.is_active !== false,
       })
       .select()
       .single()

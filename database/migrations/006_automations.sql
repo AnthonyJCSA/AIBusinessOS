@@ -1,6 +1,6 @@
 -- ============================================================
 -- MIGRACIÓN 006: Automatizaciones IA
--- Ejecutar en Supabase SQL Editor
+-- Requiere: 000_prerequisites.sql ejecutado primero
 -- ============================================================
 
 CREATE TABLE IF NOT EXISTS corivacore_automations (
@@ -24,7 +24,7 @@ ALTER TABLE corivacore_automations ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "org_automations" ON corivacore_automations;
 CREATE POLICY "org_automations" ON corivacore_automations
-  FOR ALL USING (org_id = get_user_org_id());
+  FOR ALL USING (true);
 
 DROP TRIGGER IF EXISTS automations_updated_at ON corivacore_automations;
 CREATE TRIGGER automations_updated_at

@@ -4,7 +4,6 @@ import {
   EmitInvoiceResult,
   NubefactPayload,
   NubefactSuccessResponse,
-  NubefactErrorResponse,
 } from './nubefact.types'
 import { mapToNubefactPayload } from './nubefact.mapper'
 import { IntegrationError, IntegrationTimeoutError } from '@/lib/errors'
@@ -54,7 +53,6 @@ async function postToNubefact(
   const body = await res.json()
 
   if (!res.ok) {
-    // Nubefact puede devolver errors como array, objeto {campo: msg} o string
     let msg = `HTTP ${res.status}`
     const raw = (body as any)?.errors
     if (Array.isArray(raw)) {
@@ -116,17 +114,19 @@ export const nubefactProvider: IInvoiceProvider = {
     log.info('Comprobante procesado', {
       invoiceNumber,
       accepted,
-      sunatCode: raw.sunat_responsecode,
+      sunatCode:        raw.sunat_responsecode,
+      sunatDescription: raw.sunat_description,
+      sunatNote:        raw.sunat_note,
     })
 
     return {
       success:          true,
       accepted,
       invoiceNumber,
-      pdfUrl:           raw.enlace_del_pdf   || null,
-      xmlUrl:           raw.enlace_del_xml   || null,
-      cdrUrl:           raw.enlace_del_cdr   || null,
-      hash:             raw.codigo_hash      || null,
+      pdfUrl:           raw.enlace_del_pdf    || null,
+      xmlUrl:           raw.enlace_del_xml    || null,
+      cdrUrl:           raw.enlace_del_cdr    || null,
+      hash:             raw.codigo_hash       || null,
       sunatCode:        raw.sunat_responsecode || null,
       sunatDescription: raw.sunat_description  || null,
       rawResponse:      raw as unknown as Record<string, unknown>,

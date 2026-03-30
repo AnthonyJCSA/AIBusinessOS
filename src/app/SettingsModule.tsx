@@ -188,18 +188,27 @@ export default function SettingsModule({ currentOrg, onUpdate }: { currentOrg: O
               <span className="text-sm font-bold" style={{ color: 'var(--text)' }}>📊 Tu Plan</span>
             </div>
             <div className="p-4 text-center">
-              <div className="text-3xl font-extrabold mb-1" style={{ background: 'var(--gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>PRO</div>
-              <div className="text-xs mb-4" style={{ color: 'var(--muted)' }}>Plan activo · $29/mes</div>
+              <div className="text-3xl font-extrabold mb-1" style={{ background: 'var(--gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                {(currentOrg.settings?.plan ?? 'PRO').toUpperCase()}
+              </div>
+              <div className="text-xs mb-4" style={{ color: 'var(--muted)' }}>Plan activo</div>
               <div className="flex flex-col gap-[5px] text-left mb-4">
-                {[['Usuarios', '5 incluidos'], ['Productos', 'Ilimitados'], ['Tienda virtual', '✅'], ['WhatsApp', '✅'], ['IA completa', '✅']].map(([k, v]) => (
+                {[
+                  ['POS + Inventario', '✅'],
+                  ['Facturación SUNAT', currentOrg.settings?.plan === 'premium' ? '✅' : '🔒 Premium'],
+                  ['Módulo Farmacia',   currentOrg.settings?.plan === 'premium' ? '✅' : '🔒 Premium'],
+                  ['Asistente IA',      ['pro','premium'].includes(currentOrg.settings?.plan) ? '✅' : '🔒 Pro'],
+                  ['Tienda Virtual',    currentOrg.settings?.plan === 'premium' ? '✅' : '🔒 Premium'],
+                ].map(([k, v]) => (
                   <div key={k} className="flex justify-between text-xs">
                     <span style={{ color: 'var(--muted)' }}>{k}</span>
-                    <span style={{ color: 'var(--green)' }}>{v}</span>
+                    <span style={{ color: String(v).startsWith('✅') ? 'var(--green)' : 'var(--sub)' }}>{v}</span>
                   </div>
                 ))}
               </div>
-              <button className="w-full py-[9px] rounded-[9px] text-xs font-bold text-white transition-all"
-                style={{ background: 'var(--gradient)' }}>⚡ Enterprise →</button>
+              <a href="/precios"
+                className="block w-full py-[9px] rounded-[9px] text-xs font-bold text-white text-center transition-all"
+                style={{ background: 'var(--gradient)' }}>⚡ Ver planes →</a>
             </div>
           </div>
 

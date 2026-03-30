@@ -13,7 +13,7 @@ import { createLogger } from '@/lib/logger'
 
 const log = createLogger('InvoiceService')
 
-// Inyección del proveedor — cambiar nubefactProvider por otro para swapear
+// Proveedor de facturación — Nubefact
 const provider: IInvoiceProvider = nubefactProvider
 
 export interface CreateInvoiceDTO {
@@ -24,6 +24,8 @@ export interface CreateInvoiceDTO {
   clientName?: string
   clientAddress?: string
   clientEmail?: string
+  // Tipo de comprobante explícito — si no se pasa, se lee de la venta
+  invoiceType?: InvoiceType
   // Solo para notas
   modifiesType?: InvoiceType
   modifiesSeries?: string
@@ -78,8 +80,16 @@ export const invoiceService = {
 
     if (itemsErr || !items?.length) throw new NotFoundError('Ítems de la venta')
 
-    // 4. Obtener serie activa para el tipo de comprobante
-    const receiptType = dbSale.receipt_type as InvoiceType
+    // 4. Determinar tipo de comprobante:
+    //    - Si el DTO trae invoiceType explícito (seleccionado en InvoicePanel), usarlo
+    //    - Si no, leer de la venta (fallback)
+    const receiptType = (dto.invoiceType ?? dbSale.receipt_type) as InvoiceType
+
+    // Validar coherencia: RUC requiere FACTURA
+    if (dto.clientDocType === 'RUC' && receiptType === 'BOLETA') {
+      throw new ValidationError('Para emitir FACTURA se requiere seleccionar el tipo FACTURA en el formulario')
+    }
+    // 5. Obtener serie activa para el tipo de comprobante
     const { data: seriesRow, error: seriesErr } = await supabase
       .from('corivacore_invoice_series')
       .select('*')
@@ -131,7 +141,17 @@ export const invoiceService = {
       ? (result.accepted ? 'ACEPTADA' : 'RECHAZADA')
       : 'PENDIENTE'
 
-    // 8. Persistir comprobante (siempre, incluso si fue rechazado — para auditoría)
+    // 8. Persistir comprobante SOLO si la emisión fue exitosa o fue rechazada por SUNAT
+    //    (no persistir si Nubefact falló por error de configuración/red)
+    if (!result.success && !result.accepted && result.error) {
+      // Nubefact falló antes de llegar a SUNAT — no persistir, no incrementar correlativo
+      log.error('Nubefact falló antes de SUNAT — no se persiste ni incrementa correlativo', {
+        invoiceNumber: result.invoiceNumber,
+        error: result.error,
+      })
+      return { invoice: null as any, result }
+    }
+
     const { data: invoice, error: insertErr } = await supabase
       .from('corivacore_invoices')
       .insert({
@@ -198,5 +218,39 @@ export const invoiceService = {
       .maybeSingle()
 
     return data as InvoiceRecord | null
+  },
+
+  async listByOrg(
+    orgId: string,
+    options: { saleId?: string; limit?: number } = {},
+  ): Promise<InvoiceRecord[]> {
+    let query = supabase
+      .from('corivacore_invoices')
+      .select('id, invoice_number, type, series, correlative, status, sunat_status, pdf_url, xml_url, total, client_name, client_doc_type, client_doc, client_email, created_at')
+      .eq('org_id', orgId)
+      .order('created_at', { ascending: false })
+      .limit(options.limit ?? 50)
+
+    if (options.saleId) query = query.eq('sale_id', options.saleId)
+
+    const { data, error } = await query
+    if (error) throw new Error(error.message)
+    return (data ?? []) as InvoiceRecord[]
+  },
+
+  async resend(id: string): Promise<void> {
+    const { data: inv, error } = await supabase
+      .from('corivacore_invoices')
+      .select('id, client_email, pdf_url, invoice_number, org_id')
+      .eq('id', id)
+      .single()
+
+    if (error || !inv) throw new NotFoundError('Comprobante')
+    if (!inv.client_email) throw new ValidationError('El comprobante no tiene email de destino')
+    if (!inv.pdf_url)      throw new ValidationError('El comprobante no tiene PDF disponible')
+
+    // Reenvío delegado al proveedor — Nubefact reenvía automáticamente si se re-emite
+    // Por ahora registramos el intento en el log; integrar con email service si se requiere
+    log.info('Resend invoice', { id, email: inv.client_email, number: inv.invoice_number })
   },
 }

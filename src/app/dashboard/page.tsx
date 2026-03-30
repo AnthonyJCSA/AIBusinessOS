@@ -25,6 +25,7 @@ import BillingModule from '@/app/BillingModule'
 import LeadsModule from '@/app/LeadsModule'
 import PurchasesModule from '@/app/PurchasesModule'
 import AutomationsModule from '@/app/AutomationsModule'
+import PharmaModule     from '@/app/PharmaModule'
 
 import type { Product, Sale } from '@/types'
 
@@ -57,10 +58,61 @@ export default function DashboardPage() {
         return
       }
     } else if (org) {
-      loadThemeFromOrg(org)
+      // Refrescar datos del usuario y org desde Supabase
+      // para que cambios de rol/plan se reflejen sin logout
+      const refreshSession = async () => {
+        if (!user?.id) return
+        try {
+          const { data } = await import('@/lib/supabase').then(m =>
+            m.supabase
+              .from('corivacore_users')
+              .select('*, org:corivacore_organizations(*)')
+              .or(`id.eq.${user.id},username.eq.${user.username}`)
+              .eq('is_active', true)
+              .single()
+          )
+          if (data) {
+            const freshUser = {
+              id:              data.id,
+              organization_id: data.org_id,
+              username:        data.username,
+              email:           data.email,
+              full_name:       data.full_name,
+              role:            data.role,
+              is_active:       data.is_active,
+              created_at:      data.created_at,
+            }
+            const freshOrg = {
+              id:            data.org.id,
+              name:          data.org.name,
+              slug:          data.org.slug,
+              business_type: data.org.business_type,
+              ruc:           data.org.ruc,
+              address:       data.org.address,
+              phone:         data.org.phone,
+              email:         data.org.email,
+              logo_url:      data.org.logo_url,
+              settings:      data.org.settings,
+              is_active:     data.org.is_active,
+              created_at:    data.org.created_at,
+              updated_at:    data.org.updated_at,
+            }
+            // Solo actualizar si hay cambios reales en rol o plan
+            const planChanged = freshOrg.settings?.plan !== org?.settings?.plan
+            const roleChanged = freshUser.role !== user?.role
+            if (planChanged || roleChanged) {
+              setSession(freshUser, freshOrg)
+            } else {
+              setSession(freshUser, freshOrg)
+            }
+            loadThemeFromOrg(freshOrg)
+          }
+        } catch {}
+      }
+      refreshSession()
     }
     setLoading(false)
-  }, [isAuthenticated, org, setSession, router])
+  }, [isAuthenticated, org?.id, setSession, router])
 
   // ── Data loaders ───────────────────────────────────────────
   const loadProducts = useCallback(async () => {
@@ -138,6 +190,8 @@ export default function DashboardPage() {
         return <PurchasesModule orgId={org.id} />
       case 'automations':
         return <AutomationsModule currentOrg={org} />
+      case 'pharma':
+        return <PharmaModule orgId={org.id} currentUser={user} />
       case 'reports':
         return <ReportsModule sales={sales} currentUser={user} />
       case 'users':

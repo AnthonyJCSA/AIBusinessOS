@@ -59,35 +59,35 @@ export const authService = {
   }): Promise<User> {
     if (!isSupabaseConfigured()) throw new Error('Supabase not configured')
 
-    // Generar ID único
-    const userId = `user_${Date.now()}`
+    // La tabla usa id TEXT — generamos un UUID v4 real en el código
+    const userId = crypto.randomUUID()
 
     const { data, error } = await supabase
       .from('corivacore_users')
       .insert({
-        id: userId,
-        org_id: userData.organization_id,
-        username: userData.username,
-        password_hash: userData.password, // En producción usar bcrypt
-        full_name: userData.full_name,
-        email: userData.email,
-        role: userData.role,
-        is_active: userData.is_active
+        id:            userId,
+        org_id:        userData.organization_id,
+        username:      userData.username,
+        password_hash: userData.password,
+        full_name:     userData.full_name,
+        email:         userData.email || null,
+        role:          userData.role,
+        is_active:     userData.is_active,
       })
       .select()
       .single()
 
     if (error) throw error
-    
+
     return {
-      id: data.id,
+      id:              data.id,
       organization_id: data.org_id,
-      username: data.username,
-      email: data.email,
-      full_name: data.full_name,
-      role: data.role,
-      is_active: data.is_active,
-      created_at: data.created_at
+      username:        data.username,
+      email:           data.email,
+      full_name:       data.full_name,
+      role:            data.role,
+      is_active:       data.is_active,
+      created_at:      data.created_at,
     }
   },
 

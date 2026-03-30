@@ -1,4 +1,6 @@
 'use client'
+import { useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { InvoicePanel } from './InvoicePanel'
 import { InvoiceEmitResult } from '../hooks/useInvoiceEmit'
 
@@ -12,15 +14,51 @@ interface Props {
 }
 
 export function InvoiceModal({ saleId, orgId, total, currency, onSuccess, onClose }: Props) {
-  return (
-    <div className="fixed inset-0 bg-black/70 flex items-end sm:items-center justify-center p-0 sm:p-4 z-50 backdrop-blur-sm">
+  const overlayRef = useRef<HTMLDivElement>(null)
+
+  // Cerrar con Escape
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [onClose])
+
+  // Bloquear scroll del body
+  useEffect(() => {
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = '' }
+  }, [])
+
+  const modal = (
+    <div
+      ref={overlayRef}
+      onClick={e => { if (e.target === overlayRef.current) onClose() }}
+      style={{
+        position:       'fixed',
+        inset:          0,
+        zIndex:         9999,
+        background:     'rgba(0,0,0,.72)',
+        backdropFilter: 'blur(4px)',
+        display:        'flex',
+        alignItems:     'flex-end',
+        justifyContent: 'center',
+        padding:        '0',
+      }}
+    >
       <div
-        className="w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl overflow-y-auto"
         style={{
+          width:       '100%',
+          maxWidth:    '460px',
+          maxHeight:   '92dvh',
+          overflowY:   'auto',
           background:  'var(--card)',
           border:      '1px solid var(--border2)',
-          maxHeight:   '92dvh',
+          borderRadius: '20px 20px 0 0',
         }}
+        // En desktop centrar verticalmente
+        className="sm:rounded-[20px] sm:mb-4"
       >
         {/* Header */}
         <div
@@ -58,4 +96,8 @@ export function InvoiceModal({ saleId, orgId, total, currency, onSuccess, onClos
       </div>
     </div>
   )
+
+  // Renderizar en document.body para escapar cualquier overflow:hidden padre
+  if (typeof document === 'undefined') return null
+  return createPortal(modal, document.body)
 }

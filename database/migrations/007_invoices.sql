@@ -1,6 +1,5 @@
 -- ============================================================
 -- MIGRACIÓN 007: Facturación electrónica
--- Ejecutar en Supabase SQL Editor
 -- ============================================================
 
 -- ── 1. Series de comprobantes ────────────────────────────────
@@ -8,7 +7,7 @@ CREATE TABLE IF NOT EXISTS corivacore_invoice_series (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   org_id      UUID NOT NULL,
   type        VARCHAR(20) NOT NULL CHECK (type IN ('FACTURA','BOLETA','NOTA_CREDITO','NOTA_DEBITO')),
-  series      VARCHAR(10) NOT NULL,   -- Ej: F001, B001
+  series      VARCHAR(10) NOT NULL,
   last_number INTEGER NOT NULL DEFAULT 0,
   is_active   BOOLEAN DEFAULT true,
   created_at  TIMESTAMPTZ DEFAULT NOW(),
@@ -18,7 +17,7 @@ CREATE TABLE IF NOT EXISTS corivacore_invoice_series (
 ALTER TABLE corivacore_invoice_series ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "org_invoice_series" ON corivacore_invoice_series;
 CREATE POLICY "org_invoice_series" ON corivacore_invoice_series
-  FOR ALL USING (true);  -- permisivo hasta activar RLS real
+  FOR ALL USING (true);
 
 -- ── 2. Comprobantes emitidos ─────────────────────────────────
 CREATE TABLE IF NOT EXISTS corivacore_invoices (
@@ -46,20 +45,12 @@ CREATE TABLE IF NOT EXISTS corivacore_invoices (
   created_at       TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_invoices_org ON corivacore_invoices(org_id);
-CREATE INDEX IF NOT EXISTS idx_invoices_sale ON corivacore_invoices(sale_id);
+CREATE INDEX IF NOT EXISTS idx_invoices_org    ON corivacore_invoices(org_id);
+CREATE INDEX IF NOT EXISTS idx_invoices_sale   ON corivacore_invoices(sale_id);
+CREATE INDEX IF NOT EXISTS idx_invoices_org_created
+  ON corivacore_invoices(org_id, created_at DESC);
 
 ALTER TABLE corivacore_invoices ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "org_invoices" ON corivacore_invoices;
 CREATE POLICY "org_invoices" ON corivacore_invoices
-  FOR ALL USING (true);  -- permisivo hasta activar RLS real
-
--- ── 3. Series por defecto para org demo ─────────────────────
--- Reemplaza 'org_1772836382137' con el ID real de tu organización
--- o ejecuta esto después de conocer el UUID de tu org en Supabase
-
--- INSERT INTO corivacore_invoice_series (org_id, type, series, last_number, is_active)
--- VALUES
---   ('TU_ORG_UUID', 'BOLETA',  'B001', 0, true),
---   ('TU_ORG_UUID', 'FACTURA', 'F001', 0, true)
--- ON CONFLICT (org_id, type, series) DO NOTHING;
+  FOR ALL USING (true);

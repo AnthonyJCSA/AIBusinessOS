@@ -1,6 +1,5 @@
 -- ============================================================
 -- MIGRACIÓN 005: Sesiones de caja formales
--- Ejecutar en Supabase SQL Editor
 -- ============================================================
 
 CREATE TABLE IF NOT EXISTS corivacore_cash_sessions (
@@ -26,4 +25,4 @@ ALTER TABLE corivacore_cash_sessions ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "org_cash_sessions" ON corivacore_cash_sessions;
 CREATE POLICY "org_cash_sessions" ON corivacore_cash_sessions
-  FOR ALL USING (org_id = get_user_org_id());
+  FOR ALL USING (true);

@@ -16,7 +16,15 @@ export async function POST(req: NextRequest) {
     try {
       const ctx = orgId
         ? await buildBusinessContext(orgId)
-        : { businessName: 'Mi Negocio', businessType: businessType ?? 'retail', currency: 'S/', productsCount: 0, lowStockCount: 0, todaySales: 0, todayRevenue: 0 }
+        : {
+            businessName: 'Mi Negocio', businessType: businessType ?? 'retail',
+            currency: 'S/', plan: 'pro',
+            productsCount: 0, lowStockCount: 0, outOfStockCount: 0,
+            todaySales: 0, todayRevenue: 0, weekRevenue: 0,
+            pendingInvoices: 0, rejectedInvoices: 0,
+            expiringBatches: 0, expiredBatches: 0, prescriptionSales: 0,
+            activeLeads: 0, pendingPurchases: 0,
+          }
       systemPrompt = buildSystemPrompt(ctx)
     } catch {
       systemPrompt = `Eres el asistente IA de Coriva, un sistema POS para negocios en Perú. Responde en español, de forma concisa y accionable.`

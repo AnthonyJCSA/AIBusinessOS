@@ -16,29 +16,30 @@ const navSections = [
   {
     label: 'Principal',
     items: [
-      { id: 'dashboard', icon: <GridIcon />, label: 'Dashboard IA', badge: null, badgeColor: 'accent' },
-      { id: 'asistente', icon: <AIIcon />, label: 'Asistente IA', badge: 'IA', badgeColor: 'green' },
+      { id: 'dashboard', icon: <GridIcon />,    label: 'Dashboard IA',      badge: null,     badgeColor: 'accent' },
+      { id: 'asistente', icon: <AIIcon />,      label: 'Asistente IA',      badge: 'IA',     badgeColor: 'green'  },
     ],
   },
   {
     label: 'Ventas',
     items: [
-      { id: 'pos', icon: <POSIcon />, label: 'Punto de Venta', badge: null, badgeColor: null },
-      { id: 'cash', icon: <CashIcon />, label: 'Caja', badge: null, badgeColor: null },
-      { id: 'billing', icon: <BillingIcon />, label: 'Facturación SUNAT', badge: 'SUNAT', badgeColor: 'amber' },
+      { id: 'pos',     icon: <POSIcon />,     label: 'Punto de Venta',    badge: null,     badgeColor: null    },
+      { id: 'cash',    icon: <CashIcon />,    label: 'Caja',              badge: null,     badgeColor: null    },
+      { id: 'billing', icon: <BillingIcon />, label: 'Facturación SUNAT', badge: 'SUNAT',  badgeColor: 'amber' },
     ],
   },
   {
-    label: 'Inventario & IA',
+    label: 'Inventario & Farmacia',
     items: [
-      { id: 'inventory', icon: <BoxIcon />, label: 'Inventario', badge: null, badgeColor: 'red' },
+      { id: 'inventory', icon: <BoxIcon />,    label: 'Inventario', badge: null,     badgeColor: 'red'   },
+      { id: 'pharma',    icon: <PharmaIcon />, label: 'Farmacia',   badge: 'PHARMA', badgeColor: 'green' },
     ],
   },
   {
     label: 'Tienda Virtual',
     items: [
-      { id: 'store', icon: <StoreIcon />, label: 'Tienda Virtual', badge: 'NUEVO', badgeColor: 'green' },
-      { id: 'catalog', icon: <CatalogIcon />, label: 'Catálogo Digital', badge: null, badgeColor: null },
+      { id: 'store',   icon: <StoreIcon />,   label: 'Tienda Virtual',   badge: 'NUEVO', badgeColor: 'green' },
+      { id: 'catalog', icon: <CatalogIcon />, label: 'Catálogo Digital', badge: null,    badgeColor: null    },
     ],
   },
   {
@@ -50,8 +51,8 @@ const navSections = [
   {
     label: 'CRM',
     items: [
-      { id: 'customers', icon: <UsersIcon />, label: 'Clientes', badge: null, badgeColor: null },
-      { id: 'leads', icon: <LeadsIcon />, label: 'Leads & Pipeline', badge: null, badgeColor: null },
+      { id: 'customers', icon: <UsersIcon />, label: 'Clientes',        badge: null, badgeColor: null },
+      { id: 'leads',     icon: <LeadsIcon />, label: 'Leads & Pipeline', badge: null, badgeColor: null },
     ],
   },
   {
@@ -75,17 +76,17 @@ const navSections = [
   {
     label: 'Sistema',
     items: [
-      { id: 'users', icon: <UserIcon />, label: 'Usuarios', badge: null, badgeColor: null },
-      { id: 'settings', icon: <SettingsIcon />, label: 'Configuración', badge: null, badgeColor: null },
+      { id: 'users',    icon: <UserIcon />,     label: 'Usuarios',       badge: null, badgeColor: null },
+      { id: 'settings', icon: <SettingsIcon />, label: 'Configuración',  badge: null, badgeColor: null },
     ],
   },
 ]
 
 const badgeStyles: Record<string, string> = {
   accent: 'bg-indigo-500/15 text-indigo-400',
-  green: 'bg-emerald-500/15 text-emerald-400',
-  red: 'bg-red-500/15 text-red-400',
-  amber: 'bg-amber-500/15 text-amber-400',
+  green:  'bg-emerald-500/15 text-emerald-400',
+  red:    'bg-red-500/15 text-red-400',
+  amber:  'bg-amber-500/15 text-amber-400',
 }
 
 export default function Sidebar({ currentUser, currentOrg, activeModule, setActiveModule, isOpen, onClose, onLogout }: SidebarProps) {
@@ -94,6 +95,8 @@ export default function Sidebar({ currentUser, currentOrg, activeModule, setActi
     .map((n: string) => n[0])
     .slice(0, 2)
     .join('') || 'U'
+
+  const plan = (currentOrg?.settings?.plan ?? 'pro').toUpperCase()
 
   const handleClick = (id: string) => {
     setActiveModule(id)
@@ -183,19 +186,12 @@ export default function Sidebar({ currentUser, currentOrg, activeModule, setActi
                   <button
                     key={item.id}
                     onClick={() => handleClick(item.id)}
-                    className={`
-                      w-full flex items-center gap-[9px] px-3 py-2 mx-2 rounded-[9px] text-[13px] font-medium
-                      transition-all cursor-pointer text-left
-                      ${isActive
-                        ? 'text-indigo-400'
-                        : 'hover:text-[var(--text)]'
-                      }
-                    `}
+                    className="w-full flex items-center gap-[9px] px-3 py-2 mx-2 rounded-[9px] text-[13px] font-medium transition-all cursor-pointer text-left"
                     style={{
-                      width: 'calc(100% - 16px)',
-                      background: isActive ? 'rgba(99,102,241,.15)' : 'transparent',
-                      border: isActive ? '1px solid rgba(99,102,241,.2)' : '1px solid transparent',
-                      color: isActive ? 'var(--accent)' : 'var(--muted)',
+                      width:        'calc(100% - 16px)',
+                      background:   isActive ? 'rgba(99,102,241,.15)' : 'transparent',
+                      border:       isActive ? '1px solid rgba(99,102,241,.2)' : '1px solid transparent',
+                      color:        isActive ? 'var(--accent)' : 'var(--muted)',
                       marginBottom: '1px',
                     }}
                   >
@@ -222,7 +218,7 @@ export default function Sidebar({ currentUser, currentOrg, activeModule, setActi
               className="text-[11px] font-bold"
               style={{ background: 'var(--gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
             >
-              Plan PRO
+              Plan {plan}
             </span>
             <span className="text-[10px] px-2 py-[2px] rounded-full font-semibold" style={{ background: 'rgba(16,185,129,.1)', color: 'var(--green)' }}>
               Activo
@@ -243,52 +239,21 @@ export default function Sidebar({ currentUser, currentOrg, activeModule, setActi
   )
 }
 
-// ── Icons ──
-function BillingIcon() {
-  return <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full"><rect x="2" y="1" width="12" height="14" rx="1.5"/><path d="M5 5h6M5 8h6M5 11h3"/></svg>
-}
-function GridIcon() {
-  return <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
-}
-function AIIcon() {
-  return <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full"><circle cx="8" cy="8" r="6"/><path d="M6 6c0-1.1.9-2 2-2s2 .9 2 2c0 1-1 1.5-2 2"/><circle cx="8" cy="12" r=".5" fill="currentColor"/></svg>
-}
-function POSIcon() {
-  return <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M5 7h6M5 10h3"/></svg>
-}
-function CashIcon() {
-  return <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full"><rect x="1" y="5" width="14" height="9" rx="1.5"/><path d="M5 5V3.5a3 3 0 016 0V5"/><circle cx="8" cy="9.5" r="1.5"/></svg>
-}
-function BoxIcon() {
-  return <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full"><path d="M2 4l6-2 6 2v8l-6 2-6-2V4z"/><path d="M8 2v12M2 4l6 2 6-2"/></svg>
-}
-function StoreIcon() {
-  return <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full"><path d="M2 2h12l-1.5 6H3.5L2 2z"/><circle cx="6" cy="13" r="1.5"/><circle cx="11" cy="13" r="1.5"/></svg>
-}
-function CatalogIcon() {
-  return <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full"><rect x="2" y="2" width="12" height="12" rx="1.5"/><path d="M5 6h6M5 9h4"/></svg>
-}
-function EmailIcon() {
-  return <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full"><path d="M14 3H2a1 1 0 00-1 1v7a1 1 0 001 1h12a1 1 0 001-1V4a1 1 0 00-1-1z"/><path d="M1 4l7 4 7-4"/></svg>
-}
-function UsersIcon() {
-  return <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full"><circle cx="6" cy="5" r="2.5"/><path d="M1 13c0-2.76 2.24-5 5-5s5 2.24 5 5"/><circle cx="12" cy="5" r="2"/><path d="M15 13c0-1.66-1.34-3-3-3"/></svg>
-}
-function ChartIcon() {
-  return <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full"><path d="M3 12V8M6 12V5M9 12V7M12 12V4"/><path d="M1 14h14"/></svg>
-}
-function UserIcon() {
-  return <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.31 2.69-6 6-6s6 2.69 6 6"/></svg>
-}
-function SettingsIcon() {
-  return <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2"/></svg>
-}
-function LeadsIcon() {
-  return <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full"><path d="M3 12V5l5-3 5 3v7l-5 3-5-3z"/><path d="M8 2v13M3 5l5 3 5-3"/></svg>
-}
-function PurchasesIcon() {
-  return <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full"><path d="M2 2h2l2 7h6l2-5H6"/><circle cx="7" cy="13" r="1"/><circle cx="12" cy="13" r="1"/></svg>
-}
-function AutoIcon() {
-  return <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full"><path d="M8 1v4M8 11v4M1 8h4M11 8h4"/><circle cx="8" cy="8" r="3"/></svg>
-}
+// ── Icons ──────────────────────────────────────────────────────────────────────
+function BillingIcon()   { return <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full"><rect x="2" y="1" width="12" height="14" rx="1.5"/><path d="M5 5h6M5 8h6M5 11h3"/></svg> }
+function GridIcon()      { return <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg> }
+function AIIcon()        { return <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full"><circle cx="8" cy="8" r="6"/><path d="M6 6c0-1.1.9-2 2-2s2 .9 2 2c0 1-1 1.5-2 2"/><circle cx="8" cy="12" r=".5" fill="currentColor"/></svg> }
+function POSIcon()       { return <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full"><rect x="2" y="3" width="12" height="10" rx="1.5"/><path d="M5 7h6M5 10h3"/></svg> }
+function CashIcon()      { return <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full"><rect x="1" y="5" width="14" height="9" rx="1.5"/><path d="M5 5V3.5a3 3 0 016 0V5"/><circle cx="8" cy="9.5" r="1.5"/></svg> }
+function BoxIcon()       { return <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full"><path d="M2 4l6-2 6 2v8l-6 2-6-2V4z"/><path d="M8 2v12M2 4l6 2 6-2"/></svg> }
+function PharmaIcon()    { return <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full"><rect x="5" y="1" width="6" height="3" rx="1"/><rect x="2" y="4" width="12" height="11" rx="1.5"/><path d="M8 7v4M6 9h4"/></svg> }
+function StoreIcon()     { return <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full"><path d="M2 2h12l-1.5 6H3.5L2 2z"/><circle cx="6" cy="13" r="1.5"/><circle cx="11" cy="13" r="1.5"/></svg> }
+function CatalogIcon()   { return <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full"><rect x="2" y="2" width="12" height="12" rx="1.5"/><path d="M5 6h6M5 9h4"/></svg> }
+function EmailIcon()     { return <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full"><path d="M14 3H2a1 1 0 00-1 1v7a1 1 0 001 1h12a1 1 0 001-1V4a1 1 0 00-1-1z"/><path d="M1 4l7 4 7-4"/></svg> }
+function UsersIcon()     { return <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full"><circle cx="6" cy="5" r="2.5"/><path d="M1 13c0-2.76 2.24-5 5-5s5 2.24 5 5"/><circle cx="12" cy="5" r="2"/><path d="M15 13c0-1.66-1.34-3-3-3"/></svg> }
+function ChartIcon()     { return <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full"><path d="M3 12V8M6 12V5M9 12V7M12 12V4"/><path d="M1 14h14"/></svg> }
+function UserIcon()      { return <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.31 2.69-6 6-6s6 2.69 6 6"/></svg> }
+function SettingsIcon()  { return <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2"/></svg> }
+function LeadsIcon()     { return <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full"><path d="M3 12V5l5-3 5 3v7l-5 3-5-3z"/><path d="M8 2v13M3 5l5 3 5-3"/></svg> }
+function PurchasesIcon() { return <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full"><path d="M2 2h2l2 7h6l2-5H6"/><circle cx="7" cy="13" r="1"/><circle cx="12" cy="13" r="1"/></svg> }
+function AutoIcon()      { return <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-full h-full"><path d="M8 1v4M8 11v4M1 8h4M11 8h4"/><circle cx="8" cy="8" r="3"/></svg> }

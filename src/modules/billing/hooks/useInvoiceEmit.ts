@@ -4,6 +4,7 @@ import { useState } from 'react'
 export interface InvoiceEmitPayload {
   saleId: string
   orgId: string
+  invoiceType?: string   // tipo explícito: 'BOLETA' | 'FACTURA'
   clientDocType?: string
   clientDocNumber?: string
   clientName?: string

@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { supabase, isSupabaseConfigured } from '@/lib/supabase'
+import { ExpiryAlerts }   from '@/modules/pharma'
+import { useFeatureFlag } from '@/shared/hooks/useFeatureFlag'
 
 interface DashboardProps {
   sales: any[]
@@ -100,8 +102,10 @@ function useDashKPIs(orgId: string | undefined) {
 }
 
 export default function DashboardModule({ sales, products, currentOrg, onNavigate }: DashboardProps) {
-  const currency = currentOrg?.settings?.currency || 'S/'
-  const kpis = useDashKPIs(currentOrg?.id)
+  const currency   = currentOrg?.settings?.currency || 'S/'
+  const kpis       = useDashKPIs(currentOrg?.id)
+  const hasPharma  = useFeatureFlag('pharma')
+  const hasBilling = useFeatureFlag('billing')
 
   // Fallback a props mientras carga Supabase
   const today = new Date().toISOString().split('T')[0]
@@ -154,6 +158,11 @@ export default function DashboardModule({ sales, products, currentOrg, onNavigat
           Ver análisis
         </button>
       </div>
+
+      {/* Pharma: alertas de vencimiento — solo si el plan lo incluye */}
+      {hasPharma && currentOrg?.id && (
+        <ExpiryAlerts orgId={currentOrg.id} compact />
+      )}
 
       {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-[10px]">
