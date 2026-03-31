@@ -10,6 +10,9 @@ export default function RegistroPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [step, setStep] = useState<'form' | 'payment'>('form')
+  const [selectedPlan, setSelectedPlan] = useState<'pro' | 'premium'>('pro')
+  const [orgData, setOrgData] = useState<any>(null)
 
   const handleComplete = async (
     org: Organization, 
@@ -20,19 +23,16 @@ export default function RegistroPage() {
       setLoading(true)
       setError('')
       
-      // Validar email
       if (!userData.email || !userData.email.includes('@')) {
         throw new Error('Email inválido')
       }
 
-      // Validar contraseña
       if (!userData.password || userData.password.length < 6) {
         throw new Error('La contraseña debe tener al menos 6 caracteres')
       }
 
       const supabase = createBrowserClient()
 
-      // 1. Crear usuario en Supabase Auth desde cliente
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: userData.email,
         password: userData.password,
@@ -48,7 +48,6 @@ export default function RegistroPage() {
         throw new Error(`Error al crear usuario: ${authError?.message || 'Error desconocido'}`)
       }
 
-      // 2. Llamar al API route para crear org y usuario en tabla
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -62,19 +61,44 @@ export default function RegistroPage() {
       const data = await response.json()
 
       if (!response.ok) {
-        // Si falla, intentar eliminar usuario de Auth
         await supabase.auth.signOut()
         throw new Error(data.error || 'Error al crear la cuenta')
       }
 
-      // 3. Usuario ya está logueado automáticamente por signUp
-      // Redirigir al dashboard
-      router.push('/dashboard')
-      router.refresh()
+      // Guardar datos para el pago
+      setOrgData({ orgId: data.data.orgId, email: userData.email })
+      setStep('payment')
+      setLoading(false)
       
     } catch (error: any) {
       console.error('Error en registro:', error)
       setError(error?.message || 'Error desconocido al crear la cuenta')
+      setLoading(false)
+    }
+  }
+
+  const handlePayment = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          plan: selectedPlan,
+          orgId: orgData.orgId,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Error al crear checkout')
+      }
+
+      window.location.href = data.url
+      
+    } catch (error: any) {
+      setError(error?.message || 'Error al procesar el pago')
       setLoading(false)
     }
   }
@@ -85,7 +109,63 @@ export default function RegistroPage() {
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 rounded-full border-4 border-t-transparent animate-spin"
             style={{ borderColor: '#0C0E12', borderTopColor: 'transparent' }} />
-          <p className="text-sm font-semibold" style={{ color: '#6B7280' }}>Creando tu cuenta...</p>
+          <p className="text-sm font-semibold" style={{ color: '#6B7280' }}>
+            {step === 'form' ? 'Creando tu cuenta...' : 'Redirigiendo al pago...'}
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  if (step === 'payment') {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ background: '#FAFAF8' }}>
+        <div className="w-full max-w-2xl">
+          <h1 className="text-3xl font-bold mb-8 text-center">Selecciona tu plan</h1>
+          
+          <div className="grid md:grid-cols-2 gap-6 mb-8">
+            <div 
+              onClick={() => setSelectedPlan('pro')}
+              className={`p-6 rounded-xl cursor-pointer transition-all ${
+                selectedPlan === 'pro' ? 'ring-2 ring-indigo-600' : ''
+              }`}
+              style={{ background: '#fff', border: '2px solid #e5e7eb' }}
+            >
+              <h3 className="text-xl font-bold mb-2">Plan Pro</h3>
+              <p className="text-3xl font-bold mb-4">S/ 99<span className="text-sm">/mes</span></p>
+              <ul className="space-y-2 text-sm">
+                <li>✓ POS completo</li>
+                <li>✓ Inventario y caja</li>
+                <li>✓ CRM y reportes</li>
+                <li>✓ Facturación SUNAT</li>
+              </ul>
+            </div>
+
+            <div 
+              onClick={() => setSelectedPlan('premium')}
+              className={`p-6 rounded-xl cursor-pointer transition-all ${
+                selectedPlan === 'premium' ? 'ring-2 ring-indigo-600' : ''
+              }`}
+              style={{ background: '#fff', border: '2px solid #e5e7eb' }}
+            >
+              <h3 className="text-xl font-bold mb-2">Plan Premium</h3>
+              <p className="text-3xl font-bold mb-4">S/ 199<span className="text-sm">/mes</span></p>
+              <ul className="space-y-2 text-sm">
+                <li>✓ Todo en Pro</li>
+                <li>✓ Asistente IA</li>
+                <li>✓ Automatizaciones</li>
+                <li>✓ Tienda virtual</li>
+              </ul>
+            </div>
+          </div>
+
+          <button
+            onClick={handlePayment}
+            className="w-full py-4 rounded-xl text-white font-bold text-lg"
+            style={{ background: '#0C0E12' }}
+          >
+            Continuar al pago
+          </button>
         </div>
       </div>
     )

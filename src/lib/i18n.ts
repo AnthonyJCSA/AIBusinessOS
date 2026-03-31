@@ -22,7 +22,7 @@ export const LOCALES = {
       popular: "🔥 Más Popular",
       pro: { name: "Plan Pro", desc: "Para negocios en crecimiento" },
       premium: { name: "Plan Premium", desc: "Todo Pro + IA avanzada" },
-      cta: { trial: "Prueba 30 días gratis", sales: "Hablar con ventas" }
+      cta: { trial: "Comenzar ahora", sales: "Hablar con ventas" }
     },
     common: {
       loading: "Cargando...",
@@ -55,7 +55,7 @@ export const LOCALES = {
       popular: "🔥 Most Popular",
       pro: { name: "Pro Plan", desc: "For growing businesses" },
       premium: { name: "Premium Plan", desc: "All Pro + Advanced AI" },
-      cta: { trial: "Try 30 days free", sales: "Talk to sales" }
+      cta: { trial: "Get started", sales: "Talk to sales" }
     },
     common: {
       loading: "Loading...",

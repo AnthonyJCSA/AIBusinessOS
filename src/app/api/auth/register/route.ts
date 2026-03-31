@@ -63,6 +63,7 @@ export async function POST(req: NextRequest) {
           full_name: user.full_name,
           role: 'OWNER',
           is_active: true,
+          password_hash: null,
         })
 
       if (userError) {
