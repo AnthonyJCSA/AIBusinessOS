@@ -89,7 +89,7 @@ export default function PreciosPage() {
               ))}
             </select>
             <Link href="/registro" className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-2.5 rounded-xl font-bold hover:from-indigo-700 hover:to-purple-700 shadow-md hover:shadow-lg transition-all">
-              {t.pricing.cta.free}
+              {t.pricing.cta.trial}
             </Link>
           </div>
         </nav>
