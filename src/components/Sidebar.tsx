@@ -106,11 +106,11 @@ export default function Sidebar({ currentUser, currentOrg, activeModule, setActi
 
   // Helper para verificar acceso completo (rol + plan)
   const canAccess = (moduleId: string) => {
+    // OWNER siempre tiene acceso completo a TODO
+    if (currentUser?.role === 'OWNER') return true
+    
     // Verificar permisos de rol
     if (!canAccessModule(currentUser?.role, moduleId)) return false
-    
-    // OWNER siempre tiene acceso completo a todo
-    if (currentUser?.role === 'OWNER') return true
     
     // Verificar plan (solo Pro y Premium)
     const currentPlan = (currentOrg?.settings?.plan ?? 'pro') as 'pro' | 'premium'
