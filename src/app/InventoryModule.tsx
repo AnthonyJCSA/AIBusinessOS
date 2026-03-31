@@ -2,10 +2,13 @@
 
 import { useState, useEffect } from 'react'
 import { exportInventoryToCSV } from '../lib/export'
+import ImageCapture from '../components/ImageCapture'
+import { generateProductQR, downloadQR } from '../lib/qr-generator'
 
 interface Product {
   id: string; code: string; name: string; category?: string
   price: number; cost?: number; stock: number; min_stock: number
+  image_url?: string | null
   // DIGEMID
   digemid_code?: string; unit_price?: number; allows_fractionation?: boolean
   // Farmacia
@@ -24,6 +27,7 @@ interface InventoryProps {
 }
 
 const emptyProduct = { code: '', name: '', category: 'General', price: 0, cost: 0, stock: 0, min_stock: 5,
+  image_url: null,
   digemid_code: '', unit_price: 0, allows_fractionation: false,
   laboratory: '', brand: '', active_ingredient: '', expiry_date: '', supplier: '', unit: 'unidad', description: '' }
 
@@ -34,8 +38,23 @@ export default function InventoryModule({ products: initial, onUpdateProduct, on
   const [editing, setEditing] = useState<Product | null>(null)
   const [newP, setNewP] = useState(emptyProduct)
   const [loading, setLoading] = useState(false)
+  const [showQR, setShowQR] = useState<{ product: Product; qrImage: string } | null>(null)
 
   useEffect(() => { setProducts(initial) }, [initial])
+
+  const handleGenerateQR = async (product: Product) => {
+    try {
+      const qrImage = await generateProductQR({
+        id: product.id,
+        sku: product.code,
+        name: product.name,
+        price: product.price,
+      })
+      setShowQR({ product, qrImage })
+    } catch (error) {
+      alert('Error al generar código QR')
+    }
+  }
 
   const filtered = products.filter(p =>
     p.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -138,7 +157,7 @@ export default function InventoryModule({ products: initial, onUpdateProduct, on
           <table className="w-full text-xs" style={{ minWidth: '600px' }}>
             <thead>
               <tr style={{ background: 'var(--surface)', borderBottom: '1px solid var(--border)' }}>
-                {['Código', 'Producto', 'Categoría', 'P. Venta', 'Costo', 'Stock', 'Mín.', 'Estado IA', 'Acciones'].map(h => (
+                {['Imagen', 'Código', 'Producto', 'Categoría', 'P. Venta', 'Costo', 'Stock', 'Mín.', 'Estado IA', 'Acciones'].map(h => (
                   <th key={h} className="px-[14px] py-[9px] text-left font-bold uppercase tracking-[.6px]"
                     style={{ color: 'var(--sub)', fontSize: '10px' }}>{h}</th>
                 ))}
@@ -149,6 +168,13 @@ export default function InventoryModule({ products: initial, onUpdateProduct, on
                 const st = stockStatus(p)
                 return (
                   <tr key={p.id} style={{ borderBottom: '1px solid rgba(30,45,69,.5)' }}>
+                    <td className="px-[14px] py-[10px]">
+                      {p.image_url ? (
+                        <img src={p.image_url} alt={p.name} className="w-10 h-10 object-cover rounded-lg" />
+                      ) : (
+                        <div className="w-10 h-10 rounded-lg flex items-center justify-center text-lg" style={{ background: 'var(--surface)' }}>📷</div>
+                      )}
+                    </td>
                     <td className="px-[14px] py-[10px] font-mono text-[11px]" style={{ color: 'var(--muted)' }}>{p.code}</td>
                     <td className="px-[14px] py-[10px] font-bold" style={{ color: 'var(--text)' }}>{p.name}</td>
                     <td className="px-[14px] py-[10px]">
@@ -174,6 +200,9 @@ export default function InventoryModule({ products: initial, onUpdateProduct, on
                     </td>
                     <td className="px-[14px] py-[10px]">
                       <div className="flex gap-2">
+                        <button onClick={() => handleGenerateQR(p)}
+                          className="px-2 py-[3px] rounded-[7px] text-[10px] font-semibold transition-all"
+                          style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--muted)' }} title="Generar QR">📦</button>
                         <button onClick={() => setEditing(p)}
                           className="px-2 py-[3px] rounded-[7px] text-[10px] font-semibold transition-all"
                           style={{ background: 'var(--surface)', border: '1px solid var(--border)', color: 'var(--muted)' }}>✏</button>
@@ -194,6 +223,11 @@ export default function InventoryModule({ products: initial, onUpdateProduct, on
       {showAdd && (
         <Modal title="➕ Agregar Producto" onClose={() => setShowAdd(false)}>
           <form onSubmit={handleAdd} className="space-y-4">
+            <ImageCapture
+              currentImage={newP.image_url || undefined}
+              onImageCapture={(imageData) => setNewP(p => ({ ...p, image_url: imageData }))}
+              onImageRemove={() => setNewP(p => ({ ...p, image_url: null }))}
+            />
             <div className="grid grid-cols-2 gap-3">
               <FI label="Código *"><input className="fi-dark" value={newP.code} onChange={e => setNewP(p => ({ ...p, code: e.target.value }))} required /></FI>
               <FI label="Nombre *"><input className="fi-dark" value={newP.name} onChange={e => setNewP(p => ({ ...p, name: e.target.value }))} required /></FI>
@@ -229,6 +263,11 @@ export default function InventoryModule({ products: initial, onUpdateProduct, on
       {editing && (
         <Modal title="✏️ Editar Producto" onClose={() => setEditing(null)}>
           <form onSubmit={handleUpdate} className="space-y-4">
+            <ImageCapture
+              currentImage={editing.image_url}
+              onImageCapture={(imageData) => setEditing(p => p ? { ...p, image_url: imageData } : p)}
+              onImageRemove={() => setEditing(p => p ? { ...p, image_url: null } : p)}
+            />
             <div className="grid grid-cols-2 gap-3">
               <FI label="Código"><input className="fi-dark" value={editing.code} onChange={e => setEditing(p => p ? { ...p, code: e.target.value } : p)} /></FI>
               <FI label="Nombre"><input className="fi-dark" value={editing.name} onChange={e => setEditing(p => p ? { ...p, name: e.target.value } : p)} /></FI>
@@ -245,6 +284,34 @@ export default function InventoryModule({ products: initial, onUpdateProduct, on
             </div>
             <ModalActions onCancel={() => setEditing(null)} loading={loading} label="Guardar Cambios" />
           </form>
+        </Modal>
+      )}
+
+      {/* Modal QR */}
+      {showQR && (
+        <Modal title="📦 Código QR del Producto" onClose={() => setShowQR(null)}>
+          <div className="text-center space-y-4">
+            <div className="text-sm font-medium" style={{ color: 'var(--text)' }}>
+              {showQR.product.name}
+            </div>
+            <div className="text-xs" style={{ color: 'var(--muted)' }}>
+              Código: {showQR.product.code}
+            </div>
+            <div className="flex justify-center">
+              <img src={showQR.qrImage} alt="QR Code" className="w-64 h-64" />
+            </div>
+            <div className="text-xs" style={{ color: 'var(--muted)' }}>
+              Escanea este código con tu pistola lectora o cámara
+            </div>
+            <button
+              type="button"
+              onClick={() => downloadQR(showQR.qrImage, `QR-${showQR.product.code}`)}
+              className="w-full px-4 py-2 rounded-lg text-sm font-medium text-white transition-all"
+              style={{ background: 'var(--accent)' }}
+            >
+              📥 Descargar QR
+            </button>
+          </div>
         </Modal>
       )}
     </div>

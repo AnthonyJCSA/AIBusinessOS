@@ -31,6 +31,8 @@ export default function POSModule({ products, currentOrg, currentUser, onSaleCom
   const [paymentMethod, setPaymentMethod] = useState<'EFECTIVO' | 'TARJETA' | 'YAPE' | 'PLIN' | 'TRANSFERENCIA'>('EFECTIVO')
   const [receiptType, setReceiptType] = useState<'BOLETA' | 'FACTURA' | 'TICKET'>('BOLETA')
   const [amountPaid, setAmountPaid] = useState('')
+  const [discount, setDiscount] = useState(0)
+  const [discountReason, setDiscountReason] = useState('')
   const [processing, setProcessing] = useState(false)
   const [showSuccess, setShowSuccess] = useState<{ number: string; total: number } | null>(null)
   const [pendingInvoice, setPendingInvoice] = useState<{ saleId: string; total: number } | null>(null)
@@ -70,9 +72,11 @@ export default function POSModule({ products, currentOrg, currentUser, onSaleCom
   }
 
   const subtotal = cart.reduce((s, i) => s + i.price * i.quantity, 0)
-  const igv = subtotal * 0.18 / 1.18
-  const opGravadas = subtotal - igv
-  const total = subtotal
+  const discountAmount = discount > 0 ? (subtotal * discount / 100) : 0
+  const subtotalAfterDiscount = subtotal - discountAmount
+  const igv = subtotalAfterDiscount * 0.18 / 1.18
+  const opGravadas = subtotalAfterDiscount - igv
+  const total = subtotalAfterDiscount
   const change = amountPaid ? Math.max(0, Number(amountPaid) - total) : 0
 
   const printReceipt = (saleNumber: string) => {
@@ -111,7 +115,7 @@ export default function POSModule({ products, currentOrg, currentUser, onSaleCom
       if (receiptType !== 'TICKET') {
         setPendingInvoice({ saleId: sale.id, total })
       }
-      setCart([]); setCustomerName(''); setAmountPaid('')
+      setCart([]); setCustomerName(''); setAmountPaid(''); setDiscount(0); setDiscountReason('')
     } catch (e) {
       console.error(e); alert('❌ Error al procesar la venta')
     } finally {
@@ -122,7 +126,7 @@ export default function POSModule({ products, currentOrg, currentUser, onSaleCom
   // Keyboard shortcuts
   const handleKey = useCallback((e: KeyboardEvent) => {
     if (e.key === 'F2') { e.preventDefault(); processSale() }
-    if (e.key === 'F1') { e.preventDefault(); setCart([]); setCustomerName(''); setAmountPaid('') }
+    if (e.key === 'F1') { e.preventDefault(); setCart([]); setCustomerName(''); setAmountPaid(''); setDiscount(0); setDiscountReason('') }
     if (e.key === 'Escape') { setSearch('') }
   }, [cart, paymentMethod, amountPaid])
 
@@ -294,9 +298,45 @@ export default function POSModule({ products, currentOrg, currentUser, onSaleCom
               <div className="flex justify-between text-[11px]" style={{ color: 'var(--muted)' }}>
                 <span>Subtotal</span><span>{currency} {subtotal.toFixed(2)}</span>
               </div>
+              {discount > 0 && (
+                <div className="flex justify-between text-[11px] font-semibold" style={{ color: 'var(--amber)' }}>
+                  <span>🏷️ Descuento ({discount}%)</span><span>- {currency} {discountAmount.toFixed(2)}</span>
+                </div>
+              )}
               <div className="flex justify-between text-[11px]" style={{ color: 'var(--muted)' }}>
                 <span>IGV (18%)</span><span>{currency} {igv.toFixed(2)}</span>
               </div>
+            </div>
+            
+            {/* Campo de descuento */}
+            <div className="mb-2 p-2 rounded-lg" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+              <div className="text-[10px] font-bold uppercase tracking-[.5px] mb-[5px]" style={{ color: 'var(--sub)' }}>🏷️ Descuento (Opcional)</div>
+              <div className="flex gap-2 mb-2">
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="1"
+                  value={discount || ''}
+                  onChange={e => setDiscount(Math.min(100, Math.max(0, Number(e.target.value) || 0)))}
+                  placeholder="% Desc."
+                  className="w-20 px-2 py-1 rounded-lg text-xs font-bold outline-none"
+                  style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)' }}
+                />
+                <input
+                  type="text"
+                  value={discountReason}
+                  onChange={e => setDiscountReason(e.target.value)}
+                  placeholder="Motivo del descuento"
+                  className="flex-1 px-2 py-1 rounded-lg text-xs outline-none"
+                  style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)' }}
+                />
+              </div>
+              {discount > 0 && !discountReason && (
+                <div className="text-[10px] px-2 py-1 rounded" style={{ background: 'rgba(245,158,11,.08)', color: 'var(--amber)' }}>
+                  ⚠️ Se recomienda indicar el motivo del descuento
+                </div>
+              )}
             </div>
             <div className="flex justify-between items-center py-2 mb-2" style={{ borderTop: '1px solid var(--border)' }}>
               <span className="text-sm font-extrabold" style={{ color: 'var(--text)' }}>TOTAL</span>
@@ -512,6 +552,30 @@ export default function POSModule({ products, currentOrg, currentUser, onSaleCom
                 </div>
               )}
               {/* Total + botón */}
+              <div className="mb-[8px]">
+                <div className="space-y-[2px] mb-2 text-xs" style={{ color: 'var(--muted)' }}>
+                  <div className="flex justify-between"><span>Subtotal</span><span>{currency} {subtotal.toFixed(2)}</span></div>
+                  {discount > 0 && (
+                    <div className="flex justify-between font-semibold" style={{ color: 'var(--amber)' }}>
+                      <span>🏷️ Descuento ({discount}%)</span><span>- {currency} {discountAmount.toFixed(2)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between"><span>IGV</span><span>{currency} {igv.toFixed(2)}</span></div>
+                </div>
+                {/* Campo descuento móvil */}
+                <div className="mb-2 p-2 rounded-lg" style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
+                  <div className="text-[10px] font-bold uppercase mb-1" style={{ color: 'var(--sub)' }}>🏷️ Descuento</div>
+                  <div className="flex gap-2">
+                    <input type="number" min="0" max="100" value={discount || ''}
+                      onChange={e => setDiscount(Math.min(100, Math.max(0, Number(e.target.value) || 0)))}
+                      placeholder="%" className="w-16 px-2 py-1 rounded text-xs font-bold outline-none"
+                      style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)' }} />
+                    <input type="text" value={discountReason} onChange={e => setDiscountReason(e.target.value)}
+                      placeholder="Motivo" className="flex-1 px-2 py-1 rounded text-xs outline-none"
+                      style={{ background: 'var(--card)', border: '1px solid var(--border)', color: 'var(--text)' }} />
+                  </div>
+                </div>
+              </div>
               <div className="flex items-center justify-between mb-[8px]">
                 <span className="text-sm font-extrabold" style={{ color: 'var(--text)' }}>TOTAL</span>
                 <span className="text-2xl font-extrabold" style={{ color: 'var(--green)' }}>{currency} {total.toFixed(2)}</span>

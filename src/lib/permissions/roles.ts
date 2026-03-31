@@ -26,7 +26,7 @@ export const MODULE_PERMISSIONS: Record<string, Role[]> = {
   leads: ['OWNER', 'ADMIN', 'MANAGER'],
   reportes: ['OWNER', 'ADMIN', 'MANAGER', 'VIEWER'],
   'asistente-ia': ['OWNER', 'ADMIN', 'MANAGER'],
-  automatizaciones: ['OWNER', 'ADMIN'],
+  automations: ['OWNER', 'ADMIN', 'MANAGER'],
   usuarios: ['OWNER', 'ADMIN'],
   configuracion: ['OWNER', 'ADMIN'],
   facturacion: ['OWNER', 'ADMIN', 'MANAGER'],
