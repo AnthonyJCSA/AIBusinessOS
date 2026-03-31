@@ -34,7 +34,7 @@ export default function BoticaLanding() {
             "operatingSystem": "Web",
             "offers": {
               "@type": "Offer",
-              "price": "49",
+              "price": "99",
               "priceCurrency": "PEN"
             },
             "description": "Sistema para boticas que controla ventas, stock y caja"

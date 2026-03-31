@@ -32,7 +32,7 @@ export default function BodegaLanding() {
             "operatingSystem": "Web",
             "offers": {
               "@type": "Offer",
-              "price": "49",
+              "price": "99",
               "priceCurrency": "PEN"
             },
             "description": "Sistema para bodegas que controla ventas, stock y caja"
