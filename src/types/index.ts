@@ -51,6 +51,7 @@ export interface Product {
   stock: number
   min_stock: number
   unit?: string
+  image_url?: string | null
   digemid_code?: string
   unit_price?: number
   allows_fractionation?: boolean

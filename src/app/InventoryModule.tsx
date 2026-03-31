@@ -26,7 +26,7 @@ interface InventoryProps {
   currentUser: any
 }
 
-const emptyProduct = { code: '', name: '', category: 'General', price: 0, cost: 0, stock: 0, min_stock: 5,
+const emptyProduct: Omit<Product, 'id'> = { code: '', name: '', category: 'General', price: 0, cost: 0, stock: 0, min_stock: 5,
   image_url: null,
   digemid_code: '', unit_price: 0, allows_fractionation: false,
   laboratory: '', brand: '', active_ingredient: '', expiry_date: '', supplier: '', unit: 'unidad', description: '' }
