@@ -180,7 +180,9 @@ export default function Sidebar({ currentUser, currentOrg, activeModule, setActi
                 {section.label}
               </div>
               {section.items.map(item => {
-                if (!canAccessModule(currentUser?.role, item.id)) return null
+                const hasAccess = canAccessModule(currentUser?.role, item.id)
+                console.log(`Module: ${item.id}, Role: ${currentUser?.role}, HasAccess: ${hasAccess}`)
+                if (!hasAccess) return null
                 const isActive = activeModule === item.id
                 return (
                   <button
