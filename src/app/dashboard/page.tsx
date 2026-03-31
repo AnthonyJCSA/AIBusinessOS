@@ -51,6 +51,12 @@ export default function DashboardPage() {
       const { data: { session }, error } = await supabase.auth.getSession()
       
       if (error || !session) {
+        // Si viene de Stripe, esperar un momento y reintentar
+        const urlParams = new URLSearchParams(window.location.search)
+        if (urlParams.get('payment') === 'success') {
+          setTimeout(() => window.location.reload(), 1000)
+          return
+        }
         router.push('/login')
         return
       }
@@ -60,6 +66,13 @@ export default function DashboardPage() {
         const response = await fetch('/api/auth/session')
         
         if (!response.ok) {
+          console.error('Error en /api/auth/session:', response.status)
+          // Si viene de pago exitoso, recargar
+          const urlParams = new URLSearchParams(window.location.search)
+          if (urlParams.get('payment') === 'success') {
+            setTimeout(() => window.location.reload(), 1000)
+            return
+          }
           router.push('/login')
           return
         }

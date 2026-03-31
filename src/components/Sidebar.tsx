@@ -199,6 +199,9 @@ export default function Sidebar({ currentUser, currentOrg, activeModule, setActi
                 {section.label}
               </div>
               {section.items.map(item => {
+                // Ocultar Farmacia si no es pharmacy
+                if (item.id === 'pharma' && currentOrg?.business_type !== 'pharmacy') return null
+                
                 if (!canAccess(item.id)) return null
                 const isActive = activeModule === item.id
                 return (
