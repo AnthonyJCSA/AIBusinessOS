@@ -4,26 +4,11 @@ import { createClient } from '@/lib/auth/supabase-server'
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
-    const { organization, user } = body
+    const { organization, user, authUserId } = body
 
-    if (!organization || !user) {
+    if (!organization || !user || !authUserId) {
       return NextResponse.json(
         { error: 'Datos incompletos' },
-        { status: 400 }
-      )
-    }
-
-    // Validaciones
-    if (!user.email || !user.email.includes('@')) {
-      return NextResponse.json(
-        { error: 'Email inválido' },
-        { status: 400 }
-      )
-    }
-
-    if (!user.password || user.password.length < 6) {
-      return NextResponse.json(
-        { error: 'La contraseña debe tener al menos 6 caracteres' },
         { status: 400 }
       )
     }
@@ -37,29 +22,8 @@ export async function POST(req: NextRequest) {
 
     const supabase = createClient()
 
-    // 1. Crear usuario en Supabase Auth
-    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-      email: user.email,
-      password: user.password,
-      email_confirm: true,
-      user_metadata: {
-        full_name: user.full_name,
-        username: user.username,
-      },
-    })
-
-    if (authError || !authData.user) {
-      console.error('Error creando usuario en Auth:', authError)
-      return NextResponse.json(
-        { error: `Error al crear usuario: ${authError?.message || 'Error desconocido'}` },
-        { status: 500 }
-      )
-    }
-
-    const authUserId = authData.user.id
-
     try {
-      // 2. Crear organización
+      // 1. Crear organización
       const orgId = crypto.randomUUID()
       const { data: orgData, error: orgError } = await supabase
         .from('corivacore_organizations')
@@ -79,7 +43,6 @@ export async function POST(req: NextRequest) {
         .single()
 
       if (orgError) {
-        await supabase.auth.admin.deleteUser(authUserId)
         console.error('Error creando organización:', orgError)
         return NextResponse.json(
           { error: `Error al crear organización: ${orgError.message}` },
@@ -87,7 +50,7 @@ export async function POST(req: NextRequest) {
         )
       }
 
-      // 3. Crear usuario en nuestra tabla
+      // 2. Crear usuario en nuestra tabla
       const userId = crypto.randomUUID()
       const { error: userError } = await supabase
         .from('corivacore_users')
@@ -104,7 +67,6 @@ export async function POST(req: NextRequest) {
 
       if (userError) {
         await supabase.from('corivacore_organizations').delete().eq('id', orgId)
-        await supabase.auth.admin.deleteUser(authUserId)
         console.error('Error creando usuario en tabla:', userError)
         return NextResponse.json(
           { error: `Error al crear usuario: ${userError.message}` },
@@ -118,12 +80,10 @@ export async function POST(req: NextRequest) {
         data: {
           userId,
           orgId,
-          authUserId,
         },
       })
 
     } catch (error: any) {
-      await supabase.auth.admin.deleteUser(authUserId)
       console.error('Error en proceso de registro:', error)
       return NextResponse.json(
         { error: error.message || 'Error en el proceso de registro' },

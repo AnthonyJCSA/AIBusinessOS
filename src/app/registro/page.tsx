@@ -30,33 +30,44 @@ export default function RegistroPage() {
         throw new Error('La contraseña debe tener al menos 6 caracteres')
       }
 
-      // Llamar al API route para crear todo el registro
+      const supabase = createBrowserClient()
+
+      // 1. Crear usuario en Supabase Auth desde cliente
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: userData.email,
+        password: userData.password,
+        options: {
+          data: {
+            full_name: userData.full_name,
+            username: userData.username,
+          },
+        },
+      })
+
+      if (authError || !authData.user) {
+        throw new Error(`Error al crear usuario: ${authError?.message || 'Error desconocido'}`)
+      }
+
+      // 2. Llamar al API route para crear org y usuario en tabla
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           organization: org,
           user: userData,
+          authUserId: authData.user.id,
         }),
       })
 
       const data = await response.json()
 
       if (!response.ok) {
+        // Si falla, intentar eliminar usuario de Auth
+        await supabase.auth.signOut()
         throw new Error(data.error || 'Error al crear la cuenta')
       }
 
-      // Login automático después del registro
-      const supabase = createBrowserClient()
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: userData.email,
-        password: userData.password,
-      })
-
-      if (signInError) {
-        throw new Error('Cuenta creada pero error al iniciar sesión. Intenta iniciar sesión manualmente.')
-      }
-
+      // 3. Usuario ya está logueado automáticamente por signUp
       // Redirigir al dashboard
       router.push('/dashboard')
       router.refresh()
