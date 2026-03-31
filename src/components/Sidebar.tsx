@@ -109,15 +109,14 @@ export default function Sidebar({ currentUser, currentOrg, activeModule, setActi
     // Verificar permisos de rol
     if (!canAccessModule(currentUser?.role, moduleId)) return false
     
-    // OWNER siempre tiene acceso
+    // OWNER siempre tiene acceso completo a todo
     if (currentUser?.role === 'OWNER') return true
     
-    // Verificar plan
-    const currentPlan = (currentOrg?.settings?.plan ?? 'pro') as 'starter' | 'pro' | 'premium'
+    // Verificar plan (solo Pro y Premium)
+    const currentPlan = (currentOrg?.settings?.plan ?? 'pro') as 'pro' | 'premium'
     const planFeatures: Record<string, string[]> = {
-      starter: ['pos', 'inventory', 'cash', 'customers', 'reports', 'dashboard'],
-      pro: ['pos', 'inventory', 'cash', 'customers', 'reports', 'leads', 'purchases', 'communications', 'billing', 'store', 'catalog', 'automations', 'pharma', 'dashboard', 'users', 'settings'],
-      premium: ['pos', 'inventory', 'cash', 'customers', 'reports', 'leads', 'purchases', 'communications', 'billing', 'store', 'catalog', 'automations', 'pharma', 'asistente', 'dashboard', 'users', 'settings'],
+      pro: ['dashboard', 'pos', 'inventory', 'cash', 'customers', 'reports', 'leads', 'purchases', 'communications', 'billing', 'catalog', 'users', 'settings', 'pharma'],
+      premium: ['dashboard', 'pos', 'inventory', 'cash', 'customers', 'reports', 'leads', 'purchases', 'communications', 'billing', 'catalog', 'users', 'settings', 'pharma', 'store', 'automations', 'asistente'],
     }
     
     return planFeatures[currentPlan]?.includes(moduleId) ?? false

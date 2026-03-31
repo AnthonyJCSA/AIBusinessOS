@@ -168,11 +168,12 @@ Cada organización tiene aislamiento total via RLS. Todos los servicios filtran 
 
 ## Planes y feature flags
 
-| Plan | Módulos incluidos |
-|---|---|
-| `starter` | POS, Inventario, Caja, Clientes, Reportes |
-| `pro` | + Leads, Compras, Comunicaciones, Asistente IA |
-| `premium` | + Facturación, Tienda Virtual, Catálogo, Automatizaciones |
+| Plan | Precio | Módulos incluidos |
+|------|--------|-------------------|
+| `pro` | S/ 99/mes | POS, Inventario, Caja, Clientes, Reportes, Leads, Compras, Comunicaciones, Facturación, Catálogo, Farmacia |
+| `premium` | S/ 199/mes | Todo lo de Pro + Tienda Virtual, Automatizaciones IA, Asistente IA |
+
+**Sin contratos largos** - Cancela cuando quieras
 
 ## Inteligencia Artificial
 
