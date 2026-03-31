@@ -1,10 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { buildBusinessContext } from '@/lib/ai/context-builder'
 import { buildSystemPrompt } from '@/lib/ai/prompts'
+import { requireModule } from '@/lib/permissions/guards'
 
 export async function POST(req: NextRequest) {
+  const authResult = await requireModule(req, 'asistente-ia')
+  if (authResult instanceof NextResponse) return authResult
+  
+  const { user } = authResult
+  
   try {
-    const { messages, orgId, businessType } = await req.json()
+    const { messages, businessType } = await req.json()
+    const orgId = user.org_id
 
     const apiKey = process.env.OPENAI_API_KEY
     if (!apiKey) {
