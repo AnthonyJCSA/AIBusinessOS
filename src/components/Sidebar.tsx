@@ -124,58 +124,48 @@ export default function Sidebar({ currentUser, currentOrg, activeModule, setActi
         style={{ background: 'var(--sidebar)', borderRight: '1px solid var(--border)' }}
       >
         {/* Logo */}
-        <div className="px-4 py-[18px] pb-[14px]" style={{ borderBottom: '1px solid var(--border)' }}>
-          <div className="flex items-center gap-[10px]">
+        <div className="px-4 py-4 border-b" style={{ borderColor: 'var(--border)' }}>
+          <div className="flex items-center gap-3">
             <div
-              className="w-9 h-9 rounded-[10px] flex items-center justify-center text-lg flex-shrink-0"
-              style={{ background: 'var(--gradient)', boxShadow: '0 0 20px rgba(99,102,241,.3)' }}
+              className="w-10 h-10 rounded-lg flex items-center justify-center text-xl font-bold text-white"
+              style={{ background: 'var(--accent)' }}
             >
-              🚀
+              C
             </div>
             <div>
-              <div
-                className="text-[17px] font-extrabold tracking-tight"
-                style={{ background: 'var(--gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
-              >
+              <div className="text-base font-semibold" style={{ color: 'var(--text)' }}>
                 Coriva Core
               </div>
-              <div className="text-[9px] font-medium uppercase tracking-[.8px]" style={{ color: 'var(--sub)' }}>
-                SaaS · IA para Negocios
+              <div className="text-xs font-medium" style={{ color: 'var(--muted)' }}>
+                Business OS
               </div>
             </div>
           </div>
         </div>
 
         {/* User card */}
-        <div className="mx-3 my-[10px] p-[10px] rounded-[11px] cursor-pointer transition-all" style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
-          <div className="flex items-center gap-[9px]">
+        <div className="mx-3 my-3 p-3 rounded-lg" style={{ background: 'var(--card)', border: '1px solid var(--border)' }}>
+          <div className="flex items-center gap-3">
             <div
-              className="w-8 h-8 rounded-[9px] flex items-center justify-center text-xs font-extrabold text-white flex-shrink-0"
-              style={{ background: 'var(--gradient)' }}
+              className="w-10 h-10 rounded-lg flex items-center justify-center text-sm font-semibold text-white"
+              style={{ background: 'var(--accent)' }}
             >
               {initials}
             </div>
-            <div>
-              <div className="text-xs font-bold" style={{ color: 'var(--text)' }}>{currentUser?.full_name || 'Usuario'}</div>
-              <div className="text-[10px]" style={{ color: 'var(--muted)' }}>{currentUser?.role} · {currentOrg?.name}</div>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-medium truncate" style={{ color: 'var(--text)' }}>{currentUser?.full_name || 'Usuario'}</div>
+              <div className="text-xs truncate" style={{ color: 'var(--muted)' }}>{currentUser?.role}</div>
             </div>
-          </div>
-          <div
-            className="mt-2 rounded-[7px] px-2 py-[5px] text-[10px] flex items-center gap-[5px]"
-            style={{ background: 'rgba(99,102,241,.08)', border: '1px solid rgba(99,102,241,.2)', color: 'var(--accent)' }}
-          >
-            <span className="w-[6px] h-[6px] rounded-full animate-pulse-dot" style={{ background: 'var(--accent)' }} />
-            IA activa — analizando tu negocio
           </div>
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 py-[6px] overflow-y-auto touch-scroll">
+        <nav className="flex-1 py-2 overflow-y-auto touch-scroll">
           {navSections.map(section => (
-            <div key={section.label}>
+            <div key={section.label} className="mb-4">
               <div
-                className="px-[14px] pt-[10px] pb-[3px] text-[9px] font-bold uppercase tracking-[1px]"
-                style={{ color: 'var(--sub)' }}
+                className="px-4 py-2 text-xs font-semibold uppercase tracking-wider"
+                style={{ color: 'var(--muted)' }}
               >
                 {section.label}
               </div>
@@ -186,21 +176,21 @@ export default function Sidebar({ currentUser, currentOrg, activeModule, setActi
                   <button
                     key={item.id}
                     onClick={() => handleClick(item.id)}
-                    className="w-full flex items-center gap-[9px] px-3 py-2 mx-2 rounded-[9px] text-[13px] font-medium transition-all cursor-pointer text-left"
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-all text-left"
                     style={{
-                      width:        'calc(100% - 16px)',
-                      background:   isActive ? 'rgba(99,102,241,.15)' : 'transparent',
-                      border:       isActive ? '1px solid rgba(99,102,241,.2)' : '1px solid transparent',
-                      color:        isActive ? 'var(--accent)' : 'var(--muted)',
-                      marginBottom: '1px',
+                      background:   isActive ? 'var(--accent)' : 'transparent',
+                      color:        isActive ? '#FFFFFF' : 'var(--muted)',
                     }}
                   >
-                    <span className="w-[15px] h-[15px] flex-shrink-0" style={{ opacity: isActive ? 1 : 0.8 }}>
+                    <span className="w-5 h-5 flex-shrink-0">
                       {item.icon}
                     </span>
                     <span className="flex-1">{item.label}</span>
                     {item.badge && (
-                      <span className={`text-[9px] px-[7px] py-[2px] rounded-full font-bold ${badgeStyles[item.badgeColor || 'accent']}`}>
+                      <span className="text-xs px-2 py-0.5 rounded-md font-medium" style={{
+                        background: isActive ? 'rgba(255,255,255,0.2)' : 'var(--surface)',
+                        color: isActive ? '#FFFFFF' : 'var(--muted)'
+                      }}>
                         {item.badge}
                       </span>
                     )}
@@ -212,21 +202,18 @@ export default function Sidebar({ currentUser, currentOrg, activeModule, setActi
         </nav>
 
         {/* Footer */}
-        <div className="p-3" style={{ borderTop: '1px solid var(--border)' }}>
-          <div className="flex items-center justify-between mb-2">
-            <span
-              className="text-[11px] font-bold"
-              style={{ background: 'var(--gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
-            >
+        <div className="p-4 border-t" style={{ borderColor: 'var(--border)' }}>
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-medium" style={{ color: 'var(--text)' }}>
               Plan {plan}
             </span>
-            <span className="text-[10px] px-2 py-[2px] rounded-full font-semibold" style={{ background: 'rgba(16,185,129,.1)', color: 'var(--green)' }}>
+            <span className="text-xs px-2 py-1 rounded-md font-medium" style={{ background: 'rgba(16,185,129,.1)', color: 'var(--green)' }}>
               Activo
             </span>
           </div>
           <button
-            className="w-full py-[9px] rounded-[9px] text-white text-xs font-bold transition-all"
-            style={{ background: 'var(--gradient)', boxShadow: '0 0 15px rgba(99,102,241,.25)' }}
+            className="w-full py-2.5 rounded-lg text-white text-sm font-medium transition-all hover:opacity-90"
+            style={{ background: 'var(--accent)' }}
             onClick={() => {
               if (onLogout) { onLogout() } else { sessionStorage.clear(); window.location.href = '/' }
             }}

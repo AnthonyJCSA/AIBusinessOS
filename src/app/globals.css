@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,40 +6,40 @@
 
 /* ── Tema oscuro (default) ── */
 :root {
-  --bg: #070B12;
-  --sidebar: #0D1117;
-  --surface: #111827;
-  --card: #161D2E;
-  --card2: #1A2035;
-  --border: #1E2D45;
-  --border2: #243350;
-  --accent: #6366F1;
+  --bg: #0A0E17;
+  --sidebar: #111827;
+  --surface: #1F2937;
+  --card: #1F2937;
+  --card2: #374151;
+  --border: #374151;
+  --border2: #4B5563;
+  --accent: #3B82F6;
   --accent2: #06B6D4;
   --accent3: #8B5CF6;
-  --text: #E8EDF8;
-  --muted: #8896B3;
-  --sub: #3D4F6E;
+  --text: #F9FAFB;
+  --muted: #9CA3AF;
+  --sub: #6B7280;
   --green: #10B981;
   --amber: #F59E0B;
   --red: #EF4444;
   --blue: #3B82F6;
   --pink: #EC4899;
-  --gradient: linear-gradient(135deg, #6366F1, #8B5CF6);
-  font-family: 'Outfit', sans-serif;
+  --gradient: linear-gradient(135deg, #3B82F6, #1D4ED8);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 /* ── Tema claro ── */
 html.theme-light {
-  --bg: #F4F6FA;
+  --bg: #F9FAFB;
   --sidebar: #FFFFFF;
-  --surface: #F0F2F8;
+  --surface: #FFFFFF;
   --card: #FFFFFF;
-  --card2: #F8F9FC;
-  --border: #E2E6F0;
-  --border2: #D0D6E8;
-  --text: #0F172A;
-  --muted: #64748B;
-  --sub: #94A3B8;
+  --card2: #F9FAFB;
+  --border: #E5E7EB;
+  --border2: #D1D5DB;
+  --text: #111827;
+  --muted: #6B7280;
+  --sub: #9CA3AF;
 }
 
 * {
@@ -57,19 +57,21 @@ html {
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   overscroll-behavior-y: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Scrollbar */
-::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
 ::-webkit-scrollbar-track { background: transparent; }
 
-/* Inputs en móvil */
+/* Inputs */
 input, textarea, select {
-  font-size: 16px !important;
-  font-family: 'Outfit', sans-serif;
+  font-size: 14px !important;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 button, a {
@@ -78,8 +80,8 @@ button, a {
 }
 
 /* Mono font */
-.font-mono-dm {
-  font-family: 'DM Mono', monospace;
+.font-mono {
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
 }
 
 /* Animations */
@@ -89,7 +91,7 @@ button, a {
 }
 @keyframes pulse-dot {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+  50% { opacity: 0.5; }
 }
 @keyframes slideIn {
   from { transform: translateX(120%); opacity: 0; }
@@ -104,20 +106,23 @@ button, a {
 .animate-slide-in { animation: slideIn 0.2s ease; }
 .animate-spin-slow { animation: spin 1s linear infinite; }
 
-/* Input dark reutilizable */
+/* Input profesional */
 .fi-dark {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 9px;
-  padding: 9px 13px;
-  font-size: 13px;
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-size: 14px;
   color: var(--text);
-  font-family: 'Outfit', sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   outline: none;
-  transition: border-color .15s;
+  transition: all 0.15s ease;
   width: 100%;
 }
-.fi-dark:focus { border-color: var(--accent); }
+.fi-dark:focus { 
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
 .fi-dark option { background: var(--card); }
 
 /* Safe areas */
