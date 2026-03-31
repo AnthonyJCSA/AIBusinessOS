@@ -26,6 +26,7 @@ export default function ReportsModule({ sales, currentUser }: { sales: Sale[]; c
   // orgId desde el store (más confiable que currentUser.organization_id)
   const org    = useSessionStore(s => s.org)
   const orgId  = org?.id ?? currentUser?.organization_id ?? ''
+  const isPharmacy = org?.business_type === 'pharmacy'
 
   useEffect(() => {
     const today = new Date().toISOString().split('T')[0]
@@ -51,14 +52,14 @@ export default function ReportsModule({ sales, currentUser }: { sales: Sale[]; c
     { key: 'ventas'       as Tab, label: 'Ventas',        icon: '💰' },
     ...(hasBilling ? [{ key: 'comprobantes' as Tab, label: 'Comprobantes', icon: '🧾' }] : []),
     { key: 'stock'        as Tab, label: 'Stock',         icon: '📦' },
-    ...(hasPharma  ? [{ key: 'farmacia'     as Tab, label: 'Farmacia',     icon: '💊' }] : []),
-    ...(hasPharma  ? [{ key: 'oppf'         as Tab, label: 'OPPF/SNIPPF',  icon: '📋' }] : []),
+    ...(hasPharma && isPharmacy ? [{ key: 'farmacia' as Tab, label: 'Farmacia', icon: '💊' }] : []),
+    ...(hasPharma && isPharmacy ? [{ key: 'oppf'     as Tab, label: 'OPPF/SNIPPF', icon: '📋' }] : []),
   ]
 
   // Si el tab activo ya no existe (ej: perdió acceso), volver a ventas
   useEffect(() => {
     if (!TABS.find(t => t.key === tab)) setTab('ventas')
-  }, [hasBilling, hasPharma]) // eslint-disable-line
+  }, [hasBilling, hasPharma, isPharmacy]) // eslint-disable-line
 
   return (
     <div className="p-5 animate-fade-up flex flex-col gap-[14px]">
