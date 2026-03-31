@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { authService } from '@/lib/services'
+import { createBrowserClient } from '@/lib/auth'
 
 const C = {
   ink: '#0C0E12', ink2: '#2D3142', muted: '#6B7280',
@@ -13,28 +13,45 @@ const C = {
 
 export default function LoginPage() {
   const router = useRouter()
-  const [form, setForm] = useState({ username: '', password: '' })
+  const [form, setForm] = useState({ email: '', password: '' })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [showPass, setShowPass] = useState(false)
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!form.username || !form.password) { setError('Completa todos los campos'); return }
-    setLoading(true); setError('')
-    try {
-      const result = await authService.login(form.username, form.password)
-      if (result) {
-        sessionStorage.setItem('coriva_user', JSON.stringify(result.user))
-        sessionStorage.setItem('coriva_org', JSON.stringify(result.org))
-        router.push('/dashboard')
-      } else {
-        setError('Usuario o contraseña incorrectos')
-      }
-    } catch {
-      setError('Error al conectar. Intenta de nuevo.')
+    if (!form.email || !form.password) { 
+      setError('Completa todos los campos')
+      return 
     }
-    setLoading(false)
+    
+    setLoading(true)
+    setError('')
+    
+    try {
+      const supabase = createBrowserClient()
+      
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email: form.email,
+        password: form.password,
+      })
+
+      if (authError) {
+        setError('Email o contraseña incorrectos')
+        setLoading(false)
+        return
+      }
+
+      if (data.user) {
+        // Redirigir al dashboard - el middleware manejará la sesión
+        router.push('/dashboard')
+        router.refresh()
+      }
+    } catch (err) {
+      console.error('Error en login:', err)
+      setError('Error al conectar. Intenta de nuevo.')
+      setLoading(false)
+    }
   }
 
   return (
@@ -89,13 +106,13 @@ export default function LoginPage() {
           </div>
 
           <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {/* username */}
+            {/* email */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <label style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.6px', color: C.muted }}>Usuario</label>
+              <label style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.6px', color: C.muted }}>Email</label>
               <input
-                type="text" value={form.username} autoComplete="username"
-                onChange={e => setForm(f => ({ ...f, username: e.target.value }))}
-                placeholder="tu_usuario"
+                type="email" value={form.email} autoComplete="email"
+                onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
+                placeholder="tu@email.com"
                 style={{ padding: '12px 14px', borderRadius: 10, border: `1.5px solid ${C.border2}`, background: C.bg2, fontSize: 15, color: C.ink, outline: 'none', transition: 'border .15s' }}
                 onFocus={e => (e.target.style.borderColor = C.ink)}
                 onBlur={e => (e.target.style.borderColor = C.border2)}

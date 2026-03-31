@@ -1,37 +1,19 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest } from 'next/server'
+import { updateSession } from '@/lib/auth'
 
-const PROTECTED = ['/dashboard']
-
-export function middleware(req: NextRequest) {
-  const { pathname } = req.nextUrl
-
-  // Only guard dashboard routes
-  if (!PROTECTED.some(p => pathname.startsWith(p))) {
-    return NextResponse.next()
-  }
-
-  // Allow if Supabase not configured (demo mode)
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  if (!supabaseUrl || supabaseUrl.includes('placeholder')) {
-    return NextResponse.next()
-  }
-
-  // Check Zustand persisted session in cookie (coriva-session)
-  const sessionCookie = req.cookies.get('coriva-session')
-  if (sessionCookie) {
-    try {
-      const session = JSON.parse(sessionCookie.value)
-      if (session?.state?.isAuthenticated) return NextResponse.next()
-    } catch {}
-  }
-
-  // Redirect to login
-  const loginUrl = req.nextUrl.clone()
-  loginUrl.pathname = '/login'
-  loginUrl.searchParams.set('from', pathname)
-  return NextResponse.redirect(loginUrl)
+export async function middleware(request: NextRequest) {
+  return await updateSession(request)
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*'],
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public folder
+     */
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
 }

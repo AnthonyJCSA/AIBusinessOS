@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSessionStore } from '@/state/session.store'
+import { createBrowserClient } from '@/lib/auth'
 import { productService, saleService, cashService } from '@/lib/services'
 import { loadThemeFromOrg } from '@/lib/theme'
 
@@ -25,13 +26,13 @@ import BillingModule from '@/app/BillingModule'
 import LeadsModule from '@/app/LeadsModule'
 import PurchasesModule from '@/app/PurchasesModule'
 import AutomationsModule from '@/app/AutomationsModule'
-import PharmaModule     from '@/app/PharmaModule'
+import PharmaModule from '@/app/PharmaModule'
 
 import type { Product, Sale } from '@/types'
 
 export default function DashboardPage() {
   const router = useRouter()
-  const { user, org, isAuthenticated, setSession, updateOrg, clearSession } = useSessionStore()
+  const { user, org, setSession, updateOrg, clearSession } = useSessionStore()
 
   const [activeModule, setActiveModule] = useState('dashboard')
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -41,89 +42,59 @@ export default function DashboardPage() {
   const [sales, setSales] = useState<Sale[]>([])
   const [showCatalogModal, setShowCatalogModal] = useState(false)
 
-  // ── Auth: migrate legacy sessionStorage → Zustand ──────────
+  // ── Auth: Cargar sesión desde Supabase Auth ────────────────
   useEffect(() => {
-    if (!isAuthenticated) {
-      const savedUser = sessionStorage.getItem('coriva_user')
-      const savedOrg  = sessionStorage.getItem('coriva_org')
-      if (savedUser && savedOrg) {
-        const u = JSON.parse(savedUser)
-        const o = JSON.parse(savedOrg)
-        setSession(u, o)
-        loadThemeFromOrg(o)
-        sessionStorage.removeItem('coriva_user')
-        sessionStorage.removeItem('coriva_org')
-      } else {
+    const loadSession = async () => {
+      const supabase = createBrowserClient()
+      
+      // Verificar si hay sesión activa
+      const { data: { session }, error } = await supabase.auth.getSession()
+      
+      if (error || !session) {
         router.push('/login')
         return
       }
-    } else if (org) {
-      // Refrescar datos del usuario y org desde Supabase
-      // para que cambios de rol/plan se reflejen sin logout
-      const refreshSession = async () => {
-        if (!user?.id) return
-        try {
-          const { data } = await import('@/lib/supabase').then(m =>
-            m.supabase
-              .from('corivacore_users')
-              .select('*, org:corivacore_organizations(*)')
-              .or(`id.eq.${user.id},username.eq.${user.username}`)
-              .eq('is_active', true)
-              .single()
-          )
-          if (data) {
-            const freshUser = {
-              id:              data.id,
-              organization_id: data.org_id,
-              username:        data.username,
-              email:           data.email,
-              full_name:       data.full_name,
-              role:            data.role,
-              is_active:       data.is_active,
-              created_at:      data.created_at,
-            }
-            const freshOrg = {
-              id:            data.org.id,
-              name:          data.org.name,
-              slug:          data.org.slug,
-              business_type: data.org.business_type,
-              ruc:           data.org.ruc,
-              address:       data.org.address,
-              phone:         data.org.phone,
-              email:         data.org.email,
-              logo_url:      data.org.logo_url,
-              digemid_establishment_code: data.org.digemid_establishment_code,
-              settings:      data.org.settings,
-              is_active:     data.org.is_active,
-              created_at:    data.org.created_at,
-              updated_at:    data.org.updated_at,
-            }
-            // Solo actualizar si hay cambios reales en rol o plan
-            const planChanged = freshOrg.settings?.plan !== org?.settings?.plan
-            const roleChanged = freshUser.role !== user?.role
-            if (planChanged || roleChanged) {
-              setSession(freshUser, freshOrg)
-            } else {
-              setSession(freshUser, freshOrg)
-            }
-            loadThemeFromOrg(freshOrg)
-          }
-        } catch {}
+
+      // Obtener datos del usuario desde API route
+      try {
+        const response = await fetch('/api/auth/session')
+        
+        if (!response.ok) {
+          router.push('/login')
+          return
+        }
+
+        const { user: loadedUser, org: loadedOrg } = await response.json()
+
+        setSession(loadedUser, loadedOrg)
+        loadThemeFromOrg(loadedOrg)
+        setLoading(false)
+      } catch (error) {
+        console.error('Error cargando sesión:', error)
+        router.push('/login')
       }
-      refreshSession()
     }
-    setLoading(false)
-  }, [isAuthenticated, org?.id, setSession, router])
+
+    loadSession()
+  }, [router, setSession])
 
   // ── Data loaders ───────────────────────────────────────────
   const loadProducts = useCallback(async () => {
     if (!org) return
-    try { setProducts(await productService.getAll(org.id)) } catch {}
+    try { 
+      setProducts(await productService.getAll(org.id)) 
+    } catch (error) {
+      console.error('Error cargando productos:', error)
+    }
   }, [org])
 
   const loadSales = useCallback(async () => {
     if (!org) return
-    try { setSales(await saleService.getAll(org.id)) } catch {}
+    try { 
+      setSales(await saleService.getAll(org.id)) 
+    } catch (error) {
+      console.error('Error cargando ventas:', error)
+    }
   }, [org])
 
   const loadCajaStatus = useCallback(async () => {
@@ -131,18 +102,25 @@ export default function DashboardPage() {
     try {
       const mvs = await cashService.getTodayMovements(org.id)
       setCajaOpen((mvs || []).some((m: any) => m.type === 'opening'))
-    } catch { setCajaOpen(false) }
+    } catch { 
+      setCajaOpen(false) 
+    }
   }, [org])
 
   useEffect(() => {
-    if (isAuthenticated && org) {
+    if (user && org) {
       loadProducts()
       loadSales()
       loadCajaStatus()
     }
-  }, [isAuthenticated, org, loadProducts, loadSales, loadCajaStatus])
+  }, [user, org, loadProducts, loadSales, loadCajaStatus])
 
-  const handleLogout = () => { clearSession(); router.push('/login') }
+  const handleLogout = async () => {
+    const supabase = createBrowserClient()
+    await supabase.auth.signOut()
+    clearSession()
+    router.push('/login')
+  }
 
   const storeUrl = typeof window !== 'undefined'
     ? `${window.location.origin}/tienda/${org?.slug || 'mi-negocio'}`
@@ -158,7 +136,7 @@ export default function DashboardPage() {
     </div>
   )
 
-  if (!isAuthenticated || !user || !org) return null
+  if (!user || !org) return null
 
   const renderModule = () => {
     switch (activeModule) {
