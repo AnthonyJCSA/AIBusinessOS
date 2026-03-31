@@ -4,10 +4,12 @@ import Stripe from 'stripe'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
+function getSupabaseAdmin() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
+}
 
 export async function POST(req: NextRequest) {
   const body = await req.text()
@@ -31,6 +33,8 @@ export async function POST(req: NextRequest) {
   }
 
   console.log('[Webhook] Event:', event.type)
+
+  const supabaseAdmin = getSupabaseAdmin()
 
   try {
     switch (event.type) {
@@ -89,13 +93,16 @@ export async function POST(req: NextRequest) {
       }
 
       case 'invoice.payment_failed': {
-        const invoice = event.data.object as Stripe.Invoice
+        const invoice = event.data.object as any
+        const subscriptionId = invoice.subscription
         
-        if (invoice.subscription) {
+        if (subscriptionId) {
+          const subId = typeof subscriptionId === 'string' ? subscriptionId : subscriptionId.id
+          
           const { data: org } = await supabaseAdmin
             .from('corivacore_organizations')
             .select('id')
-            .eq('subscription_id', invoice.subscription as string)
+            .eq('subscription_id', subId)
             .single()
 
           if (org) {
