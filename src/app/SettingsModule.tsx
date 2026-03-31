@@ -93,10 +93,21 @@ export default function SettingsModule({ currentOrg, onUpdate }: { currentOrg: O
               </div>
               {fi('RUC', 'ruc')}
               {fi('Teléfono / WhatsApp', 'phone')}
-              {s.business_type === 'pharmacy' && fi('Código DIGEMID', 'digemid_establishment_code')}
               {fi('Dirección', 'address', 'text', true)}
               {fi('Email', 'email', 'email')}
               {fi('Web / Instagram', 'web')}
+              {s.business_type === 'pharmacy' && (
+                <div className="col-span-2">
+                  <div className="rounded-[9px] p-3 mb-2" style={{ background: 'rgba(139,92,246,.08)', border: '1px solid rgba(139,92,246,.2)' }}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-sm">💊</span>
+                      <strong className="text-xs font-bold" style={{ color: 'var(--text)' }}>Configuración DIGEMID</strong>
+                    </div>
+                    <p className="text-[10px]" style={{ color: 'var(--muted)' }}>Requerido para generar reportes OPPF/SNIPPF</p>
+                  </div>
+                  {fi('Código de Establecimiento DIGEMID', 'digemid_establishment_code', 'text', true)}
+                </div>
+              )}
             </div>
           </div>
 

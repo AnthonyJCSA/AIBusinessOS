@@ -21,6 +21,8 @@ export function OPPFReport({ orgId }: { orgId: string }) {
   }, [orgId]) // eslint-disable-line
 
   async function loadStats() {
+    console.log('=== OPPF DEBUG ===')
+    console.log('orgId:', orgId)
     try {
       const res = await fetch('/api/reports/oppf', {
         method: 'POST',
@@ -28,15 +30,19 @@ export function OPPFReport({ orgId }: { orgId: string }) {
         body: JSON.stringify({ orgId })
       })
       const data = await res.json()
+      console.log('Response:', data)
       
       if (!data.valid) {
         setError(data.message || 'Configuración incompleta')
+        console.log('Validation failed:', data.message)
         return
       }
       
       setStats(data.stats)
       setError(null)
+      console.log('Stats loaded:', data.stats)
     } catch (err: any) {
+      console.error('Error loading stats:', err)
       setError(err.message || 'Error al cargar estadísticas')
     }
   }
