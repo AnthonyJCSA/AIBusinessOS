@@ -96,7 +96,7 @@ export default function OnboardingWizard({ onComplete, businessType }: Props) {
         <div className="flex items-center gap-[10px] mb-[28px]">
           <div className="w-9 h-9 rounded-[10px] flex items-center justify-center text-lg font-black"
             style={{ background: '#0C0E12', color: '#C8F23A', fontFamily: 'Georgia,serif' }}>C</div>
-          <span className="text-[18px] font-bold" style={{ color: '#0C0E12', fontFamily: 'Georgia,serif' }}>Coriva</span>
+          <span className="text-[18px] font-bold" style={{ color: '#0C0E12', fontFamily: 'Georgia,serif' }}>AI Business OS</span>
         </div>
 
         {/* Header */}

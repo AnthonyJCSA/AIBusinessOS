@@ -4,12 +4,12 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import OnboardingWizard from '@/app/OnboardingWizard'
 import { Organization } from '@/types'
-import { organizationService } from '@/lib/services'
 import { createBrowserClient } from '@/lib/auth'
 
 export default function RegistroPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   const handleComplete = async (
     org: Organization, 
@@ -18,64 +18,52 @@ export default function RegistroPage() {
   ) => {
     try {
       setLoading(true)
-      const supabase = createBrowserClient()
+      setError('')
+      
+      // Validar email
+      if (!userData.email || !userData.email.includes('@')) {
+        throw new Error('Email inválido')
+      }
 
-      // 1. Crear usuario en Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: userData.email,
-        password: userData.password,
-        options: {
-          data: {
-            full_name: userData.full_name,
-            username: userData.username,
-          },
-          emailRedirectTo: `${window.location.origin}/dashboard`,
-        },
+      // Validar contraseña
+      if (!userData.password || userData.password.length < 6) {
+        throw new Error('La contraseña debe tener al menos 6 caracteres')
+      }
+
+      // Llamar al API route para crear todo el registro
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          organization: org,
+          user: userData,
+        }),
       })
 
-      if (authError) {
-        throw new Error(`Error al crear usuario: ${authError.message}`)
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Error al crear la cuenta')
       }
 
-      if (!authData.user) {
-        throw new Error('No se pudo crear el usuario en Supabase Auth')
+      // Login automático después del registro
+      const supabase = createBrowserClient()
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: userData.email,
+        password: userData.password,
+      })
+
+      if (signInError) {
+        throw new Error('Cuenta creada pero error al iniciar sesión. Intenta iniciar sesión manualmente.')
       }
 
-      const authUserId = authData.user.id
-
-      // 2. Crear organización
-      const createdOrg = await organizationService.create(org)
-
-      // 3. Crear usuario en nuestra tabla con auth_user_id
-      const { error: userError } = await supabase
-        .from('corivacore_users')
-        .insert({
-          id: crypto.randomUUID(),
-          org_id: createdOrg.id,
-          auth_user_id: authUserId,
-          username: userData.username,
-          email: userData.email,
-          full_name: userData.full_name,
-          role: 'OWNER',
-          is_active: true,
-        })
-
-      if (userError) {
-        // Si falla, eliminar usuario de Supabase Auth
-        await supabase.auth.admin.deleteUser(authUserId)
-        throw new Error(`Error al crear usuario en base de datos: ${userError.message}`)
-      }
-
-      // 4. Login automático (ya está logueado por signUp)
-      // Supabase Auth ya creó la sesión automáticamente
-      
-      // 5. Redirigir al dashboard
+      // Redirigir al dashboard
       router.push('/dashboard')
       router.refresh()
       
     } catch (error: any) {
       console.error('Error en registro:', error)
-      alert(`Error al crear la cuenta: ${error?.message || 'Error desconocido'}`)
+      setError(error?.message || 'Error desconocido al crear la cuenta')
       setLoading(false)
     }
   }
@@ -93,9 +81,17 @@ export default function RegistroPage() {
   }
 
   return (
-    <OnboardingWizard
-      onComplete={handleComplete}
-      businessType={undefined}
-    />
+    <div>
+      {error && (
+        <div className="fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 max-w-md">
+          <p className="font-semibold">Error</p>
+          <p className="text-sm">{error}</p>
+        </div>
+      )}
+      <OnboardingWizard
+        onComplete={handleComplete}
+        businessType={undefined}
+      />
+    </div>
   )
 }
