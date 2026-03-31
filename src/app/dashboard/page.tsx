@@ -131,7 +131,7 @@ export default function DashboardPage() {
       <div className="flex flex-col items-center gap-4">
         <div className="w-16 h-16 rounded-full border-4 border-t-transparent animate-spin"
           style={{ borderColor: 'var(--accent)', borderTopColor: 'transparent' }} />
-        <div className="text-sm font-semibold" style={{ color: 'var(--muted)' }}>Cargando AI Business OS…</div>
+        <div className="text-sm font-semibold" style={{ color: 'var(--muted)' }}>Cargando Coriva OS…</div>
       </div>
     </div>
   )
@@ -240,7 +240,7 @@ export default function DashboardPage() {
         </div>
       )}
 
-      <a href="https://wa.me/51913916967?text=Hola,%20necesito%20ayuda%20con%20AI Business"
+      <a href="https://wa.me/51913916967?text=Hola,%20necesito%20ayuda%20con%20Coriva"
         target="_blank" rel="noopener noreferrer"
         className="fixed bottom-6 right-6 w-14 h-14 rounded-full flex items-center justify-center text-2xl transition-all hover:scale-110 z-50"
         style={{ background: '#25D366', boxShadow: '0 4px 20px rgba(37,211,102,.4)' }}>

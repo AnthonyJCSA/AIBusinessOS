@@ -29,12 +29,12 @@ export default function BoticaLanding() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "SoftwareApplication",
-            "name": "AI Business OS - Sistema para Boticas",
+            "name": "Coriva Core - Sistema para Boticas",
             "applicationCategory": "BusinessApplication",
             "operatingSystem": "Web",
             "offers": {
               "@type": "Offer",
-              "price": "99",
+              "price": "49",
               "priceCurrency": "PEN"
             },
             "description": "Sistema para boticas que controla ventas, stock y caja"
@@ -55,7 +55,7 @@ export default function BoticaLanding() {
       </main>
       <StickyWhatsApp 
         phoneNumber="51913916967"
-        message="Hola,%20tengo%20una%20botica%20y%20quiero%20digitalizar%20mi%20negocio%20con%20AI%20Business%20OS."
+        message="Hola,%20tengo%20una%20botica%20y%20quiero%20digitalizar%20mi%20negocio%20con%20Coriva%20Core."
         text="WhatsApp: Implementación gratis"
         source="botica"
       />

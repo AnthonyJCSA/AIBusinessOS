@@ -76,7 +76,7 @@ export default function PreciosPage() {
             <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center">
               <span className="text-white font-bold text-xl">C</span>
             </div>
-            <span className="text-2xl font-bold text-gray-900">AI Business OS</span>
+            <span className="text-2xl font-bold text-gray-900">Coriva</span>
           </Link>
           <div className="flex items-center gap-4">
             <select value={locale} onChange={(e) => { setLocale(e.target.value as Locale); trackEvent('change_language', 'pricing', e.target.value) }} className="px-3 py-2 border border-gray-300 rounded-lg text-sm">

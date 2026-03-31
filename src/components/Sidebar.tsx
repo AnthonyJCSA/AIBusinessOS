@@ -156,7 +156,7 @@ export default function Sidebar({ currentUser, currentOrg, activeModule, setActi
                 className="text-[17px] font-extrabold tracking-tight"
                 style={{ background: 'var(--gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}
               >
-                AI Business OS
+                Coriva Core
               </div>
               <div className="text-[9px] font-medium uppercase tracking-[.8px]" style={{ color: 'var(--sub)' }}>
                 SaaS · IA para Negocios
