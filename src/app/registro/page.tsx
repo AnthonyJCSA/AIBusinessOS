@@ -80,6 +80,10 @@ export default function RegistroPage() {
   const handlePayment = async () => {
     try {
       setLoading(true)
+      setError('')
+      
+      console.log('Iniciando pago con:', { plan: selectedPlan, orgId: orgData.orgId })
+      
       const response = await fetch('/api/stripe/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -90,14 +94,20 @@ export default function RegistroPage() {
       })
 
       const data = await response.json()
+      console.log('Respuesta de checkout:', data)
 
       if (!response.ok) {
         throw new Error(data.error || 'Error al crear checkout')
       }
 
+      if (!data.url) {
+        throw new Error('No se recibió URL de pago')
+      }
+
       window.location.href = data.url
       
     } catch (error: any) {
+      console.error('Error en pago:', error)
       setError(error?.message || 'Error al procesar el pago')
       setLoading(false)
     }
