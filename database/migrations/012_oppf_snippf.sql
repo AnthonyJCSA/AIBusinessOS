@@ -24,7 +24,7 @@ ADD COLUMN IF NOT EXISTS digemid_establishment_code VARCHAR(50);
 -- ── RPC: Generar Reporte OPPF ───────────────────────────────
 -- Retorna productos con stock para el reporte mensual
 CREATE OR REPLACE FUNCTION generate_oppf_report(
-  p_org_id UUID,
+  p_org_id TEXT,
   p_month INTEGER DEFAULT EXTRACT(MONTH FROM CURRENT_DATE)::INTEGER,
   p_year INTEGER DEFAULT EXTRACT(YEAR FROM CURRENT_DATE)::INTEGER
 )
