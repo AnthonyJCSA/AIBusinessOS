@@ -1,38 +1,91 @@
-# Coriva OS — AI Business OS
+# Coriva Core — AI Business OS
 
-Sistema operativo para negocios: POS + CRM + Inventario + IA, construido como SaaS multi-tenant para Perú y USA.
+**Sistema operativo para negocios:** POS + CRM + Inventario + IA, construido como SaaS multi-tenant production-ready.
 
-## Stack
+[![CI](https://github.com/AnthonyJCSA/AIBusinessOS/workflows/CI/badge.svg)](https://github.com/AnthonyJCSA/AIBusinessOS/actions)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-14-black)](https://nextjs.org/)
+[![Supabase](https://img.shields.io/badge/Supabase-Auth%20%2B%20DB-green)](https://supabase.com/)
 
-| Capa | Tecnología |
-|---|---|
-| Frontend | Next.js 14 · TypeScript · Tailwind CSS |
-| Estado | Zustand (session, cart, notifications) |
-| Base de datos | Supabase (PostgreSQL + RLS) |
-| IA | OpenAI GPT-4o-mini (server-side) |
-| Deploy | Vercel |
-| Analytics | Google Analytics 4 + Google Tag Manager |
+---
 
-## Instalación
+## 🚀 Quick Start
 
 ```bash
 git clone https://github.com/AnthonyJCSA/AIBusinessOS.git
 cd AIBusinessOS
 npm install
 cp .env.example .env.local
+# Configurar variables de entorno (ver abajo)
 npm run dev
 # http://localhost:3000
 ```
 
-## Variables de entorno
+## 📋 Stack Tecnológico
 
+| Capa | Tecnología |
+|---|---|
+| Frontend | Next.js 14 · TypeScript · Tailwind CSS |
+| Autenticación | **Supabase Auth** (JWT + HTTP-only cookies) |
+| Estado | Zustand (cart, notifications) |
+| Base de datos | Supabase (PostgreSQL + RLS) |
+| Permisos | **RBAC** (5 roles jerárquicos) |
+| IA | OpenAI GPT-4o-mini (server-side) |
+| Deploy | Vercel |
+| CI/CD | GitHub Actions |
+| Analytics | Google Analytics 4 + Google Tag Manager |
+
+## 🔒 Seguridad
+
+### Autenticación y Autorización
+- ✅ **Supabase Auth** con JWT tokens
+- ✅ Contraseñas hasheadas con bcrypt
+- ✅ Sesión en HTTP-only cookies
+- ✅ Middleware valida tokens reales
+- ✅ **RBAC** con 5 roles: OWNER, ADMIN, MANAGER, VENDEDOR, VIEWER
+- ✅ Guards en API routes y UI
+- ✅ RLS (Row Level Security) en Supabase
+
+### Multi-Tenant
+- ✅ Aislamiento total por `org_id`
+- ✅ Validación en cada request
+- ✅ No hay cross-tenant data leaks
+
+## 📚 Documentación
+
+- **[Guía de Deployment](docs/DEPLOYMENT.md)** - Instrucciones completas para producción
+- **[Checklist de Producción](docs/PRODUCTION_CHECKLIST.md)** - Verificación pre-launch
+- **[Plan de Hardening](docs/PRODUCTION_HARDENING_PLAN.md)** - Auditoría de seguridad
+- **[Fase 2 Completada](docs/FASE_2_AUTH_COMPLETADA.md)** - Migración a Supabase Auth
+- **[Fase 4 Completada](docs/FASE_4_GUARDS_COMPLETADA.md)** - Sistema de permisos
+
+## ⚙️ Variables de Entorno
+
+### Obligatorias
 ```env
-NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=xxxx
-OPENAI_API_KEY=xxxx
+# Supabase (REQUERIDO)
+NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+### Opcionales
+```env
+# OpenAI (para Asistente IA)
+OPENAI_API_KEY=sk-proj-xxxxx
+
+# Nubefact (para facturación electrónica)
+NUBEFACT_API_URL=https://api.nubefact.com/api/v1
+NUBEFACT_TOKEN=tu-token
+
+# PeruAPI (para validación DNI/RUC)
+PERUAPI_TOKEN=tu-token
+
+# Analytics
 NEXT_PUBLIC_GTM_ID=GTM-XXXXXXX
 NEXT_PUBLIC_GA4_ID=G-XXXXXXXXXX
 ```
+
+Ver [.env.example](.env.example) para documentación completa.
 
 ## Arquitectura multi-tenant
 
@@ -172,6 +225,43 @@ Cada organización tiene aislamiento total via RLS. Todos los servicios filtran 
 - `/registro` — Onboarding wizard
 - `/tienda/[slug]` — Tienda virtual pública
 
+## 🛠️ Desarrollo
+
+### Scripts Disponibles
+```bash
+npm run dev        # Servidor de desarrollo
+npm run build      # Build de producción
+npm run start      # Servidor de producción
+npm run lint       # ESLint
+npm run typecheck  # TypeScript check
+npm run check      # Lint + TypeCheck
+npm run verify     # Check + Build (pre-commit)
+```
+
+### Estructura del Proyecto
+```
+AIBusinessOS/
+├── src/
+│   ├── app/                    # Next.js 14 App Router
+│   │   ├── (auth)/            # Rutas públicas (login, registro)
+│   │   ├── (dashboard)/       # Rutas protegidas
+│   │   └── api/               # API Routes
+│   ├── components/            # Componentes UI
+│   ├── lib/
+│   │   ├── auth/              # Supabase Auth clients
+│   │   ├── permissions/       # Sistema RBAC
+│   │   ├── services/          # Lógica de negocio
+│   │   ├── env/               # Validación de entorno
+│   │   └── errors/            # Manejo de errores
+│   ├── state/                 # Zustand stores
+│   └── types/                 # TypeScript types
+├── database/
+│   └── migrations/            # Migraciones SQL
+├── docs/                      # Documentación
+├── .github/workflows/         # CI/CD
+└── middleware.ts              # Auth middleware
+```
+
 ## Deploy
 
 ```bash
@@ -186,15 +276,29 @@ Variables de entorno configuradas en Vercel dashboard.
 
 `pharmacy` · `hardware` · `clothing` · `barbershop` · `restaurant` · `retail` · `other`
 
-## Roadmap
+## 🛣️ Roadmap
 
-- [ ] Autenticación Supabase Auth (migrar de tabla custom)
+### Completado ✅
+- [x] Autenticación Supabase Auth
+- [x] Sistema RBAC con 5 roles
+- [x] Guards de permisos
+- [x] Validación de entorno
+- [x] CI/CD con GitHub Actions
+- [x] Documentación de deployment
+
+### En Progreso 🚧
+- [ ] Tests automáticos
+- [ ] Staging environment
+- [ ] Monitoreo con Sentry
+
+### Futuro 🔮
 - [ ] Billing con Stripe
 - [ ] Multi-sucursal
 - [ ] Códigos de barras (ZXing)
 - [ ] App móvil (React Native / Expo)
 - [ ] API pública con API keys
 - [ ] Webhooks para integraciones
+- [ ] 2FA
 
 ## Soporte
 
