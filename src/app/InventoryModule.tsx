@@ -6,6 +6,8 @@ import { exportInventoryToCSV } from '../lib/export'
 interface Product {
   id: string; code: string; name: string; category?: string
   price: number; cost?: number; stock: number; min_stock: number
+  // DIGEMID
+  digemid_code?: string; unit_price?: number; allows_fractionation?: boolean
   // Farmacia
   laboratory?: string; brand?: string; active_ingredient?: string
   expiry_date?: string; supplier?: string
@@ -22,6 +24,7 @@ interface InventoryProps {
 }
 
 const emptyProduct = { code: '', name: '', category: 'General', price: 0, cost: 0, stock: 0, min_stock: 5,
+  digemid_code: '', unit_price: 0, allows_fractionation: false,
   laboratory: '', brand: '', active_ingredient: '', expiry_date: '', supplier: '', unit: 'unidad', description: '' }
 
 export default function InventoryModule({ products: initial, onUpdateProduct, onAddProduct, onDeleteProduct, currentUser }: InventoryProps) {
@@ -201,6 +204,15 @@ export default function InventoryModule({ products: initial, onUpdateProduct, on
               <FI label="Stock Inicial"><input type="number" className="fi-dark" value={newP.stock} onChange={e => setNewP(p => ({ ...p, stock: parseInt(e.target.value) || 0 }))} /></FI>
               <FI label="Stock Mínimo"><input type="number" className="fi-dark" value={newP.min_stock} onChange={e => setNewP(p => ({ ...p, min_stock: parseInt(e.target.value) || 5 }))} /></FI>
               <FI label="Proveedor" full><input className="fi-dark" value={newP.supplier} onChange={e => setNewP(p => ({ ...p, supplier: e.target.value }))} /></FI>
+              {/* Campos DIGEMID */}
+              <FI label="Código DIGEMID"><input className="fi-dark" value={newP.digemid_code} onChange={e => setNewP(p => ({ ...p, digemid_code: e.target.value }))} placeholder="MED-001234" /></FI>
+              <FI label="Precio Unitario"><input type="number" step="0.01" className="fi-dark" value={newP.unit_price} onChange={e => setNewP(p => ({ ...p, unit_price: parseFloat(e.target.value) || 0 }))} placeholder="Para fraccionamiento" /></FI>
+              <FI label="Permite Fraccionamiento" full>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" checked={newP.allows_fractionation} onChange={e => setNewP(p => ({ ...p, allows_fractionation: e.target.checked }))} className="w-4 h-4" />
+                  <span className="text-xs" style={{ color: 'var(--muted)' }}>Producto se puede vender por unidad</span>
+                </label>
+              </FI>
               {/* Campos farmacia */}
               <FI label="Laboratorio"><input className="fi-dark" value={newP.laboratory} onChange={e => setNewP(p => ({ ...p, laboratory: e.target.value }))} /></FI>
               <FI label="Marca"><input className="fi-dark" value={newP.brand} onChange={e => setNewP(p => ({ ...p, brand: e.target.value }))} /></FI>
@@ -222,6 +234,14 @@ export default function InventoryModule({ products: initial, onUpdateProduct, on
               <FI label="Nombre"><input className="fi-dark" value={editing.name} onChange={e => setEditing(p => p ? { ...p, name: e.target.value } : p)} /></FI>
               <FI label="Precio"><input type="number" step="0.01" className="fi-dark" value={editing.price} onChange={e => setEditing(p => p ? { ...p, price: parseFloat(e.target.value) || 0 } : p)} /></FI>
               <FI label="Stock"><input type="number" className="fi-dark" value={editing.stock} onChange={e => setEditing(p => p ? { ...p, stock: parseInt(e.target.value) || 0 } : p)} /></FI>
+              <FI label="Código DIGEMID"><input className="fi-dark" value={editing.digemid_code || ''} onChange={e => setEditing(p => p ? { ...p, digemid_code: e.target.value } : p)} /></FI>
+              <FI label="Precio Unitario"><input type="number" step="0.01" className="fi-dark" value={editing.unit_price || 0} onChange={e => setEditing(p => p ? { ...p, unit_price: parseFloat(e.target.value) || 0 } : p)} /></FI>
+              <FI label="Permite Fraccionamiento" full>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" checked={editing.allows_fractionation || false} onChange={e => setEditing(p => p ? { ...p, allows_fractionation: e.target.checked } : p)} className="w-4 h-4" />
+                  <span className="text-xs" style={{ color: 'var(--muted)' }}>Producto se puede vender por unidad</span>
+                </label>
+              </FI>
             </div>
             <ModalActions onCancel={() => setEditing(null)} loading={loading} label="Guardar Cambios" />
           </form>

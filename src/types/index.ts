@@ -10,6 +10,7 @@ export interface Organization {
   phone?: string
   email?: string
   logo_url?: string
+  digemid_establishment_code?: string
   settings: OrganizationSettings
   is_active: boolean
   created_at: string
@@ -50,6 +51,9 @@ export interface Product {
   stock: number
   min_stock: number
   unit?: string
+  digemid_code?: string
+  unit_price?: number
+  allows_fractionation?: boolean
   metadata?: ProductMetadata
   is_active?: boolean
   created_at?: string

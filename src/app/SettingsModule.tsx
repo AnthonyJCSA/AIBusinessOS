@@ -15,6 +15,7 @@ export default function SettingsModule({ currentOrg, onUpdate }: { currentOrg: O
     phone: currentOrg.phone || '',
     email: currentOrg.email || '',
     web: '',
+    digemid_establishment_code: currentOrg.digemid_establishment_code || '',
     currency: currentOrg.settings?.currency || 'S/',
     tax_rate: ((currentOrg.settings?.tax_rate || 0.18) * 100),
     receipt_footer: currentOrg.settings?.receipt_footer || 'Gracias por su compra · Coriva POS',
@@ -31,6 +32,7 @@ export default function SettingsModule({ currentOrg, onUpdate }: { currentOrg: O
       ...currentOrg,
       name: s.name, business_type: s.business_type as any,
       ruc: s.ruc, address: s.address, phone: s.phone, email: s.email,
+      digemid_establishment_code: s.digemid_establishment_code,
       settings: { ...currentOrg.settings, currency: s.currency, tax_rate: s.tax_rate / 100, receipt_footer: s.receipt_footer, theme_color: s.accent, theme_mode: s.theme_mode },
       updated_at: new Date().toISOString(),
     })
@@ -91,6 +93,7 @@ export default function SettingsModule({ currentOrg, onUpdate }: { currentOrg: O
               </div>
               {fi('RUC', 'ruc')}
               {fi('Teléfono / WhatsApp', 'phone')}
+              {s.business_type === 'pharmacy' && fi('Código DIGEMID', 'digemid_establishment_code')}
               {fi('Dirección', 'address', 'text', true)}
               {fi('Email', 'email', 'email')}
               {fi('Web / Instagram', 'web')}
