@@ -211,7 +211,7 @@ export default function SettingsModule({ currentOrg, onUpdate }: { currentOrg: O
                   ['POS + Inventario', '✅'],
                   ['Facturación SUNAT', currentOrg.settings?.plan === 'premium' ? '✅' : '🔒 Premium'],
                   ['Módulo Farmacia',   currentOrg.settings?.plan === 'premium' ? '✅' : '🔒 Premium'],
-                  ['Asistente IA',      ['pro','premium'].includes(currentOrg.settings?.plan) ? '✅' : '🔒 Pro'],
+                  ['Asistente IA',      ['pro','premium'].includes(currentOrg.settings?.plan || 'pro') ? '✅' : '🔒 Pro'],
                   ['Tienda Virtual',    currentOrg.settings?.plan === 'premium' ? '✅' : '🔒 Premium'],
                 ].map(([k, v]) => (
                   <div key={k} className="flex justify-between text-xs">
