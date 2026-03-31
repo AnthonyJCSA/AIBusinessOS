@@ -61,9 +61,23 @@ export const organizationService = {
   async update(id: string, updates: Partial<Organization>): Promise<Organization> {
     if (!isSupabaseConfigured()) throw new Error('Supabase not configured')
     
+    // Preparar objeto de actualización limpio
+    const updateData: any = {}
+    if (updates.name !== undefined) updateData.name = updates.name
+    if (updates.slug !== undefined) updateData.slug = updates.slug
+    if (updates.business_type !== undefined) updateData.business_type = updates.business_type
+    if (updates.ruc !== undefined) updateData.ruc = updates.ruc
+    if (updates.address !== undefined) updateData.address = updates.address
+    if (updates.phone !== undefined) updateData.phone = updates.phone
+    if (updates.email !== undefined) updateData.email = updates.email
+    if (updates.logo_url !== undefined) updateData.logo_url = updates.logo_url
+    if (updates.digemid_establishment_code !== undefined) updateData.digemid_establishment_code = updates.digemid_establishment_code
+    if (updates.settings !== undefined) updateData.settings = updates.settings
+    if (updates.is_active !== undefined) updateData.is_active = updates.is_active
+    
     const { data, error } = await supabase
       .from(TABLE)
-      .update(updates)
+      .update(updateData)
       .eq('id', id)
       .select()
       .single()

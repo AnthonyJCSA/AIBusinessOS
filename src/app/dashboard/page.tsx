@@ -92,6 +92,7 @@ export default function DashboardPage() {
               phone:         data.org.phone,
               email:         data.org.email,
               logo_url:      data.org.logo_url,
+              digemid_establishment_code: data.org.digemid_establishment_code,
               settings:      data.org.settings,
               is_active:     data.org.is_active,
               created_at:    data.org.created_at,
