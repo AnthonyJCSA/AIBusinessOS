@@ -20,24 +20,29 @@ export default function PreciosPage() {
 
   const plans = [
     {
-      name: t.pricing.starter.name,
-      price: prices.starter,
-      period: isYearly ? t.pricing.yearly : t.pricing.monthly,
-      description: t.pricing.starter.desc,
-      features: ['1 usuario', '100 productos', 'Ventas ilimitadas', 'Reportes básicos', 'Soporte por email'],
-      cta: t.pricing.cta.free,
-      popular: false
-    },
-    {
       name: t.pricing.pro.name,
       price: isYearly ? prices.proYearly : prices.pro,
       originalPrice: isYearly ? Math.round(prices.pro * 12) : undefined,
       period: isYearly ? t.pricing.yearly : t.pricing.monthly,
       description: t.pricing.pro.desc,
-      features: ['5 usuarios', 'Productos ilimitados', 'IA predictiva', 'WhatsApp automático', 'Códigos de barras', 'Reportes avanzados', 'Soporte prioritario'],
+      features: [
+        'POS completo con atajos de teclado',
+        'Gestión de inventario y stock',
+        'Caja registradora con reconciliación',
+        'CRM de clientes',
+        'Pipeline de leads',
+        'Gestión de compras y proveedores',
+        'Reportes avanzados',
+        'Facturación electrónica SUNAT',
+        'Comunicaciones Email & WhatsApp',
+        'Catálogo digital compartible',
+        'Módulo farmacia DIGEMID',
+        'Multi-usuario con roles',
+        'Soporte prioritario'
+      ],
       cta: t.pricing.cta.trial,
       popular: true,
-      savings: isYearly ? '60% OFF' : undefined
+      savings: isYearly ? '20% OFF' : undefined
     },
     {
       name: t.pricing.premium.name,
@@ -45,8 +50,19 @@ export default function PreciosPage() {
       originalPrice: isYearly ? Math.round(prices.premium * 12) : undefined,
       period: isYearly ? t.pricing.yearly : t.pricing.monthly,
       description: t.pricing.premium.desc,
-      features: ['Usuarios ilimitados', 'Multi-sucursal', 'API personalizada', 'Onboarding dedicado', 'Soporte 24/7', 'Gerente de cuenta'],
-      cta: t.pricing.cta.sales,
+      features: [
+        '✨ Todo lo incluido en Plan Pro',
+        '🤖 Asistente IA con GPT-4',
+        '⚡ Automatizaciones inteligentes',
+        '🛍️ Tienda virtual propia',
+        '📊 Insights predictivos de IA',
+        '🔔 Alertas automáticas de stock',
+        '💬 Respuestas automáticas WhatsApp',
+        '📈 Análisis avanzado con IA',
+        '🎯 Recomendaciones personalizadas',
+        '🚀 Acceso anticipado a nuevas features'
+      ],
+      cta: t.pricing.cta.trial,
       popular: false,
       savings: isYearly ? '20% OFF' : undefined
     }
@@ -96,7 +112,7 @@ export default function PreciosPage() {
               className={`px-8 py-3 rounded-full font-semibold transition-all ${isYearly ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white' : 'text-gray-600'}`}
             >
               {t.pricing.yearly}
-              <span className="ml-2 text-xs bg-green-500 text-white px-2 py-1 rounded-full">{t.pricing.save} 60%</span>
+              <span className="ml-2 text-xs bg-green-500 text-white px-2 py-1 rounded-full">{t.pricing.save} 20%</span>
             </button>
           </div>
         </div>
@@ -104,7 +120,7 @@ export default function PreciosPage() {
 
       <section className="py-20 -mt-32">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
             {plans.map((plan, i) => (
               <div key={i} className={`relative bg-white rounded-2xl border-2 p-8 ${plan.popular ? 'border-indigo-500 shadow-2xl scale-105' : 'border-gray-200 shadow-lg'}`}>
                 {plan.popular && (

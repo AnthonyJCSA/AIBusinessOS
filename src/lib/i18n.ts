@@ -14,16 +14,15 @@ export const LOCALES = {
     },
     pricing: {
       title: "Precios simples y transparentes",
-      subtitle: "Elige el plan perfecto para tu negocio",
+      subtitle: "Sin contratos largos. Cancela cuando quieras.",
       monthly: "mes",
       yearly: "año",
       save: "Ahorra",
       guarantee: "💯 Garantía de 30 días. Si no te gusta, te devolvemos tu dinero.",
       popular: "🔥 Más Popular",
-      starter: { name: "Starter", desc: "Perfecto para empezar" },
-      pro: { name: "Pro", desc: "El más popular" },
-      premium: { name: "Premium", desc: "Para empresas" },
-      cta: { free: "Empezar gratis", trial: "Prueba 30 días gratis", sales: "Hablar con ventas" }
+      pro: { name: "Plan Pro", desc: "Para negocios en crecimiento" },
+      premium: { name: "Plan Premium", desc: "Todo Pro + IA avanzada" },
+      cta: { trial: "Prueba 30 días gratis", sales: "Hablar con ventas" }
     },
     common: {
       loading: "Cargando...",
@@ -48,16 +47,15 @@ export const LOCALES = {
     },
     pricing: {
       title: "Simple, transparent pricing",
-      subtitle: "Choose the perfect plan for your business",
+      subtitle: "No long-term contracts. Cancel anytime.",
       monthly: "month",
       yearly: "year",
       save: "Save",
       guarantee: "💯 30-day money-back guarantee. No questions asked.",
       popular: "🔥 Most Popular",
-      starter: { name: "Starter", desc: "Perfect to get started" },
-      pro: { name: "Pro", desc: "Most popular" },
-      premium: { name: "Premium", desc: "For enterprises" },
-      cta: { free: "Start free", trial: "Try 30 days free", sales: "Talk to sales" }
+      pro: { name: "Pro Plan", desc: "For growing businesses" },
+      premium: { name: "Premium Plan", desc: "All Pro + Advanced AI" },
+      cta: { trial: "Try 30 days free", sales: "Talk to sales" }
     },
     common: {
       loading: "Loading...",
@@ -84,14 +82,14 @@ export const CURRENCIES = {
 }
 
 export const PRICING_BY_CURRENCY = {
-  PEN: { starter: 0, pro: 49, premium: 149, proYearly: 470, premiumYearly: 1430 },
-  USD: { starter: 0, pro: 13, premium: 39, proYearly: 125, premiumYearly: 375 },
-  MXN: { starter: 0, pro: 249, premium: 749, proYearly: 2390, premiumYearly: 7190 },
-  COP: { starter: 0, pro: 49000, premium: 149000, proYearly: 470000, premiumYearly: 1430000 },
-  CLP: { starter: 0, pro: 11900, premium: 35900, proYearly: 114240, premiumYearly: 344640 },
-  ARS: { starter: 0, pro: 12900, premium: 38900, proYearly: 123840, premiumYearly: 373440 },
-  BRL: { starter: 0, pro: 69, premium: 209, proYearly: 662, premiumYearly: 2006 },
-  EUR: { starter: 0, pro: 12, premium: 36, proYearly: 115, premiumYearly: 346 }
+  PEN: { pro: 99, premium: 199, proYearly: 950, premiumYearly: 1910 },
+  USD: { pro: 26, premium: 52, proYearly: 250, premiumYearly: 500 },
+  MXN: { pro: 499, premium: 999, proYearly: 4790, premiumYearly: 9590 },
+  COP: { pro: 99000, premium: 199000, proYearly: 950000, premiumYearly: 1910000 },
+  CLP: { pro: 23900, premium: 47900, proYearly: 229440, premiumYearly: 459840 },
+  ARS: { pro: 25900, premium: 51900, proYearly: 248640, premiumYearly: 498240 },
+  BRL: { pro: 139, premium: 279, proYearly: 1334, premiumYearly: 2678 },
+  EUR: { pro: 24, premium: 48, proYearly: 230, premiumYearly: 461 }
 }
 
 export function detectUserLocale(): Locale {
