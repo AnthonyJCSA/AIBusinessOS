@@ -4,7 +4,7 @@
 export const BOTICA_COPY = {
   whatsapp: {
     phone: "51913916967",
-    defaultMessage: "Hola,%20tengo%20una%20botica%20y%20quiero%20digitalizar%20mi%20negocio%20con%20Coriva%20Core."
+    defaultMessage: "Hola,%20tengo%20una%20botica%20y%20quiero%20digitalizar%20mi%20negocio%20con%20AI Business OS%20Core."
   },
   
   hero: {
@@ -51,12 +51,12 @@ export const BOTICA_COPY = {
         descripcion: "¿Cuánto vendiste esta semana? ¿Qué medicamento se vende más? No tienes idea"
       }
     ],
-    ctaText: "Con Coriva Core, todos estos problemas se acaban hoy",
+    ctaText: "Con AI Business OS, todos estos problemas se acaban hoy",
     ctaButton: "💬 Quiero solucionar esto ahora →"
   },
 
   beneficios: {
-    title: "Qué ganas con Coriva Core",
+    title: "Qué ganas con AI Business OS",
     subtitle: "Beneficios reales que ves desde el primer día",
     items: [
       {
@@ -93,7 +93,7 @@ export const BOTICA_COPY = {
   },
 
   demo: {
-    title: "Así de fácil es usar Coriva Core",
+    title: "Así de fácil es usar AI Business OS",
     subtitle: "No necesitas ser experto en computadoras",
     steps: [
       {
@@ -115,7 +115,7 @@ export const BOTICA_COPY = {
   },
 
   testimonios: {
-    title: "Boticas que ya usan Coriva Core",
+    title: "Boticas que ya usan AI Business OS",
     subtitle: "Esto dicen los dueños de boticas en Perú",
     items: [
       {
@@ -143,37 +143,37 @@ export const BOTICA_COPY = {
   },
 
   comparacion: {
-    title: "Antes vs Después de Coriva Core",
+    title: "Antes vs Después de AI Business OS",
     subtitle: "La diferencia es clara",
     items: [
       {
         sinSistema: "Cierras caja en 1-2 horas",
-        conCoriva: "Cierras caja en 1 minuto",
+        conAI Business OS: "Cierras caja en 1 minuto",
         icon: "⏰"
       },
       {
         sinSistema: "No sabes cuánto vendiste",
-        conCoriva: "Ves tus ventas en tiempo real",
+        conAI Business OS: "Ves tus ventas en tiempo real",
         icon: "📊"
       },
       {
         sinSistema: "Te quedas sin stock",
-        conCoriva: "Te avisa antes que se acabe",
+        conAI Business OS: "Te avisa antes que se acabe",
         icon: "📦"
       },
       {
         sinSistema: "Pierdes control de deudas",
-        conCoriva: "Sabes quién debe y cuánto",
+        conAI Business OS: "Sabes quién debe y cuánto",
         icon: "💰"
       },
       {
         sinSistema: "Cuaderno y Excel",
-        conCoriva: "Todo automático",
+        conAI Business OS: "Todo automático",
         icon: "📱"
       },
       {
         sinSistema: "No sabes qué comprar",
-        conCoriva: "Reportes claros de qué pedir",
+        conAI Business OS: "Reportes claros de qué pedir",
         icon: "📈"
       }
     ],
@@ -211,13 +211,13 @@ export const BOTICA_COPY = {
 
   ctaFinal: {
     title: "Empieza a digitalizar tu botica hoy",
-    subtitle: "Únete a las boticas que ya controlan sus ventas, stock y caja con Coriva Core",
+    subtitle: "Únete a las boticas que ya controlan sus ventas, stock y caja con AI Business OS",
     ctaPrimary: "💬 Hablar con un asesor ahora",
     ctaSecondary: "Ver demo del sistema",
     trust: ["Implementación gratis", "Soporte en Perú", "Desde S/49 al mes"],
     contacto: {
       telefono: "+51 913 916 967",
-      email: "soporte@corivape.com"
+      email: "soporte@AI Business OSpe.com"
     }
   }
 }

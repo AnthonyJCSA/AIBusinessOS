@@ -27,12 +27,12 @@ export default function BodegaLanding() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "SoftwareApplication",
-            "name": "Coriva Core - Sistema para Bodegas",
+            "name": "AI Business OS - Sistema para Bodegas",
             "applicationCategory": "BusinessApplication",
             "operatingSystem": "Web",
             "offers": {
               "@type": "Offer",
-              "price": "49",
+              "price": "99",
               "priceCurrency": "PEN"
             },
             "description": "Sistema para bodegas que controla ventas, stock y caja"
@@ -51,7 +51,7 @@ export default function BodegaLanding() {
       </main>
       <StickyWhatsApp 
         phoneNumber="51913916967"
-        message="Hola,%20tengo%20una%20bodega%20y%20quiero%20ordenar%20mi%20negocio%20con%20Coriva%20Core."
+        message="Hola,%20tengo%20una%20bodega%20y%20quiero%20ordenar%20mi%20negocio%20con%20AI%20Business%20OS."
         text="WhatsApp: Implementación gratis"
         source="bodega"
       />
