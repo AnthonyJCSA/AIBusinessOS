@@ -1,6 +1,7 @@
 'use client'
 
 import { canAccessModule } from '@/lib/permissions'
+import { useFeatureFlag } from '@/shared/hooks/useFeatureFlag'
 
 interface SidebarProps {
   currentUser: any
@@ -103,6 +104,25 @@ export default function Sidebar({ currentUser, currentOrg, activeModule, setActi
     onClose()
   }
 
+  // Helper para verificar acceso completo (rol + plan)
+  const canAccess = (moduleId: string) => {
+    // Verificar permisos de rol
+    if (!canAccessModule(currentUser?.role, moduleId)) return false
+    
+    // OWNER siempre tiene acceso
+    if (currentUser?.role === 'OWNER') return true
+    
+    // Verificar plan
+    const currentPlan = (currentOrg?.settings?.plan ?? 'pro') as 'starter' | 'pro' | 'premium'
+    const planFeatures: Record<string, string[]> = {
+      starter: ['pos', 'inventory', 'cash', 'customers', 'reports', 'dashboard'],
+      pro: ['pos', 'inventory', 'cash', 'customers', 'reports', 'leads', 'purchases', 'communications', 'billing', 'store', 'catalog', 'automations', 'pharma', 'dashboard', 'users', 'settings'],
+      premium: ['pos', 'inventory', 'cash', 'customers', 'reports', 'leads', 'purchases', 'communications', 'billing', 'store', 'catalog', 'automations', 'pharma', 'asistente', 'dashboard', 'users', 'settings'],
+    }
+    
+    return planFeatures[currentPlan]?.includes(moduleId) ?? false
+  }
+
   return (
     <>
       {/* Overlay móvil */}
@@ -180,9 +200,7 @@ export default function Sidebar({ currentUser, currentOrg, activeModule, setActi
                 {section.label}
               </div>
               {section.items.map(item => {
-                const hasAccess = canAccessModule(currentUser?.role, item.id)
-                console.log(`Module: ${item.id}, Role: ${currentUser?.role}, HasAccess: ${hasAccess}`)
-                if (!hasAccess) return null
+                if (!canAccess(item.id)) return null
                 const isActive = activeModule === item.id
                 return (
                   <button
