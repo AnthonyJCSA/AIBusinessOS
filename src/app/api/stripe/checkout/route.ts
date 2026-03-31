@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/auth/supabase-server'
-import { getStripePriceId } from '@/lib/stripe/config'
+import Stripe from 'stripe'
 
 export async function POST(req: NextRequest) {
   try {
@@ -10,6 +10,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: 'Plan y orgId requeridos' },
         { status: 400 }
+      )
+    }
+
+    // Verificar que Stripe esté configurado
+    if (!process.env.STRIPE_SECRET_KEY) {
+      console.error('STRIPE_SECRET_KEY no configurada')
+      return NextResponse.json(
+        { error: 'Stripe no configurado. Contacta al administrador.' },
+        { status: 500 }
       )
     }
 
@@ -36,20 +45,29 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
-    const priceId = getStripePriceId(plan)
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2024-11-20.acacia',
+    })
+
+    // Precios de test hardcodeados (crear estos en Stripe Dashboard)
+    const priceIds = {
+      pro: process.env.STRIPE_PRICE_PRO || 'price_test_pro',
+      premium: process.env.STRIPE_PRICE_PREMIUM || 'price_test_premium',
+    }
+
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       payment_method_types: ['card'],
       line_items: [
         {
-          price: priceId,
+          price: priceIds[plan as 'pro' | 'premium'],
           quantity: 1,
         },
       ],
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?payment=success`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/registro?payment=cancelled`,
+      success_url: `${appUrl}/dashboard?payment=success`,
+      cancel_url: `${appUrl}/registro?payment=cancelled`,
       client_reference_id: orgId,
       customer_email: user.email,
       metadata: {
