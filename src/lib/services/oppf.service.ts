@@ -57,16 +57,11 @@ export async function validateOPPFConfiguration(orgId: string): Promise<{
   valid: boolean
   message?: string
 }> {
-  console.log('validateOPPFConfiguration - orgId:', orgId)
-  
   const { data: org, error } = await supabase
     .from('corivacore_organizations')
     .select('digemid_establishment_code, business_type')
     .eq('id', orgId)
     .single()
-
-  console.log('Organization data:', org)
-  console.log('Query error:', error)
 
   if (error || !org) {
     return { valid: false, message: 'No se pudo verificar la organización' }
