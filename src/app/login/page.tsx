@@ -157,7 +157,7 @@ export default function LoginPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             <p style={{ fontSize: 14, color: C.muted, textAlign: 'center' }}>
               ¿No tienes cuenta?{' '}
-              <Link href="/registro" style={{ color: C.ink, fontWeight: 700, textDecoration: 'none' }}>Regístrate gratis →</Link>
+              <Link href="/registro" style={{ color: C.ink, fontWeight: 700, textDecoration: 'none' }}>Regístrate →</Link>
             </p>
             <a href="https://wa.me/51913916967?text=Hola,%20necesito%20ayuda%20para%20ingresar%20a%20Coriva%20Core."
               target="_blank" rel="noreferrer"

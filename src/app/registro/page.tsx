@@ -1,18 +1,41 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import OnboardingWizard from '@/app/OnboardingWizard'
 import { Organization } from '@/types'
 import { createBrowserClient } from '@/lib/auth'
 
 export default function RegistroPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [step, setStep] = useState<'form' | 'payment'>('form')
   const [selectedPlan, setSelectedPlan] = useState<'pro' | 'premium'>('pro')
   const [orgData, setOrgData] = useState<any>(null)
+
+  // Verificar si viene con step=payment en la URL
+  useEffect(() => {
+    const stepParam = searchParams.get('step')
+    if (stepParam === 'payment') {
+      // Cargar datos de la sesión actual
+      const loadCurrentOrg = async () => {
+        const supabase = createBrowserClient()
+        const { data: { session } } = await supabase.auth.getSession()
+        
+        if (session) {
+          const response = await fetch('/api/auth/session')
+          if (response.ok) {
+            const { org } = await response.json()
+            setOrgData({ orgId: org.id, email: session.user.email })
+            setStep('payment')
+          }
+        }
+      }
+      loadCurrentOrg()
+    }
+  }, [searchParams])
 
   const handleComplete = async (
     org: Organization, 

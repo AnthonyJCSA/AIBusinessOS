@@ -199,7 +199,7 @@ export default function Sidebar({ currentUser, currentOrg, activeModule, setActi
                 {section.label}
               </div>
               {section.items.map(item => {
-                // Ocultar Farmacia si no es pharmacy
+                // Ocultar Farmacia si no es pharmacy (independiente del plan)
                 if (item.id === 'pharma' && currentOrg?.business_type !== 'pharmacy') return null
                 
                 if (!canAccess(item.id)) return null

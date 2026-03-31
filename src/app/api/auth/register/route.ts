@@ -38,6 +38,7 @@ export async function POST(req: NextRequest) {
           email: organization.email || null,
           settings: organization.settings || { currency: 'S/', tax_rate: 0.18, plan: 'pro' },
           is_active: true,
+          payment_status: 'pending', // Estado inicial: pendiente de pago
         })
         .select()
         .single()

@@ -9,6 +9,7 @@ import { loadThemeFromOrg } from '@/lib/theme'
 
 import Sidebar from '@/components/Sidebar'
 import Topbar from '@/components/Topbar'
+import PaymentPendingBanner from '@/components/PaymentPendingBanner'
 
 import DashboardModule from '@/app/DashboardModule'
 import AIAssistantModule from '@/app/AIAssistantModule'
@@ -41,6 +42,7 @@ export default function DashboardPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [sales, setSales] = useState<Sale[]>([])
   const [showCatalogModal, setShowCatalogModal] = useState(false)
+  const [showPaymentBanner, setShowPaymentBanner] = useState(false)
 
   // ── Auth: Cargar sesión desde Supabase Auth ────────────────
   useEffect(() => {
@@ -78,6 +80,11 @@ export default function DashboardPage() {
         }
 
         const { user: loadedUser, org: loadedOrg } = await response.json()
+
+        // Mostrar banner si el pago está pendiente (pero permitir acceso)
+        if (loadedOrg.payment_status === 'pending') {
+          setShowPaymentBanner(true)
+        }
 
         setSession(loadedUser, loadedOrg)
         loadThemeFromOrg(loadedOrg)
@@ -199,6 +206,8 @@ export default function DashboardPage() {
 
   return (
     <div className="flex h-screen overflow-hidden" style={{ background: 'var(--bg)', fontFamily: "'Outfit', sans-serif" }}>
+      <PaymentPendingBanner show={showPaymentBanner} />
+      
       <Sidebar
         currentUser={user} currentOrg={org}
         activeModule={activeModule} setActiveModule={setActiveModule}

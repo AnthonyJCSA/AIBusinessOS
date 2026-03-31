@@ -13,6 +13,9 @@ export interface Organization {
   digemid_establishment_code?: string
   settings: OrganizationSettings
   is_active: boolean
+  payment_status?: 'pending' | 'active' | 'cancelled' | 'trial'
+  subscription_id?: string
+  trial_ends_at?: string
   created_at: string
   updated_at: string
 }
@@ -24,6 +27,7 @@ export interface OrganizationSettings {
   theme_color?: string
   enable_inventory?: boolean
   enable_customers?: boolean
+  plan?: 'pro' | 'premium'
   [key: string]: any
 }
 
