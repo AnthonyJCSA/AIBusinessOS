@@ -4,35 +4,75 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import OnboardingWizard from '@/app/OnboardingWizard'
 import { Organization } from '@/types'
-import { organizationService, authService } from '@/lib/services'
+import { organizationService } from '@/lib/services'
+import { createBrowserClient } from '@/lib/auth'
 
 export default function RegistroPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
 
-  const handleComplete = async (org: Organization, _products: any[], userData: { full_name: string; username: string; password: string; email: string }) => {
+  const handleComplete = async (
+    org: Organization, 
+    _products: any[], 
+    userData: { full_name: string; username: string; password: string; email: string }
+  ) => {
     try {
       setLoading(true)
+      const supabase = createBrowserClient()
 
-      // 1. Crear organización — Supabase genera el UUID real
-      const createdOrg = await organizationService.create(org)
-
-      // 2. Crear usuario admin con el UUID real de la org
-      const adminUser = await authService.createUser({
-        organization_id: createdOrg.id,   // UUID real de Supabase
-        username:        userData.username,
-        password:        userData.password,
-        full_name:       userData.full_name,
-        email:           userData.email || createdOrg.email || '',
-        role:            'OWNER',
-        is_active:       true,
+      // 1. Crear usuario en Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: userData.email,
+        password: userData.password,
+        options: {
+          data: {
+            full_name: userData.full_name,
+            username: userData.username,
+          },
+          emailRedirectTo: `${window.location.origin}/dashboard`,
+        },
       })
 
-      // 3. Guardar sesión y redirigir
-      sessionStorage.setItem('coriva_user', JSON.stringify(adminUser))
-      sessionStorage.setItem('coriva_org',  JSON.stringify(createdOrg))
+      if (authError) {
+        throw new Error(`Error al crear usuario: ${authError.message}`)
+      }
 
-      window.location.href = '/dashboard'
+      if (!authData.user) {
+        throw new Error('No se pudo crear el usuario en Supabase Auth')
+      }
+
+      const authUserId = authData.user.id
+
+      // 2. Crear organización
+      const createdOrg = await organizationService.create(org)
+
+      // 3. Crear usuario en nuestra tabla con auth_user_id
+      const { error: userError } = await supabase
+        .from('corivacore_users')
+        .insert({
+          id: crypto.randomUUID(),
+          org_id: createdOrg.id,
+          auth_user_id: authUserId,
+          username: userData.username,
+          email: userData.email,
+          full_name: userData.full_name,
+          role: 'OWNER',
+          is_active: true,
+        })
+
+      if (userError) {
+        // Si falla, eliminar usuario de Supabase Auth
+        await supabase.auth.admin.deleteUser(authUserId)
+        throw new Error(`Error al crear usuario en base de datos: ${userError.message}`)
+      }
+
+      // 4. Login automático (ya está logueado por signUp)
+      // Supabase Auth ya creó la sesión automáticamente
+      
+      // 5. Redirigir al dashboard
+      router.push('/dashboard')
+      router.refresh()
+      
     } catch (error: any) {
       console.error('Error en registro:', error)
       alert(`Error al crear la cuenta: ${error?.message || 'Error desconocido'}`)
