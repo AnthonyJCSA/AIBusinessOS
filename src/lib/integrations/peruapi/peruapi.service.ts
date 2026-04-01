@@ -46,11 +46,19 @@ async function fetchPeruApi<T>(path: string): Promise<T> {
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS)
 
+  // peruapi.com acepta el token como query param o como header Authorization Bearer
+  const separator = path.includes('?') ? '&' : '?'
+  const fullUrl = `${baseUrl}${path}${separator}token=${apiKey}`
+  log.info('Llamando PeruAPI', { url: fullUrl.replace(apiKey, '***'), keyLength: apiKey.length })
+
   let res: Response
   try {
-    res = await fetch(`${baseUrl}${path}`, {
-      headers: { 'X-API-KEY': apiKey },
-      signal:  controller.signal,
+    res = await fetch(fullUrl, {
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Accept': 'application/json',
+      },
+      signal: controller.signal,
     })
   } catch (err: unknown) {
     clearTimeout(timer)
@@ -66,12 +74,14 @@ async function fetchPeruApi<T>(path: string): Promise<T> {
     throw { code: 'NOT_FOUND', message: 'Documento no encontrado en el padrón' } as PeruApiError
   }
   if (res.status === 401 || res.status === 403) {
-    log.error('API key inválida o sin permisos', { status: res.status, path })
-    throw { code: 'PROVIDER_ERROR', message: 'API key inválida o sin permisos' } as PeruApiError
+    const body = await res.text().catch(() => '')
+    log.error('Auth error PeruAPI', { status: res.status, path, body })
+    throw { code: 'PROVIDER_ERROR', message: `Error de autenticación PeruAPI (${res.status}): ${body || 'API key inválida'}` } as PeruApiError
   }
   if (!res.ok) {
-    log.error('Error HTTP de Perú API', { status: res.status, path })
-    throw { code: 'PROVIDER_ERROR', message: `Error del proveedor: HTTP ${res.status}` } as PeruApiError
+    const body = await res.text().catch(() => '')
+    log.error('Error HTTP PeruAPI', { status: res.status, path, body })
+    throw { code: 'PROVIDER_ERROR', message: `Error PeruAPI HTTP ${res.status}: ${body}` } as PeruApiError
   }
 
   return res.json() as Promise<T>
