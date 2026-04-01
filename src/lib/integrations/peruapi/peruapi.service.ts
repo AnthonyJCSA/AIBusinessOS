@@ -48,9 +48,11 @@ async function fetchPeruApi<T>(path: string): Promise<T> {
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS)
 
   // peruapi.com requiere 'X-API-KEY' como header o 'api_token' como query param
+  const allowedIp = process.env.PERUAPI_ALLOWED_IP
   const separator = path.includes('?') ? '&' : '?'
-  const fullUrl = `${baseUrl}${path}${separator}api_token=${apiKey}`
-  log.info('Llamando PeruAPI', { url: fullUrl.replace(apiKey, '***'), keyLength: apiKey.length })
+  const ipParam = allowedIp ? `&ip=${allowedIp}` : ''
+  const fullUrl = `${baseUrl}${path}${separator}api_token=${apiKey}${ipParam}`
+  log.info('Llamando PeruAPI', { url: fullUrl.replace(apiKey, '***'), keyLength: apiKey.length, allowedIp })
 
   let res: Response
   try {
