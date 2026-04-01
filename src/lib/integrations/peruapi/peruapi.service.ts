@@ -35,6 +35,7 @@ export function validateRuc(ruc: string): PeruApiError | null {
 function getConfig(): { baseUrl: string; apiKey: string } {
   const baseUrl = process.env.PERUAPI_BASE_URL
   const apiKey  = process.env.PERUAPI_KEY
+  log.info('PeruAPI config check', { hasBaseUrl: !!baseUrl, hasApiKey: !!apiKey, keyLength: apiKey?.length ?? 0 })
   if (!baseUrl || !apiKey) {
     throw { code: 'PROVIDER_ERROR', message: 'Variables PERUAPI_BASE_URL y PERUAPI_KEY no configuradas' } as PeruApiError
   }
@@ -46,16 +47,16 @@ async function fetchPeruApi<T>(path: string): Promise<T> {
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS)
 
-  // peruapi.com acepta el token como query param o como header Authorization Bearer
+  // peruapi.com requiere 'X-API-KEY' como header o 'api_token' como query param
   const separator = path.includes('?') ? '&' : '?'
-  const fullUrl = `${baseUrl}${path}${separator}token=${apiKey}`
+  const fullUrl = `${baseUrl}${path}${separator}api_token=${apiKey}`
   log.info('Llamando PeruAPI', { url: fullUrl.replace(apiKey, '***'), keyLength: apiKey.length })
 
   let res: Response
   try {
     res = await fetch(fullUrl, {
       headers: {
-        'Authorization': `Bearer ${apiKey}`,
+        'X-API-KEY': apiKey,
         'Accept': 'application/json',
       },
       signal: controller.signal,
