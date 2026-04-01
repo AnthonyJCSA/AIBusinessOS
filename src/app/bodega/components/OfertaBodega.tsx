@@ -1,20 +1,20 @@
 'use client'
 
 const C = { ink: '#0C0E12', muted: '#6B7280', bg: '#FAFAF8', bg2: '#F3F2EF', card: '#FFFFFF', border: '#E5E3DE', lime: '#C8F23A', green: '#0D9C6E', greenLight: '#E8F8F3', orange: '#FF5A1F', wa: '#25D366', pale: '#9CA3AF' }
-const WA = "https://wa.me/51913916967?text=Hola,%20tengo%20una%20bodega%20y%20quiero%20ordenar%20mi%20negocio%20con%20Coriva%20Core."
+const WA = "https://wa.me/51913916967?text=Hola,%20tengo%20una%20bodega%20y%20quiero%20ordenar%20mi%20negocio%20con%20AI%20Business%20OS."
 
 const plans = [
   {
-    name: 'Starter', badge: '🔥 Más popular', price: 'S/ 79', old: 'Antes S/ 129 / mes',
+    name: 'Pro', badge: '🔥 Más popular', price: 'S/ 99', old: 'Plan completo',
     ai: '🤖 IA Básica', aiDesc: 'Alertas de stock automáticas',
-    feats: ['Control de ventas','Control de mercadería','Control de caja','Alertas cuando se acaba','Reportes de ventas','Control de deudas','Soporte en Perú','Te enseñamos a usarlo'],
-    cta: '💬 Empezar con Starter →', highlight: true,
+    feats: ['Control de ventas','Control de mercadería','Control de caja','Alertas cuando se acaba','Reportes de ventas','Control de deudas','Facturación SUNAT','Módulo Farmacia','Soporte en Perú','Implementación incluida'],
+    cta: '💬 Empezar con Pro →', highlight: true,
   },
   {
-    name: 'PRO', badge: '⚡ IA Avanzada', price: 'S/ 149', old: 'Antes S/ 249 / mes',
+    name: 'Premium', badge: '⚡ IA Avanzada', price: 'S/ 199', old: 'Todo incluido',
     ai: '🧠 IA Avanzada', aiDesc: 'Predicción, campañas y segmentación',
-    feats: ['Todo lo del Starter','IA predicción de ventas','Campañas WhatsApp IA','Segmentación de clientes','Tienda virtual','Catálogo digital','Reportes avanzados','Soporte prioritario'],
-    cta: '💬 Empezar con PRO →', highlight: false,
+    feats: ['Todo lo del Pro','Asistente IA conversacional','IA predicción de ventas','Campañas WhatsApp IA','Segmentación de clientes','Tienda virtual','Automatizaciones IA','Reportes avanzados','Soporte prioritario'],
+    cta: '💬 Empezar con Premium →', highlight: false,
   },
 ]
 
@@ -23,7 +23,7 @@ export default function OfertaBodega() {
     <section style={{ padding: '100px clamp(20px,5vw,80px)', background: C.bg }}>
       <div style={{ maxWidth: 1200, margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: 60 }}>
-          <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2, color: C.orange, display: 'block', marginBottom: 16 }}>🔥 Oferta limitada · Solo 50 cupos</span>
+          <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2, color: C.orange, display: 'block', marginBottom: 16 }}>🚀 Planes para tu bodega</span>
           <h2 style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 'clamp(32px,4.5vw,54px)', fontWeight: 900, lineHeight: 1.0, letterSpacing: -2, color: C.ink }}>
             Elige tu plan<br />para <em style={{ fontStyle: 'italic', fontWeight: 300, color: C.orange }}>bodegas</em>
           </h2>
@@ -61,7 +61,7 @@ export default function OfertaBodega() {
           ))}
         </div>
         <div style={{ textAlign: 'center', fontSize: 12, fontWeight: 600, color: C.orange, marginTop: 20 }}>
-          ⏰ Solo para las primeras 50 bodegas · Implementación gratis incluida
+          ✅ Sin contratos largos · ✅ Cancela cuando quieras · ✅ Implementación incluida
         </div>
       </div>
       <style>{`@media (max-width: 640px) { .plans-bodega-grid { grid-template-columns: 1fr !important; } }`}</style>
