@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, ReactNode } from 'react'
+import { useEffect, useRef, ReactNode, useState } from 'react'
 
 interface ScrollRevealProps {
   children: ReactNode
@@ -9,6 +9,7 @@ interface ScrollRevealProps {
 
 export default function ScrollReveal({ children, delay = 0 }: ScrollRevealProps) {
   const ref = useRef<HTMLDivElement>(null)
+  const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -16,7 +17,7 @@ export default function ScrollReveal({ children, delay = 0 }: ScrollRevealProps)
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             setTimeout(() => {
-              entry.target.classList.add('animate-fade-in-up')
+              setIsVisible(true)
             }, delay)
             observer.unobserve(entry.target)
           }
@@ -33,7 +34,11 @@ export default function ScrollReveal({ children, delay = 0 }: ScrollRevealProps)
   }, [delay])
 
   return (
-    <div ref={ref} className="opacity-0">
+    <div 
+      ref={ref} 
+      className={isVisible ? 'animate-fade-in-up' : ''}
+      style={{ opacity: isVisible ? 1 : 0 }}
+    >
       {children}
     </div>
   )
