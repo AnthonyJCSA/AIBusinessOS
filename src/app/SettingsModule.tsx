@@ -210,7 +210,7 @@ export default function SettingsModule({ currentOrg, onUpdate }: { currentOrg: O
                 {[
                   ['POS + Inventario', '✅'],
                   ['Facturación SUNAT', currentOrg.settings?.plan === 'premium' ? '✅' : '🔒 Premium'],
-                  ['Módulo Farmacia',   currentOrg.settings?.plan === 'premium' ? '✅' : '🔒 Premium'],
+                  ['Módulo Farmacia',   '✅'],
                   ['Asistente IA',      ['pro','premium'].includes(currentOrg.settings?.plan || 'pro') ? '✅' : '🔒 Pro'],
                   ['Tienda Virtual',    currentOrg.settings?.plan === 'premium' ? '✅' : '🔒 Premium'],
                 ].map(([k, v]) => (
