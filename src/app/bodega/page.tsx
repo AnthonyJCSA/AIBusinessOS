@@ -6,6 +6,7 @@ import { trackPageView } from '@/lib/tracking'
 import HeroBodega from './components/HeroBodega'
 import StorysellingBodega from './components/StorysellingBodega'
 import ProblemasBodega from './components/ProblemasBodega'
+import StatsBodega from './components/StatsBodega'
 import BeneficiosBodega from './components/BeneficiosBodega'
 import TestimoniosBodega from './components/TestimoniosBodega'
 import FAQBodega from './components/FAQBodega'
@@ -43,6 +44,7 @@ export default function BodegaLanding() {
         <HeroBodega />
         <StorysellingBodega />
         <ProblemasBodega />
+        <StatsBodega />
         <BeneficiosBodega />
         <TestimoniosBodega />
         <FAQBodega />

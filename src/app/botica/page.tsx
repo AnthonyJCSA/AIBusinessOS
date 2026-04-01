@@ -6,6 +6,7 @@ import { trackPageView } from '@/lib/tracking'
 import HeroBotica from './components/HeroBotica'
 import StorysellingBotica from './components/StorysellingBotica'
 import ProblemasBotica from './components/ProblemasBotica'
+import StatsBotica from './components/StatsBotica'
 import BeneficiosBotica from './components/BeneficiosBotica'
 import DemoVisual from './components/DemoVisual'
 import TestimoniosBotica from './components/TestimoniosBotica'
@@ -45,6 +46,7 @@ export default function BoticaLanding() {
         <HeroBotica />
         <StorysellingBotica />
         <ProblemasBotica />
+        <StatsBotica />
         <BeneficiosBotica />
         <DemoVisual />
         <TestimoniosBotica />
