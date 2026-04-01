@@ -30,6 +30,7 @@ export const MODULE_PERMISSIONS: Record<string, Role[]> = {
   users: ['OWNER', 'ADMIN'],
   settings: ['OWNER', 'ADMIN'],
   billing: ['OWNER', 'ADMIN', 'MANAGER'],
+  facturacion: ['OWNER', 'ADMIN', 'MANAGER'],
   communications: ['OWNER', 'ADMIN', 'MANAGER'],
   store: ['OWNER', 'ADMIN'],
   catalog: ['OWNER', 'ADMIN', 'MANAGER'],
