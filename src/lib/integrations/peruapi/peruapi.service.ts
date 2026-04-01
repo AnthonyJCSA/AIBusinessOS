@@ -2,8 +2,6 @@ import {
   DniResult,
   RucResult,
   PeruApiError,
-  RawDniResponse,
-  RawRucResponse,
 } from './peruapi.types'
 import { createLogger } from '@/lib/logger'
 
@@ -29,86 +27,62 @@ export function validateRuc(ruc: string): PeruApiError | null {
   return null
 }
 
-// ─── Estrategia: PeruAPI (si está configurada) → apis.net.pe (fallback público) ─
+// ─── HTTP helper — api.apis.net.pe/v1 (público, sin token, sin restricción IP) ─
 
-async function fetchWithPeruApi<T>(path: string): Promise<T> {
-  const baseUrl = process.env.PERUAPI_BASE_URL
-  const apiKey  = process.env.PERUAPI_KEY
-  if (!baseUrl || !apiKey) throw new Error('no_config')
+async function fetchApisNetPe<T>(endpoint: string, numero: string): Promise<T> {
+  const url = `https://api.apis.net.pe/v1/${endpoint}?numero=${numero}`
+  log.info('Consultando api.apis.net.pe', { endpoint, numero: numero.slice(0, 4) + '****' })
 
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS)
-  try {
-    const res = await fetch(`${baseUrl}${path}?api_token=${apiKey}&summary=0&plan=0`, {
-      headers: { 'X-API-KEY': apiKey, 'Accept': 'application/json' },
-      signal: controller.signal,
-    })
-    if (!res.ok) throw new Error(`http_${res.status}`)
-    return res.json() as Promise<T>
-  } finally {
-    clearTimeout(timer)
-  }
-}
 
-async function fetchWithApisNetPe<T>(path: string): Promise<T> {
-  const controller = new AbortController()
-  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS)
+  let res: Response
   try {
-    const res = await fetch(`https://apis.net.pe/api/v1${path}`, {
+    res = await fetch(url, {
       headers: { 'Accept': 'application/json' },
       signal: controller.signal,
     })
-    if (res.status === 404) throw { code: 'NOT_FOUND', message: 'Documento no encontrado en el padrón' } as PeruApiError
-    if (!res.ok) throw new Error(`http_${res.status}`)
-    return res.json() as Promise<T>
+  } catch (err: any) {
+    clearTimeout(timer)
+    if (err?.name === 'AbortError') {
+      throw { code: 'TIMEOUT', message: 'Tiempo de espera agotado al consultar el padrón' } as PeruApiError
+    }
+    throw { code: 'PROVIDER_ERROR', message: `Error de red: ${err?.message}` } as PeruApiError
   } finally {
     clearTimeout(timer)
   }
-}
 
-async function fetchPeruApi<T>(path: string): Promise<T> {
-  // Intentar primero con PeruAPI configurada
-  try {
-    const result = await fetchWithPeruApi<T>(path)
-    log.info('PeruAPI OK', { path })
-    return result
-  } catch (err: any) {
-    if ((err as PeruApiError)?.code === 'NOT_FOUND') throw err
-    log.info('PeruAPI no disponible, usando fallback apis.net.pe', { reason: err?.message })
+  if (res.status === 404) {
+    throw { code: 'NOT_FOUND', message: 'Documento no encontrado en el padrón' } as PeruApiError
+  }
+  if (res.status === 422) {
+    const body = await res.json().catch(() => ({}))
+    throw { code: 'INVALID_FORMAT', message: (body as any).error ?? 'Formato de documento inválido' } as PeruApiError
+  }
+  if (!res.ok) {
+    log.error('Error HTTP api.apis.net.pe', { status: res.status, endpoint })
+    throw { code: 'PROVIDER_ERROR', message: `Error del proveedor: HTTP ${res.status}` } as PeruApiError
   }
 
-  // Fallback: apis.net.pe (público, sin auth, sin restricción de IP)
-  try {
-    const result = await fetchWithApisNetPe<T>(path)
-    log.info('apis.net.pe OK', { path })
-    return result
-  } catch (err: any) {
-    if ((err as PeruApiError)?.code) throw err
-    if (err?.name === 'AbortError') throw { code: 'TIMEOUT', message: 'Tiempo de espera agotado' } as PeruApiError
-    throw { code: 'PROVIDER_ERROR', message: 'No se pudo consultar el documento. Intenta de nuevo.' } as PeruApiError
-  }
+  return res.json() as Promise<T>
 }
 
 // ─── Normalizadores ───────────────────────────────────────────────────────────
 
 function normalizeDni(raw: any, dni: string): DniResult {
-  const nombres         = raw.nombres ?? raw.nombre ?? ''
-  const apellidoPaterno = raw.apellidoPaterno ?? raw.apellido_paterno ?? ''
-  const apellidoMaterno = raw.apellidoMaterno ?? raw.apellido_materno ?? ''
-  const nombreCompleto  =
-    raw.nombreCompleto ??
-    raw.nombre_completo ??
-    raw.cliente ??
-    `${nombres} ${apellidoPaterno} ${apellidoMaterno}`.replace(/\s+/g, ' ').trim()
+  const nombres         = raw.nombres ?? raw.nombre?.split(' ').slice(2).join(' ') ?? ''
+  const apellidoPaterno = raw.apellidoPaterno ?? ''
+  const apellidoMaterno = raw.apellidoMaterno ?? ''
+  const nombreCompleto  = raw.nombre ?? `${nombres} ${apellidoPaterno} ${apellidoMaterno}`.trim()
 
-  return { dni: raw.dni ?? raw.numero ?? dni, nombres, apellidoPaterno, apellidoMaterno, nombreCompleto }
+  return { dni: raw.numeroDocumento ?? dni, nombres, apellidoPaterno, apellidoMaterno, nombreCompleto }
 }
 
 function normalizeRuc(raw: any, ruc: string): RucResult {
   return {
-    ruc:          raw.ruc ?? raw.numero ?? ruc,
-    razonSocial:  raw.razonSocial ?? raw.razon_social ?? raw.nombre ?? '',
-    direccion:    raw.direccion ?? raw.domicilioFiscal ?? raw.domicilio_fiscal ?? '',
+    ruc:          raw.numeroDocumento ?? ruc,
+    razonSocial:  raw.nombre ?? raw.razonSocial ?? '',
+    direccion:    raw.direccion ?? '',
     estado:       raw.estado ?? '',
     condicion:    raw.condicion ?? '',
     departamento: raw.departamento,
@@ -121,18 +95,18 @@ function normalizeRuc(raw: any, ruc: string): RucResult {
 
 export const peruApiService = {
   async searchDni(dni: string): Promise<DniResult> {
-    const validationErr = validateDni(dni)
-    if (validationErr) throw validationErr
-    log.info('Consultando DNI', { dni: `${dni.slice(0, 4)}****` })
-    const raw = await fetchPeruApi<any>(`/dni/${dni}`)
+    const err = validateDni(dni)
+    if (err) throw err
+    const raw = await fetchApisNetPe<any>('dni', dni)
+    log.info('DNI encontrado', { dni: dni.slice(0, 4) + '****' })
     return normalizeDni(raw, dni)
   },
 
   async searchRuc(ruc: string): Promise<RucResult> {
-    const validationErr = validateRuc(ruc)
-    if (validationErr) throw validationErr
-    log.info('Consultando RUC', { ruc })
-    const raw = await fetchPeruApi<any>(`/ruc/${ruc}`)
+    const err = validateRuc(ruc)
+    if (err) throw err
+    const raw = await fetchApisNetPe<any>('ruc', ruc)
+    log.info('RUC encontrado', { ruc, razonSocial: raw.nombre ?? raw.razonSocial })
     return normalizeRuc(raw, ruc)
   },
 }
