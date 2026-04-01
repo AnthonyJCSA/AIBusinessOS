@@ -37,7 +37,7 @@ export default function HeroHome() {
           </h1>
 
           <p style={{ fontSize: 18, lineHeight: 1.7, color: C.muted, marginBottom: 36, maxWidth: 480 }}>
-            Sistema para bodegas, boticas y tiendas. Controla ventas, stock y caja desde <strong style={{ color: C.ink, fontWeight: 600 }}>S/ 79 al mes</strong>. La IA trabaja por ti.
+            Sistema para bodegas, boticas y tiendas. Controla ventas, stock y caja desde <strong style={{ color: C.ink, fontWeight: 600 }}>S/ 99 al mes</strong>. La IA trabaja por ti.
           </p>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>

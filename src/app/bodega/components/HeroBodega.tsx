@@ -30,7 +30,7 @@ export default function HeroBodega() {
           </h1>
 
           <p style={{ fontSize: 18, lineHeight: 1.7, color: C.muted, marginBottom: 28, maxWidth: 480 }}>
-            Vende rápido, controla tu mercadería y tu plata desde <strong style={{ color: C.ink }}>S/ 79 al mes</strong>. Ordena tu negocio en 1 día.
+            Vende rápido, controla tu mercadería y tu plata desde <strong style={{ color: C.ink }}>S/ 99 al mes</strong>. Ordena tu negocio en 1 día.
           </p>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 10, marginBottom: 32 }}>

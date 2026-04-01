@@ -29,7 +29,7 @@ const COMPARACION = [
   { categoria: 'Soporte', feature: 'WhatsApp', coriva: '< 1 hora', treinta: 'Email', winner: 'coriva' },
   { categoria: 'Soporte', feature: 'Horario', coriva: 'Lun-Sáb 8am-8pm', treinta: 'Lun-Vie', winner: 'coriva' },
   { categoria: 'Precio', feature: 'Plan gratuito', coriva: 'Completo', treinta: 'Limitado', winner: 'coriva' },
-  { categoria: 'Precio', feature: 'Plan Pro', coriva: 'S/ 49/mes', treinta: 'S/ 79/mes', winner: 'coriva' }
+  { categoria: 'Precio', feature: 'Plan Pro', coriva: 'S/ 99/mes', treinta: 'S/ 149/mes', winner: 'coriva' }
 ]
 
 export default function ComparacionPage() {

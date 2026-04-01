@@ -77,7 +77,7 @@ export default function LoginPage() {
 
           {/* stats */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 48 }}>
-            {[['500+','Negocios activos'],['1 min','Cierre de caja'],['S/ 79','Plan Starter / mes']].map(([n, l]) => (
+            {[['500+','Negocios activos'],['1 min','Cierre de caja'],['S/ 99','Plan Pro / mes']].map(([n, l]) => (
               <div key={l} style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
                 <div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 28, fontWeight: 900, color: C.lime, minWidth: 80 }}>{n}</div>
                 <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.4)' }}>{l}</div>

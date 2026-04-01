@@ -6,7 +6,7 @@ const stats = [
   { num: '500+', label: 'Bodegas activas', icon: '🏪' },
   { num: '1 min', label: 'Cierre de caja', icon: '⚡' },
   { num: '30%', label: 'Más ventas', icon: '📈' },
-  { num: 'S/ 79', label: 'Por mes', icon: '💰' },
+  { num: 'S/ 99', label: 'Por mes', icon: '💰' },
 ]
 
 export default function StatsBodega() {
