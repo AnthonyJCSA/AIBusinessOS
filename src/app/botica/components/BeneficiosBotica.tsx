@@ -39,7 +39,7 @@ export default function BeneficiosBotica() {
       <div className="max-w-7xl mx-auto px-6">
         <ScrollReveal>
           <h2 className="text-4xl md:text-5xl font-bold text-center text-gray-900 mb-4">
-            Qué ganas con Coriva Core
+            Qué ganas con AI Business OS
           </h2>
           <p className="text-center text-gray-600 mb-16 text-lg">
             Beneficios reales que ves desde el primer día

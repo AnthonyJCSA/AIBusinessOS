@@ -47,7 +47,7 @@ export default function FinalCTA() {
 
       {/* footer */}
       <footer style={{ maxWidth: 1200, margin: '60px auto 0', paddingTop: 36, borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 20, flexWrap: 'wrap' }}>
-        <div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 16, fontWeight: 700, color: 'rgba(255,255,255,0.3)' }}>Coriva Core</div>
+        <div style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 16, fontWeight: 700, color: 'rgba(255,255,255,0.3)' }}>AI Business OS</div>
         <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.25)' }}>soporte@corivape.com · +51 913 916 967</div>
         <div style={{ display: 'flex', gap: 20 }}>
           {[['Términos','#'],['Privacidad','#'],['WhatsApp',wa]].map(([label, href]) => (

@@ -29,7 +29,7 @@ export default function PaymentPendingBanner({ show }: PaymentPendingBannerProps
               Pago Pendiente
             </p>
             <p className="text-white/90 text-xs">
-              Completa tu pago para activar todas las funcionalidades de Coriva Core
+              Completa tu pago para activar todas las funcionalidades de AI Business OS
             </p>
           </div>
         </div>

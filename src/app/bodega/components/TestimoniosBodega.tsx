@@ -15,7 +15,7 @@ export default function TestimoniosBodega() {
         <div style={{ textAlign: 'center', marginBottom: 60 }}>
           <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 2, color: C.muted, display: 'block', marginBottom: 16 }}>Lo dicen ellos</span>
           <h2 style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 'clamp(32px,4.5vw,54px)', fontWeight: 900, lineHeight: 1.0, letterSpacing: -2, color: C.ink }}>
-            Bodegas que ya<br />usan Coriva
+            Bodegas que ya<br />usan AI Business OS
           </h2>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 14 }} className="testi-bodega-grid">

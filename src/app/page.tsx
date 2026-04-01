@@ -9,12 +9,12 @@ import StickyWhatsApp from '@/components/StickyWhatsApp'
 import ExitIntentPopup from '@/components/ExitIntentPopup'
 
 export const metadata = {
-  title: 'Sistema para negocios pequeños en Perú | Coriva Core',
-  description: 'Sistema para bodegas, boticas y tiendas en Perú. Controla ventas, stock y caja desde S/49 al mes. Implementación gratis.',
+  title: 'Sistema para negocios pequeños en Perú | AI Business OS',
+  description: 'Sistema para bodegas, boticas y tiendas en Perú. Controla ventas, stock y caja desde S/99 al mes. Implementación incluida.',
   keywords: 'pos peru, punto de venta, inventario, caja, ventas, ia, whatsapp, sistema pos, pos para negocios, treinta alternativa',
-  authors: [{ name: 'Coriva Core' }],
-  creator: 'Coriva Core',
-  publisher: 'Coriva Core',
+  authors: [{ name: 'AI Business OS' }],
+  creator: 'AI Business OS',
+  publisher: 'AI Business OS',
   robots: 'index, follow',
   manifest: '/manifest.json',
   icons: {
@@ -22,22 +22,22 @@ export const metadata = {
     apple: '/apple-icon.png',
   },
   openGraph: {
-    title: 'Coriva Core - Tu negocio en piloto automático',
+    title: 'AI Business OS - Tu negocio en piloto automático',
     description: 'Vende más, pierde menos con IA y WhatsApp automático. Sistema POS completo para cualquier negocio.',
     type: 'website',
     locale: 'es_PE',
     url: 'https://coriva-core.vercel.app',
-    siteName: 'Coriva Core',
+    siteName: 'AI Business OS',
     images: [{
       url: 'https://coriva-core.vercel.app/og-image.png',
       width: 1200,
       height: 630,
-      alt: 'Coriva Core - Sistema POS'
+      alt: 'AI Business OS - Sistema POS'
     }]
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Coriva Core - Tu negocio en piloto automático',
+    title: 'AI Business OS - Tu negocio en piloto automático',
     description: 'Sistema POS con IA y WhatsApp automático',
     images: ['https://coriva-core.vercel.app/og-image.png']
   },
@@ -58,7 +58,7 @@ export default function LandingPage() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "SoftwareApplication",
-            "name": "Coriva Core",
+            "name": "AI Business OS",
             "applicationCategory": "BusinessApplication",
             "operatingSystem": "Web",
             "offers": {
@@ -87,7 +87,7 @@ export default function LandingPage() {
       </main>
       <StickyWhatsApp 
         phoneNumber="51913916967"
-        message="Hola,%20quiero%20conocer%20Coriva%20Core%20para%20mi%20negocio."
+        message="Hola,%20quiero%20conocer%20AI%20Business%20OS%20para%20mi%20negocio."
         text="WhatsApp: Implementación gratis"
         source="home"
       />

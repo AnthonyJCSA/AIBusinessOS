@@ -39,7 +39,7 @@ export default function BeneficiosBodega() {
       <div className="max-w-7xl mx-auto px-6">
         <ScrollReveal>
           <h2 className="text-4xl md:text-5xl font-bold text-center text-gray-900 mb-4">
-            Qué cambia cuando usas Coriva Core
+            Qué cambia cuando usas AI Business OS
           </h2>
           <p className="text-center text-gray-600 mb-16 text-lg">
             Beneficios reales que ves desde el primer día
@@ -63,7 +63,7 @@ export default function BeneficiosBodega() {
                 Más ventas + Menos pérdida + Menos estrés
               </h3>
               <p className="text-gray-600 mb-6">
-                Deja el cuaderno y empieza a ganar más con Coriva Core
+                Deja el cuaderno y empieza a ganar más con AI Business OS
               </p>
               <a 
                 href="https://wa.me/51913916967?text=Hola,%20tengo%20una%20bodega%20y%20quiero%20ordenar%20mi%20negocio%20con%20Coriva%20Core."

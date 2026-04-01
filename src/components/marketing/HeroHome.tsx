@@ -85,7 +85,7 @@ export default function HeroHome() {
               <div style={{ display: 'flex', gap: 6 }}>
                 {['#FF5F57','#FEBC2E','#28C840'].map(c => <div key={c} style={{ width: 10, height: 10, borderRadius: '50%', background: c }} />)}
               </div>
-              <span style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.5)', marginLeft: 8 }}>Coriva Core — Dashboard</span>
+              <span style={{ fontSize: 12, fontWeight: 600, color: 'rgba(255,255,255,0.5)', marginLeft: 8 }}>AI Business OS — Dashboard</span>
               <span style={{ marginLeft: 'auto', background: C.lime, color: C.ink, fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 99 }}>IA activa</span>
             </div>
             {/* body */}

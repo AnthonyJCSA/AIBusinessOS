@@ -39,7 +39,7 @@ export default function ComparacionBotica() {
       <div className="max-w-7xl mx-auto px-6">
         <ScrollReveal>
           <h2 className="text-4xl md:text-5xl font-bold text-center text-gray-900 mb-4">
-            Antes vs Después de Coriva Core
+            Antes vs Después de AI Business OS
           </h2>
           <p className="text-center text-gray-600 mb-16 text-lg">
             La diferencia es clara
@@ -50,7 +50,7 @@ export default function ComparacionBotica() {
           <div className="grid md:grid-cols-3 gap-4 mb-6 text-center font-bold">
             <div></div>
             <div className="text-red-600 text-lg">❌ Sin sistema</div>
-            <div className="text-green-600 text-lg">✅ Con Coriva Core</div>
+            <div className="text-green-600 text-lg">✅ Con AI Business OS</div>
           </div>
           
           {comparaciones.map((comp, i) => (

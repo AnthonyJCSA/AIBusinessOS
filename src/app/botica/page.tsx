@@ -30,7 +30,7 @@ export default function BoticaLanding() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "SoftwareApplication",
-            "name": "Coriva Core - Sistema para Boticas",
+            "name": "AI Business OS - Sistema para Boticas",
             "applicationCategory": "BusinessApplication",
             "operatingSystem": "Web",
             "offers": {

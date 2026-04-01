@@ -87,7 +87,7 @@ export default function LoginPage() {
         </div>
 
         <div style={{ position: 'relative', zIndex: 2, fontSize: 13, color: 'rgba(255,255,255,0.2)' }}>
-          © 2025 Coriva Core · soporte@corivape.com
+          © 2025 AI Business OS · soporte@corivape.com
         </div>
       </div>
 

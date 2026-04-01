@@ -21,7 +21,7 @@ export default function ProblemasBodega() {
           <h2 style={{ fontFamily: "'Fraunces',Georgia,serif", fontSize: 'clamp(32px,4.5vw,54px)', fontWeight: 900, lineHeight: 1.0, letterSpacing: -2, color: C.ink, marginBottom: 16 }}>
             Los problemas<br />de tu bodega<br /><em style={{ fontStyle: 'italic', fontWeight: 300, color: C.orange }}>terminan hoy</em>
           </h2>
-          <p style={{ fontSize: 16, color: C.muted, lineHeight: 1.7, marginBottom: 32 }}>Estos son los problemas más comunes de los bodegueros. Coriva los resuelve desde el primer día.</p>
+          <p style={{ fontSize: 16, color: C.muted, lineHeight: 1.7, marginBottom: 32 }}>Estos son los problemas más comunes de los bodegueros. AI Business OS los resuelve desde el primer día.</p>
           <a href={WA} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 9, padding: '15px 28px', borderRadius: 12, fontSize: 16, fontWeight: 700, background: C.wa, color: '#fff', textDecoration: 'none' }}>
             💬 Ordenar mi bodega ahora →
           </a>
