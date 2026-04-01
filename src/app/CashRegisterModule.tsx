@@ -23,7 +23,7 @@ export default function CashRegisterModule({ currentUser }: { currentUser: any }
       setMovements(mvs || [])
       const bal = await cashService.getBalance(currentUser.organization_id)
       setBalance(bal || 0)
-      setHasOpened((mvs || []).some((m: any) => m.type === 'opening'))
+      setHasOpened((mvs || []).some((m: any) => m.type === 'opening') && !(mvs || []).some((m: any) => m.type === 'closing'))
     } catch { setMovements([]); setBalance(0) }
     finally { setLoading(false) }
   }

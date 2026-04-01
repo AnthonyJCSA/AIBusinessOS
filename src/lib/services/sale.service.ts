@@ -64,9 +64,27 @@ export const saleService = {
     // Decrementar stock via RPC atómica
     for (const item of sale.items) {
       const { error } = await supabase.rpc('decrement_product_stock', {
-        p_product_id: item.id, p_quantity: item.quantity,
+        p_product_id: item.id,
+        p_quantity: item.quantity,
       })
-      if (error) console.error('Stock decrement error:', error)
+      if (error) {
+        console.error('Stock decrement RPC error para producto', item.id, ':', error)
+        // Fallback: UPDATE directo
+        const { data: prod } = await supabase
+          .from('corivacore_products')
+          .select('stock')
+          .eq('id', item.id)
+          .single()
+        if (prod) {
+          const newStock = Math.max(0, (prod.stock || 0) - item.quantity)
+          const { error: updateError } = await supabase
+            .from('corivacore_products')
+            .update({ stock: newStock, updated_at: new Date().toISOString() })
+            .eq('id', item.id)
+          if (updateError) console.error('Fallback stock update error:', updateError)
+          else console.log('Stock actualizado via fallback para', item.id, '-> nuevo stock:', newStock)
+        }
+      }
     }
 
     return saleData as Sale
