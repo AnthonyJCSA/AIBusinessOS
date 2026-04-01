@@ -47,7 +47,7 @@ export class ConflictError extends AppError {
 }
 
 export class IntegrationError extends AppError {
-  constructor(message: string, public integration: string) {
+  constructor(public integration: string, message: string) {
     super(message, 502, 'INTEGRATION_ERROR')
     this.name = 'IntegrationError'
   }
@@ -55,7 +55,7 @@ export class IntegrationError extends AppError {
 
 export class IntegrationTimeoutError extends IntegrationError {
   constructor(integration: string) {
-    super(`Timeout en integracion con ${integration}`, integration)
+    super(integration, `Timeout al conectar con ${integration}. Intenta de nuevo.`)
     this.name = 'IntegrationTimeoutError'
   }
 }

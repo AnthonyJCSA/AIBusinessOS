@@ -15,8 +15,11 @@ const TIMEOUT_MS = 15_000
 function getConfig(): { url: string; token: string } {
   const url   = process.env.NUBEFACT_API_URL
   const token = process.env.NUBEFACT_TOKEN
-  if (!url || !token) {
-    throw new IntegrationError('Nubefact', 'Variables NUBEFACT_API_URL y NUBEFACT_TOKEN no configuradas')
+  if (!url) {
+    throw new IntegrationError('Nubefact', 'NUBEFACT_API_URL no configurada en variables de entorno')
+  }
+  if (!token) {
+    throw new IntegrationError('Nubefact', 'NUBEFACT_TOKEN no configurado. Agrega tu token de Nubefact en las variables de entorno de Vercel.')
   }
   return { url, token }
 }
