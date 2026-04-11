@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import Stripe from 'stripe'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
+function getStripe() {
+  return new Stripe(process.env.STRIPE_SECRET_KEY!)
+}
 
 function getSupabaseAdmin() {
   return createClient(
@@ -20,6 +22,8 @@ export async function POST(req: NextRequest) {
   }
 
   let event: Stripe.Event
+
+  const stripe = getStripe()
 
   try {
     event = stripe.webhooks.constructEvent(
